@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OpenIPC.Views.StatusBarView">
+
+    <Border BorderBrush="Beige" BorderThickness="1">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="0">
+                <Label Grid.Row="0" Grid.Column="0" Content="Status:" />
+            </Border>
+
+            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="1">
+                <TextBlock Grid.Row="0" Grid.Column="1" Width="100"></TextBlock>
+            </Border>
+
+            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="2">
+                <Label Grid.Row="0" Grid.Column="2" Content="Message:" />
+            </Border>
+
+            <Border BorderBrush="Black" BorderThickness="1" Grid.Row="0" Grid.Column="3">
+                <TextBlock Grid.Row="0" Grid.Column="3"></TextBlock>
+            </Border>
+        </Grid>
+
+    </Border>
+
+</UserControl>

@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC", "OpenIPC\OpenIPC\OpenIPC.csproj", "{D7C96086-86FE-4F49-A2C8-9921266BFF07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC.Android", "OpenIPC\OpenIPC.Android\OpenIPC.Android.csproj", "{F3CD9E57-7012-483D-82D7-6DC69BA4B3BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC.Desktop", "OpenIPC\OpenIPC.Desktop\OpenIPC.Desktop.csproj", "{445CAA0E-70FB-4781-A7E9-C12D98A410C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC.iOS", "OpenIPC\OpenIPC.iOS\OpenIPC.iOS.csproj", "{8BF87FC8-33E4-4347-A33C-E1DB8D91B6DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC.Browser", "OpenIPC\OpenIPC.Browser\OpenIPC.Browser.csproj", "{7BE3565B-E70B-4F23-82CD-5EEBD9C4FF15}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D7C96086-86FE-4F49-A2C8-9921266BFF07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7C96086-86FE-4F49-A2C8-9921266BFF07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7C96086-86FE-4F49-A2C8-9921266BFF07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7C96086-86FE-4F49-A2C8-9921266BFF07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3CD9E57-7012-483D-82D7-6DC69BA4B3BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3CD9E57-7012-483D-82D7-6DC69BA4B3BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3CD9E57-7012-483D-82D7-6DC69BA4B3BA}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F3CD9E57-7012-483D-82D7-6DC69BA4B3BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3CD9E57-7012-483D-82D7-6DC69BA4B3BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3CD9E57-7012-483D-82D7-6DC69BA4B3BA}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{445CAA0E-70FB-4781-A7E9-C12D98A410C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{445CAA0E-70FB-4781-A7E9-C12D98A410C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{445CAA0E-70FB-4781-A7E9-C12D98A410C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{445CAA0E-70FB-4781-A7E9-C12D98A410C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BF87FC8-33E4-4347-A33C-E1DB8D91B6DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BF87FC8-33E4-4347-A33C-E1DB8D91B6DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BF87FC8-33E4-4347-A33C-E1DB8D91B6DE}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{8BF87FC8-33E4-4347-A33C-E1DB8D91B6DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BF87FC8-33E4-4347-A33C-E1DB8D91B6DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BF87FC8-33E4-4347-A33C-E1DB8D91B6DE}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{7BE3565B-E70B-4F23-82CD-5EEBD9C4FF15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BE3565B-E70B-4F23-82CD-5EEBD9C4FF15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BE3565B-E70B-4F23-82CD-5EEBD9C4FF15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BE3565B-E70B-4F23-82CD-5EEBD9C4FF15}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenIPC.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OpenIPC.Views.WfbTabView"
+             x:DataType="vm:WfbTabViewModel">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Label Grid.Column="0" Grid.Row="0" Content="5.8GHz Frequency"/>
+        <Label Grid.Column="0" Grid.Row="1" Content="5.8GHz TX Power"/> 
+        <Label Grid.Column="0" Grid.Row="2" Content="2.4GHz Frequency"/>
+        <Label Grid.Column="0" Grid.Row="3" Content="2.4GHz TX Power" />
+        <Label Grid.Column="0" Grid.Row="4" Content="MCS INDEX"/>
+        <Label Grid.Column="0" Grid.Row="5" Content="STBC"/>
+        <Label Grid.Column="0" Grid.Row="6" Content="LDPC"/>
+        <Label Grid.Column="0" Grid.Row="7" Content="FEC K"/>
+        <Label Grid.Column="0" Grid.Row="8" Content="FEC N"/>
+        
+        <ComboBox Grid.Column="1" Grid.Row="0" 
+                  ToolTip.Tip="Select 5.8GHz Frequency" 
+                  ItemsSource="{Binding Frequencies58GHz}"
+                  SelectedItem="{Binding SelectedFrequency58String, Mode=TwoWay}" />
+        
+        
+        <ComboBox Grid.Column="1" Grid.Row="2" ToolTip.Tip="Select 2.4GHz Frequency"  
+                  ItemsSource="{Binding Frequencies24GHz}"
+                  SelectedItem="{Binding SelectedFrequency24String, Mode=TwoWay}" />
+            
+        <ComboBox Grid.Column="1" Grid.Row="1" ToolTip.Tip="Select 5.8GHz TX Power" 
+                  ItemsSource="{Binding Power58GHz}" 
+                  SelectedItem="{Binding SelectedPower, Mode=TwoWay}" />
+            
+            
+        <ComboBox Grid.Column="1" Grid.Row="3" ToolTip.Tip="Select 2.4GHz TX Power"  
+                  ItemsSource="{Binding Power24GHz}"
+                  SelectedItem="{Binding SelectedPower24GHz, Mode=TwoWay}"/>
+            
+        <ComboBox Grid.Column="1" Grid.Row="4" ToolTip.Tip="Select MCS INDEX"  
+                  ItemsSource="{Binding MCSIndex}"
+                  SelectedItem="{Binding SelectedMcsIndex, Mode=TwoWay}"/>
+            
+        <ComboBox Grid.Column="1" Grid.Row="5" ToolTip.Tip="Select STBC"  
+                  ItemsSource="{Binding STBC}"
+                  SelectedItem="{Binding SelectedStbc, Mode=TwoWay}"/>
+            
+        <ComboBox Grid.Column="1" Grid.Row="6" ToolTip.Tip="Select LDPC"  
+                  ItemsSource="{Binding LDPC}"
+                  SelectedItem="{Binding SelectedLdpc, Mode=TwoWay}"/>
+            
+        <ComboBox Grid.Column="1" Grid.Row="7" ToolTip.Tip="Select FEC K"  
+                  ItemsSource="{Binding FecK}" 
+                  SelectedItem="{Binding SelectedFecK, Mode=TwoWay}"/>
+        <ComboBox Grid.Column="1" Grid.Row="8" ToolTip.Tip="Select FEC N"  
+                  ItemsSource="{Binding FecN}"
+                  SelectedItem="{Binding SelectedFecN, Mode=TwoWay}"/>
+        
+        <Button HorizontalAlignment="Left" Grid.Row="10" Content="Restart WFB"
+                Command="{Binding RestartWfbCommand}" 
+        />
+    </Grid>
+    
+</UserControl>
