@@ -4,6 +4,8 @@
         <TargetFramework>net8.0-ios</TargetFramework>
         <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
         <Nullable>enable</Nullable>
+        <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+        <CodesignKey>REDACTED</CodesignKey>
     </PropertyGroup>
 
     <ItemGroup>
