@@ -1,0 +1,93 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
+             xmlns:views="clr-namespace:OpenIPC_Config.Views"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="550"
+             x:Class="OpenIPC_Config.Views.MainView"
+             x:DataType="vm:MainViewModel">
+
+    <UserControl.Styles>
+        <StyleInclude Source="/Styles/Styles.axaml" />
+    </UserControl.Styles>
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" >
+        <Grid>
+            <Grid.RowDefinitions>
+    
+                <!-- Tab Control -->
+                <RowDefinition Height="Auto" />
+    
+                <!-- Connection Controls -->
+                <RowDefinition Height="Auto" />
+    
+                <!-- footer -->
+                <RowDefinition Height="*" />
+    
+            </Grid.RowDefinitions>
+    
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+    
+    
+            <!-- Tab Control -->
+    
+            <TabControl x:Name="MainTabControl" Grid.Column="0" Grid.Row="0" Margin="2">
+                
+                <TabItem Header="WFB" IsVisible="{Binding !IsVRXEnabled}"  >
+                    <views:WfbTabView />
+                </TabItem>
+                
+                <TabItem Header="WFB-GS" IsVisible="{Binding IsVRXEnabled}" >
+                    <views:WfbGSTabView />
+                </TabItem>
+                
+                <TabItem Header="Telemetry" IsVisible="{Binding !IsVRXEnabled}" >
+                    <views:TelemetryTabView />
+                </TabItem>
+                
+                <TabItem Header="Camera" IsVisible="{Binding !IsVRXEnabled}" >
+                    <views:CameraSettingsView />
+                </TabItem>
+                
+                <TabItem Header="VRX" IsVisible="{Binding IsVRXEnabled}">
+                    <views:VRXTabView />
+                </TabItem>
+                
+                <TabItem Header="Setup">
+                    <views:SetupTabView />
+                </TabItem>
+                
+                <TabItem Header="LogViewer">
+                    <views:LogViewer />
+                </TabItem>
+            </TabControl>
+    
+    
+            <!-- Connect Controls -->
+            <!-- <Border Grid.Row="1" Margin="5" BorderBrush="Blue" BorderThickness="1"> -->
+            <Panel Grid.Row="1">
+                <views:ConnectControlsView />
+            </Panel>
+            <!-- </Border> -->
+    
+            <!-- <Border Grid.Row="2" Margin="5" BorderBrush="Blue" BorderThickness="1"> -->
+            <Panel Grid.Row="2" VerticalAlignment="Bottom">
+                <views:StatusBarView />
+            </Panel>
+            <!-- </Border> -->
+        </Grid>
+    
+    </ScrollViewer>
+
+</UserControl>

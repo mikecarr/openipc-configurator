@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
+             x:Class="OpenIPC_Config.Views.LogViewer"
+             x:DataType="vm:LogViewerViewModel">
+    
+    
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        
+        <!-- <ListBox Grid.Row="0" BorderBrush="Black" BorderThickness="1" ItemsSource="{Binding LogMessages}" Height="400"> -->
+        <!--     <ListBox.ItemTemplate> -->
+        <!--         <DataTemplate> -->
+        <!--             <TextBlock Text="{Binding}" TextWrapping="Wrap" /> -->
+        <!--         </DataTemplate> -->
+        <!--     </ListBox.ItemTemplate> -->
+        <!-- </ListBox> -->
+        <ListBox Grid.Row="0" BorderBrush="Black" BorderThickness="1" 
+                 ItemsSource="{Binding LogMessages}" 
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch"
+                 
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                    <!-- <TextBlock TextWrapping="Wrap" Text="ksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlkaksasjdjhaljdfhljksdhkjasdhkhdkadjnlakjsdlka" /> -->
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+        <Label Grid.Row="1" FontStyle="Italic" Content="Log File is also available in System Application Folder"/>
+        
+    </Grid>
+    
+
+    <!--  -->
+    <!-- <Button Content="Save Log" Command="{Binding SaveLogCommand}"  -->
+    <!--         CommandParameter="{Binding  -->
+    <!--             RelativeSource={RelativeSource AncestorType=Window}}" /> -->
+    
+</UserControl>

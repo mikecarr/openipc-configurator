@@ -1,14 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC", "OpenIPC\OpenIPC\OpenIPC.csproj", "{D7C96086-86FE-4F49-A2C8-9921266BFF07}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC_Config", "OpenIPC\OpenIPC_Config\OpenIPC_Config.csproj", "{D7C96086-86FE-4F49-A2C8-9921266BFF07}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC.Android", "OpenIPC\OpenIPC.Android\OpenIPC.Android.csproj", "{F3CD9E57-7012-483D-82D7-6DC69BA4B3BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC_Config.Android", "OpenIPC\OpenIPC_Config.Android\OpenIPC_Config.Android.csproj", "{F3CD9E57-7012-483D-82D7-6DC69BA4B3BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC.Desktop", "OpenIPC\OpenIPC.Desktop\OpenIPC.Desktop.csproj", "{445CAA0E-70FB-4781-A7E9-C12D98A410C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC_Config.Desktop", "OpenIPC\OpenIPC_Config.Desktop\OpenIPC_Config.Desktop.csproj", "{445CAA0E-70FB-4781-A7E9-C12D98A410C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC.iOS", "OpenIPC\OpenIPC.iOS\OpenIPC.iOS.csproj", "{8BF87FC8-33E4-4347-A33C-E1DB8D91B6DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC_Config.iOS", "OpenIPC\OpenIPC_Config.iOS\OpenIPC_Config.iOS.csproj", "{8BF87FC8-33E4-4347-A33C-E1DB8D91B6DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC.Browser", "OpenIPC\OpenIPC.Browser\OpenIPC.Browser.csproj", "{7BE3565B-E70B-4F23-82CD-5EEBD9C4FF15}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIPC_Config.Browser", "OpenIPC\OpenIPC_Config.Browser\OpenIPC_Config.Browser.csproj", "{7BE3565B-E70B-4F23-82CD-5EEBD9C4FF15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OpenIPC_Config.Views.WfbGSTabView"
+             x:DataType="vm:WfbGSTabViewModel">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Label Grid.Column="0" Grid.Row="0" Content="5.8GHz Frequency"/>
+        <Label Grid.Column="0" Grid.Row="1" Content="5.8GHz TX Power"/>
+        <Label Grid.Column="0" Grid.Row="2" Content="Wifi Region"/>
+        
+        <ComboBox Grid.Column="1" Grid.Row="0" 
+                  ToolTip.Tip="Select 5.8GHz Frequency"  
+                  ItemsSource="{Binding Frequencies58GHz}" 
+                  SelectedItem="{Binding SelectedFrequency58String, Mode=TwoWay}" /> 
+        
+        
+        <Separator Grid.Column="0"  Grid.Row="3" />
+        
+        <ComboBox Grid.Column="1" Grid.Row="1" ToolTip.Tip="Select 5.8GHz TX Power" 
+                  ItemsSource="{Binding Power58GHz}"
+                  SelectedItem="{Binding SelectedPower, Mode=TwoWay}" />
+        
+        <!-- TODO: Add Wifi Region -->
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding WifiRegion, Mode=TwoWay}" />
+            
+        <Button Grid.Column="0"  HorizontalAlignment="Left" Grid.Row="4" Content="Restart WFB" 
+                Command="{Binding RestartWfbCommand}"
+                IsEnabled="{Binding CanConnect}" />
+        
+    </Grid>
+    
+</UserControl>
