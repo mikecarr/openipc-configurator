@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Browser;
 using OpenIPC_Config;
 
+
 [assembly: SupportedOSPlatform("browser")]
 
 internal sealed partial class Program
