@@ -52,7 +52,7 @@ public partial class VRXTabViewModel : ObservableObject
         if (appMessage.CanConnect)
         {
             CanConnect = appMessage.CanConnect;
-            Log.Information($"CanConnect {CanConnect.ToString()}");
+            //Log.Information($"CanConnect {CanConnect.ToString()}");
         }
 
     }

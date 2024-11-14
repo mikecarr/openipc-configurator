@@ -6,14 +6,16 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <ApplicationIcon>Assets/Icons/OpenIPC.ico</ApplicationIcon>
         <RootNamespace>OpenIPC_Config</RootNamespace>
-        
+        <RuntimeIdentifiers>osx-arm64;win-x64;win-arm64;linux-x64;linux-arm64</RuntimeIdentifiers>
+
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64' Or '$(RuntimeIdentifier)' == 'osx-arm64'">
-        <MacOSBundleIcon>Assets/Icons/OpenIPC.icns</MacOSBundleIcon>
-        <UseAppHost>true</UseAppHost>
-    </PropertyGroup>
+<!--    <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64' Or '$(RuntimeIdentifier)' == 'osx-arm64'">-->
+<!--        <MacOSBundleIcon>Assets/Icons/OpenIPC.icns</MacOSBundleIcon>-->
+<!--        <UseAppHost>true</UseAppHost>-->
+<!--    </PropertyGroup>-->
 
+    
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
         <None Update="binaries\**\*">

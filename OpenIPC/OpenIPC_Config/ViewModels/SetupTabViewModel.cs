@@ -197,7 +197,7 @@ namespace OpenIPC_Config.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _canConnect, value);
-                Log.Debug($"CanConnect {value}");
+                //Log.Debug($"CanConnect {value}");
             }
         }
 
@@ -245,12 +245,10 @@ namespace OpenIPC_Config.ViewModels
                 switch(deviceType)
                 {
                     case DeviceType.Camera:
-                        Log.Debug("OnDeviceContentUpdate: Camera");
                         IsCamera = true;
                         IsRadxa = false;
                         break;
                     case DeviceType.Radxa:
-                        Log.Debug("OnDeviceContentUpdate: Radxa");
                         IsCamera = false;
                         IsRadxa = true;
                         break;
@@ -278,7 +276,7 @@ namespace OpenIPC_Config.ViewModels
             if (appMessage.CanConnect)
             {
                 CanConnect = appMessage.CanConnect;
-                Log.Information($"CanConnect {CanConnect.ToString()}");
+                //Log.Information($"CanConnect {CanConnect.ToString()}");
             }
 
         }

@@ -216,7 +216,7 @@ public class WfbTabViewModel : ReactiveObject
         set
         {
             this.RaiseAndSetIfChanged(ref _canConnect, value);
-            Log.Debug($"CanConnect {value}");
+            //Log.Debug($"CanConnect {value}");
         }
     }
     
@@ -476,7 +476,7 @@ public class WfbTabViewModel : ReactiveObject
         if (appMessage.CanConnect)
         {
             CanConnect = appMessage.CanConnect;
-            Log.Information($"CanConnect {CanConnect.ToString()}");
+            //Log.Information($"CanConnect {CanConnect.ToString()}");
         }
 
     }
