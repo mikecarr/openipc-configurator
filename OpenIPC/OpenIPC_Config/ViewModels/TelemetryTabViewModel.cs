@@ -83,7 +83,7 @@ public class TelemetryTabViewModel : ViewModelBase
         if (appMessage.CanConnect)
         {
             CanConnect = appMessage.CanConnect;
-            Log.Information($"CanConnect {CanConnect.ToString()}");
+            //Log.Information($"CanConnect {CanConnect.ToString()}");
         }
 
     }
@@ -104,7 +104,7 @@ public class TelemetryTabViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _canConnect, value);
-            Log.Debug($"CanConnect {value}");
+            //Log.Debug($"CanConnect {value}");
         }
     }
     public string SelectedBaudRate

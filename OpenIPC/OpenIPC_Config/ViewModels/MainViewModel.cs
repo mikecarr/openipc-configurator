@@ -21,11 +21,12 @@ public partial class MainViewModel : ObservableObject
     {
         if (true)
         {
-            MainView.TabControlInstance.UpdateLayout();
-            var targetTab = MainView.TabControlInstance.Items
-                .OfType<TabItem>()
-                .FirstOrDefault(tab => tab.Header?.ToString() == "WFB-GS");
-            MainView.TabControlInstance.SelectedItem = targetTab;
+            MainView.TabControlInstance.InvalidateVisual();
+            //MainView.TabControlInstance.UpdateLayout();
+            // var targetTab = MainView.TabControlInstance.Items
+            //     .OfType<TabItem>()
+            //     .FirstOrDefault(tab => tab.Header?.ToString() == "WFB-GS");
+            // MainView.TabControlInstance.SelectedItem = targetTab;
             
         }
         

@@ -10,7 +10,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -20,31 +20,38 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <Label Grid.Column="0" Grid.Row="0" Content="5.8GHz Frequency"/>
-        <Label Grid.Column="0" Grid.Row="1" Content="5.8GHz TX Power"/>
+        <Label Grid.Column="0" Grid.Row="0" Content="Frequency"/>
+        <Label Grid.Column="0" Grid.Row="1" Content="TX Power"/>
         <Label Grid.Column="0" Grid.Row="2" Content="Wifi Region"/>
+        <Label Grid.Column="0" Grid.Row="3" Content="gs_mavlink"/>
+        <Label Grid.Column="0" Grid.Row="4" Content="gs_video"/>
         
         <ComboBox Grid.Column="1" Grid.Row="0" 
-                  ToolTip.Tip="Select 5.8GHz Frequency"  
-                  ItemsSource="{Binding Frequencies58GHz}" 
-                  SelectedItem="{Binding SelectedFrequency58String, Mode=TwoWay}" /> 
+                  ToolTip.Tip="Select Frequency"  
+                  ItemsSource="{Binding Frequencies}" 
+                  SelectedItem="{Binding SelectedFrequencyString, Mode=TwoWay}" /> 
         
         
-        <Separator Grid.Column="0"  Grid.Row="3" />
         
-        <ComboBox Grid.Column="1" Grid.Row="1" ToolTip.Tip="Select 5.8GHz TX Power" 
-                  ItemsSource="{Binding Power58GHz}"
+        
+        <ComboBox Grid.Column="1" Grid.Row="1" ToolTip.Tip="Select TX Power" 
+                  ItemsSource="{Binding Power}"
                   SelectedItem="{Binding SelectedPower, Mode=TwoWay}" />
         
-        <!-- TODO: Add Wifi Region -->
-        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding WifiRegion, Mode=TwoWay}" />
-            
-        <Button Grid.Column="0"  HorizontalAlignment="Left" Grid.Row="4" Content="Restart WFB" 
+        
+        <TextBox Grid.Row="2" Grid.Column="1" 
+                 Text="{Binding WifiRegion, Mode=TwoWay}" /> 
+
+        <TextBox Grid.Row="3" Grid.Column="1" 
+                 Text="{Binding GsMavlink, Mode=TwoWay}" />
+        <TextBox Grid.Row="4" Grid.Column="1" 
+                 Text="{Binding GsVideo, Mode=TwoWay}" />
+
+        <Separator Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="5"></Separator>
+        
+        <Button Grid.Column="0"  HorizontalAlignment="Left" Grid.Row="6" Content="Restart WFB"
                 Command="{Binding RestartWfbCommand}"
                 IsEnabled="{Binding CanConnect}" />
         

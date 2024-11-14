@@ -42,7 +42,7 @@ public partial class VRXTabViewModel : ObservableObject
         _eventAggregator = App.EventAggregator;
         _eventAggregator.GetEvent<DeviceTypeChangeEvent>().Subscribe(onDeviceTypeChangeEvent);
         _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-        _eventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>().Subscribe(OnRadxaContentUpdateChange);
+        _eventAggregator.GetEvent<RadxaContentUpdateChangeEvent>().Subscribe(OnRadxaContentUpdateChange);
         
         InitializeCollections();
     }
@@ -52,7 +52,7 @@ public partial class VRXTabViewModel : ObservableObject
         if (appMessage.CanConnect)
         {
             CanConnect = appMessage.CanConnect;
-            Log.Information($"CanConnect {CanConnect.ToString()}");
+            //Log.Information($"CanConnect {CanConnect.ToString()}");
         }
 
     }
@@ -106,7 +106,6 @@ public partial class VRXTabViewModel : ObservableObject
             {
                 SelectedResolution = resolution;
             }
-            
 
         }
 
@@ -115,22 +114,14 @@ public partial class VRXTabViewModel : ObservableObject
             //WifiConfigParser parser = new WifiConfigParser();
             //parser.ParseConfigString(radxaContentUpdatedMessage.WfbConfContent);
             
-            
-            
         }
         
         if (!string.IsNullOrEmpty(radxaContentUpdatedMessage.DroneKeyContent))
         {
-            // value comes across as 1920x1080@60
-            var droneKey = radxaContentUpdatedMessage.DroneKeyContent;
-            string hash = Utilities.ComputeSha256Hash(droneKey);
-            DroneKeyChecksum = hash;
-            
-
+            //var droneKey = radxaContentUpdatedMessage.DroneKeyContent;
+            //DroneKeyChecksum = droneKey;
         }
 
-        
-        
     }
     
     [RelayCommand]
@@ -139,6 +130,11 @@ public partial class VRXTabViewModel : ObservableObject
         await MessageBoxManager.GetMessageBoxStandard("Warning", "Not implemented yet", ButtonEnum.Ok).ShowAsync();
 
         // update the files here
+        // VRX
+        // Resolution /config/scripts/screen-mode
+        // FPS /config/scripts/screen-mode
+        // contents of /etc/default/wifibroadcast
+        
     }
     
     

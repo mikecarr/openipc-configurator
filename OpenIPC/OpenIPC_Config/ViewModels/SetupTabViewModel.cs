@@ -86,60 +86,63 @@ namespace OpenIPC_Config.ViewModels
         private ICommand _resetCameraCommand;
         private ICommand _offlineUpdateCommand;
         private ICommand _scanCommand;
+        private ICommand _generateKeysCommand;
+        private ICommand _sendGSKeyCommand;
+        private ICommand _recvGSKeyCommand;
+        
 
 
-        public ICommand ScriptFilesBackupCommand => _scriptFilesBackupCommand ??
-                                                    (_scriptFilesBackupCommand = new RelayCommand(ScriptFilesBackup));
-
-        public ICommand SensorFilesBackupCommand => _sensorFilesBackupCommand ??
-                                                    (_scriptFilesBackupCommand = new RelayCommand(SensorFilesBackup));
+        public ICommand GenerateKeysCommand => _generateKeysCommand ??= new RelayCommand(GenerateKeys);
 
         
-        public ICommand SensorDriverUpdateCommand => _sensorDriverUpdateCommand ??
-                                                     (_sensorDriverUpdateCommand = new RelayCommand(SensorDriverUpdate));
-
         
-        public ICommand ScriptFilesRestoreCommand => _scriptFilesRestoreCommand ??
-                                                     (_scriptFilesRestoreCommand = new RelayCommand(ScriptFilesRestore));
+        public ICommand SendGSKeyCommand => _sendGSKeyCommand ??= new RelayCommand(SendGSKey);
+
+        public ICommand RecvGSKeyCommand => _recvGSKeyCommand ??= new RelayCommand(RecvGSKey);
+
+        public ICommand ScriptFilesBackupCommand => _scriptFilesBackupCommand ??= new RelayCommand(ScriptFilesBackup);
+
+        public ICommand SensorFilesBackupCommand => _sensorFilesBackupCommand ??= new RelayCommand(SensorFilesBackup);
+        
+        public ICommand SensorDriverUpdateCommand => _sensorDriverUpdateCommand ??= new RelayCommand(SensorDriverUpdate);
+
+        public ICommand ScriptFilesRestoreCommand => _scriptFilesRestoreCommand ??= new RelayCommand(ScriptFilesRestore);
 
         
         // public ICommand ScriptFilesRestoreCommand { get; } = new RelayCommand(ScriptFilesRestore);
 
-        public ICommand SensorFilesUpdateCommand => _sensorFilesUpdateCommand ??
-                                                    (_sensorFilesUpdateCommand = new RelayCommand(SensorFilesUpdate));
+        public ICommand SensorFilesUpdateCommand => _sensorFilesUpdateCommand ??= new RelayCommand(SensorFilesUpdate);
+
 
         public ICommand FirmwareUpdateCommand =>
-            _firmwareUpdateCommand ?? (_firmwareUpdateCommand = new RelayCommand(FirmwareUpdate));
+            _firmwareUpdateCommand ??= new RelayCommand(FirmwareUpdate);
 
         public ICommand SendDroneKeyCommand =>
-            _sendDroneKeyCommand ?? (_sendDroneKeyCommand = new RelayCommand(SendDroneKey));
+            _sendDroneKeyCommand ??= new RelayCommand(SendDroneKey);
 
         public ICommand RecvDroneKeyCommand =>
-            _recvDroneKeyCommand ?? (_sendDroneKeyCommand = new RelayCommand(RecvDroneKey));
+            _recvDroneKeyCommand ??= new RelayCommand(RecvDroneKey);
 
         public ICommand ResetCameraCommand =>
-            _resetCameraCommand ?? (_resetCameraCommand = new RelayCommand(ResetCamera));
+            _resetCameraCommand ??= new RelayCommand(ResetCamera);
 
         public ICommand OfflineUpdateCommand =>
-            _offlineUpdateCommand ?? (_offlineUpdateCommand = new RelayCommand(OfflineUpdate));
+            _offlineUpdateCommand ??= new RelayCommand(OfflineUpdate);
 
-        public ICommand ScanCommand => _scanCommand ?? (_scanCommand = new RelayCommand(ScanNetwork));
+        public ICommand ScanCommand => 
+            _scanCommand ??= new RelayCommand(ScanNetwork);
         
-        
-        private string _scapIpDescription;
-
-        public string ScanIPDescription
+        private string _keyChecksum;
+        public string KeyChecksum
         {
-            get => _scapIpDescription;
+            get => _keyChecksum;
             set
             {
-                this.RaiseAndSetIfChanged(ref _scapIpDescription, value);
-                Log.Debug($"ScanIPDescription updated to {value}");
+                this.RaiseAndSetIfChanged(ref _keyChecksum, value);
             }
         }
-
+        
         private string _scanIPLabel;
-
 
         public string ScanIPLabel
         {
@@ -194,19 +197,40 @@ namespace OpenIPC_Config.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _canConnect, value);
-                Log.Debug($"CanConnect {value}");
+                //Log.Debug($"CanConnect {value}");
             }
+        }
+
+        private bool _isRadxa;
+        public bool IsRadxa
+        {
+            get => _isRadxa;
+            set => this.RaiseAndSetIfChanged(ref _isRadxa, value);
+        }
+        
+        private bool _isCamera;
+        public bool IsCamera
+        {
+            get => _isCamera;
+            set => this.RaiseAndSetIfChanged(ref _isCamera, value);
         }
 
 
         public SetupTabViewModel()
         {
             InitializeCollections();
+            
+            KeyChecksum = String.Empty;
 
             ShowProgressBarCommand = new RelayCommand(() => IsProgressBarVisible = true);
 
             _eventAggregator = App.EventAggregator;
             _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
+            _eventAggregator?.GetEvent<DeviceContentUpdateEvent>().Subscribe(OnDeviceContentUpdate);
+            _eventAggregator?.GetEvent<DeviceTypeChangeEvent>().Subscribe(OnDeviceTypeChange);
+            
+            
+                
             //_eventAggregator?.GetEvent<DeviceStateUpdatedEvent>().Subscribe(OnDeviceStateUpdated);
 
             
@@ -214,12 +238,45 @@ namespace OpenIPC_Config.ViewModels
             _sshClientService = new SshClientService(_eventAggregator);
         }
 
+        private void OnDeviceTypeChange(DeviceType deviceType)
+        {
+            if (deviceType != null)
+            {
+                switch(deviceType)
+                {
+                    case DeviceType.Camera:
+                        IsCamera = true;
+                        IsRadxa = false;
+                        break;
+                    case DeviceType.Radxa:
+                        IsCamera = false;
+                        IsRadxa = true;
+                        break;
+                }
+            }
+        }
+
+        private async void OnDeviceContentUpdate(DeviceContentUpdatedMessage _deviceContentUpdatedMessage)
+        {
+            if (_deviceContentUpdatedMessage != null)
+            {
+                if (_deviceContentUpdatedMessage.DeviceConfig != null)
+                {
+                    if (!string.IsNullOrEmpty(_deviceContentUpdatedMessage.DeviceConfig.KeyChksum))
+                    {
+                        KeyChecksum = _deviceContentUpdatedMessage.DeviceConfig.KeyChksum;
+
+                    }
+                }
+            }
+        }
+
         private void OnAppMessage(AppMessage appMessage)
         {
             if (appMessage.CanConnect)
             {
                 CanConnect = appMessage.CanConnect;
-                Log.Information($"CanConnect {CanConnect.ToString()}");
+                //Log.Information($"CanConnect {CanConnect.ToString()}");
             }
 
         }
@@ -230,8 +287,7 @@ namespace OpenIPC_Config.ViewModels
             // load sensor files from local folder
             string directoryPath = Models.OpenIPC.LocalSensorsFolder;
             PopulateSensorFileNames(directoryPath);
-
-            ScanIPDescription = "Enter an IP address to scan.";
+            
             ScanIPLabel = "192.168.1.";
 
             FirmwareVersions = new ObservableCollection<string>
@@ -257,16 +313,7 @@ namespace OpenIPC_Config.ViewModels
                 "openipc.hi3516ev200-nor-fpv"
             };
         }
-
-        // private void OnDeviceStateUpdated(DeviceStateUpdatedMessage message)
-        // { 
-        //     DeviceConfig.Instance = message.DeviceConfig;
-        //     if (message.CanConnect != null)
-        //     {
-        //         CanConnect = message.CanConnect;
-        //     }
-        // }
-
+        
         private async void ScriptFilesBackup()
         {
             Log.Debug("Backup script executed");
@@ -325,7 +372,7 @@ namespace OpenIPC_Config.ViewModels
             //koup
             //echo y | pscp -scp -pw %3 %4 root@%2:/lib/modules/4.9.84/sigmastar/
             
-                DownloadProgress = 100;
+            DownloadProgress = 100;
             ProgressText = "Sensor driver updated!";
             
             Log.Debug("SensorDriverUpdate executed..done");
@@ -365,8 +412,7 @@ namespace OpenIPC_Config.ViewModels
             // echo y | pscp -scp -pw %3 sensors/%4 root@%2:/etc/sensors/ 
             //     plink -ssh root@%2 -pw %3 yaml-cli -s .isp.sensorConfig /etc/sensors/%4
             //echo y | pscp -scp -pw %3 %4 root@%2:/etc/sensors/
-
-
+            
             //_sshClientService.UploadDirectoryAsync(DeviceConfig.Instance, OpenIPC_Config.LocalSensorsFolder,
             // OpenIPC_Config.RemoteSensorsFolder);
             ProgressText = "Done updating sensor...";
@@ -384,7 +430,7 @@ namespace OpenIPC_Config.ViewModels
         private async void ScanNetwork()
         {
             ScanMessages = "Starting scan...";
-            ScanIPResultTextBox = "Available IP Addresses on your network:";
+            //ScanIPResultTextBox = "Available IP Addresses on your network:";
             await Task.Delay(500); // Replace Thread.Sleep with async-friendly delay
 
             List<Task> pingTasks = new List<Task>();
@@ -406,7 +452,7 @@ namespace OpenIPC_Config.ViewModels
                         //ScanIPResultTextBox += Environment.NewLine + host + ": " + pingReply.Status.ToString();
                         if (pingReply.Status == IPStatus.Success)
                         {
-                            ScanIPResultTextBox += Environment.NewLine + host;
+                            ScanIPResultTextBox +=  host + Environment.NewLine;
                         }
                     });
                 });
@@ -650,5 +696,46 @@ namespace OpenIPC_Config.ViewModels
                 $"{Models.OpenIPC.LocalBackUpFolder}");
             Log.Debug("SensorFilesBackup executed...done");
         }
+        
+        private async void GenerateKeys()
+        {
+            // keysgen " + String.Format("{0}", txtIP.Text) + " " + txtPassword.Text
+            // plink -ssh root@%2 -pw %3 wfb_keygen
+            // plink -ssh root@%2 -pw %3 cp /root/gs.key /etc/
+
+            try
+            {
+                _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Generating keys" });
+                await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.BackUpGsKeysIfExist);
+                await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GenerateKeys);
+                await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.CopyGenerateKeys);
+                _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Generating keys...done" });
+                
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+                
+            throw new NotImplementedException();
+        }
+        private void SendGSKey()
+        {
+            //TDOO: SendGSKey
+            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Sending keys..." });
+            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Sending keys...done" });
+            throw new NotImplementedException();
+        }
+
+        private void RecvGSKey()
+        {
+            //TDOO: RecvGSKey
+            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Receiving keys..." });
+            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Receiving keys...done" });
+        }
+        
     }
+    
+    
 }

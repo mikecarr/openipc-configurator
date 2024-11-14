@@ -67,6 +67,7 @@
                 <TabItem Header="Setup">
                     <views:SetupTabView />
                 </TabItem>
+
                 
                 <TabItem Header="LogViewer">
                     <views:LogViewer />

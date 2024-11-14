@@ -5,7 +5,7 @@
         <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
         <Nullable>enable</Nullable>
         <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
-        <CodesignKey>REDACTED</CodesignKey>
+
         <RootNamespace>OpenIPC_Config.iOS</RootNamespace>
     </PropertyGroup>
 
@@ -14,6 +14,13 @@
         <UseAppHost>true</UseAppHost>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+        <CodesignKey>REDACTED</CodesignKey>
+<!--        <CodesignProvision>XCode</CodesignProvision>-->
+<!--        <CodesignTeamId>YourTeamID</CodesignTeamId>-->
+    </PropertyGroup>
+    
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
         <None Update="binaries\**\*">

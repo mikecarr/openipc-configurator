@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash 
+
 
 # Define the project names and paths
 desktop_project="OpenIPC/OpenIPC_Config.Desktop"
@@ -6,7 +7,7 @@ android_project="OpenIPC/OpenIPC_Config.Android"
 ios_project="OpenIPC/OpenIPC_Config.iOS"
 
 # Build output directory
-output_dir="./build"
+output_dir="build"
 
 # Default verbosity level
 verbosity="normal"
@@ -31,15 +32,22 @@ create_macos_app_bundle() {
     mkdir -p "$app_bundle/Contents/MacOS"
     mkdir -p "$app_bundle/Contents/Resources"
 
+    # Copy the icon file
+    echo "Copying icon file..."
+    
+    cp "OpenIPC/OpenIPC_Config/Assets/Icons/OpenIPC.icns" "$app_bundle/Contents/Resources/$app_name.icns"
+
     # Move the executable file
     echo "Moving executable to .app bundle..."
-    cp "$output_dir/$desktop_project/osx-arm64/OpenIPC_Config.Desktop.dll" "$app_bundle/Contents/MacOS/$app_name"
     
-    # Make the executable file executable
-    chmod +x "$app_bundle/Contents/MacOS/$app_name"
+    cp -r $output_dir/$desktop_project/osx-arm64/* "$app_bundle/Contents/MacOS/"
+    
+    echo "App bundl created at $app_bundle"
+    chmod +x "$app_bundle"
 
     # Create Info.plist file
     echo "Creating Info.plist..."
+  
     cat > "$app_bundle/Contents/Info.plist" <<EOL
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -47,22 +55,18 @@ create_macos_app_bundle() {
 <dict>
     <key>CFBundleName</key>
     <string>$app_name</string>
-    <key>CFBundleDisplayName</key>
-    <string>OpenIPC Config</string>
+    <key>CFBundleExecutable</key>
+    <string>OpenIPC_Config.Desktop</string>
     <key>CFBundleIdentifier</key>
-    <string>com.openipc.config</string>
+    <string>com.openipc.$app_name</string>    
     <key>CFBundleVersion</key>
     <string>1.0</string>
-    <key>CFBundleExecutable</key>
-    <string>$app_name</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
-    <key>CFBundleSignature</key>
-    <string>????</string>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
     <key>LSMinimumSystemVersion</key>
     <string>10.12</string>
+    <key>CFBundleIconFile</key>
+    <string>$app_name.icns</string>
 </dict>
 </plist>
 EOL
@@ -74,6 +78,7 @@ EOL
 build_macos() {
     echo "Building $desktop_project for macOS (osx-arm64) as .app bundle..."
     dotnet publish $desktop_project -c Release -r osx-arm64 --output "$output_dir/$desktop_project/osx-arm64" --self-contained -v $verbosity
+  
     if [ -f "$output_dir/$desktop_project/osx-arm64/OpenIPC_Config.Desktop.dll" ]; then
         create_macos_app_bundle
     else

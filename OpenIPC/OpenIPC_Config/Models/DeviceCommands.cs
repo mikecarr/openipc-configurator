@@ -28,4 +28,9 @@ public static class DeviceCommands
     
     public const string GetHostname = "hostname";
 
+    public const string GenerateKeys = "wfb_keygen";
+    
+    public const string CopyGenerateKeys = "cp /root/gs.key /etc/";
+    
+    public static string BackUpGsKeysIfExist = "[ -f /root/gs.key ] && mv /root/gs.key \"/root/gs.key_$(date +'%m%d%Y')\"";
 }

@@ -36,13 +36,12 @@ public class CameraSettingsTabViewModel : ViewModelBase
         set
         {
             this.RaiseAndSetIfChanged(ref _canConnect, value);
-            Log.Debug($"CanConnect {value}");
+            //Log.Debug($"CanConnect {value}");
         }
     }
     
     private async void RestartMajestic()
     {
-        Log.Debug("*** TODO : RestartMajesticCommand executed");
 
         await SaveRestartMajesticCommand();
     }
@@ -213,7 +212,7 @@ public class CameraSettingsTabViewModel : ViewModelBase
         if (appMessage.CanConnect)
         {
             CanConnect = appMessage.CanConnect;
-            Log.Information($"CanConnect {CanConnect.ToString()}");
+            //Log.Debug($"CanConnect {CanConnect.ToString()}");
         }
 
     }
