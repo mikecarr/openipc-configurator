@@ -114,7 +114,10 @@
 
 
         <!-- Steps Text -->
-        <!-- <TextBlock Grid.Row="7" Text="{x:Static assets:Resources.StepsTextBox}" Margin="0,5,0,0" FontSize="12" /> -->
+        <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="7" 
+                   Text="{x:Static assets:Resources.StepsTextBox}" 
+                   Margin="0,5,0,0" 
+                   FontSize="10" />
 
 
     </Grid>
