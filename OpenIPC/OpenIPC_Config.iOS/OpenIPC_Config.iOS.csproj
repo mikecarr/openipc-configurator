@@ -16,9 +16,7 @@
 
     <PropertyGroup>
         <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
-        <CodesignKey>REDACTED</CodesignKey>
-<!--        <CodesignProvision>XCode</CodesignProvision>-->
-<!--        <CodesignTeamId>YourTeamID</CodesignTeamId>-->
+<!--        <CodesignKey>REDACTED</CodesignKey>-->
     </PropertyGroup>
     
     <ItemGroup>
