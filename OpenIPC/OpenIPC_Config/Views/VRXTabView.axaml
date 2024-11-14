@@ -25,7 +25,7 @@
 
         <Label Grid.Row="0" Grid.Column="0" Width="250" Content="Resolution"  ToolTip.Tip="{DynamicResource SelectResolutionToolTip}"/>
         <Label Grid.Row="1" Grid.Column="0" Width="250" Content="FPS" ToolTip.Tip="Select FPS" />
-        <Label Grid.Row="2" Grid.Column="0" Width="250" Content="Drone Key Checksum" ToolTip.Tip="Returns the chksum of the drone.key" />
+        <Label Grid.Row="2" Grid.Column="0" Width="250" Content="VRX Key Checksum" ToolTip.Tip="Returns the chksum of the drone.key" />
         
         <ComboBox Grid.Row="0" Grid.Column="1" Width="250" 
                   ItemsSource="{Binding Resolution}" 
@@ -34,13 +34,12 @@
         <ComboBox Grid.Row="1" Grid.Column="1" Width="250" ItemsSource="{Binding Fps}" 
                   SelectedItem="{Binding SelectedFps, 
                   Mode=TwoWay}" />
-        <TextBlock Grid.Row="2" Grid.Column="1" Width="250" Text="{Binding DroneKeyChecksum}" />
+        <TextBlock Grid.Row="2" Grid.Column="1" FontSize="12" 
+                   Text="{Binding DroneKeyChecksum}" />
         
         <Button Grid.Column="0" HorizontalAlignment="Left" Grid.Row="3" Content="Restart WFB"
                 Command="{Binding RestartWfbCommand}"
                 IsEnabled="{Binding CanConnect}"/>
-        
-        
         
         <Button Grid.Row="0" Grid.Column="2"  Content="MSP Displayport" HorizontalAlignment="Left" Margin="10" 
                 Command="{Binding EnableVrxMSPDisplayportCommand}" 

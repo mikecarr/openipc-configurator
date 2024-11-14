@@ -1,14 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using OpenIPC_Config.ViewModels;
 
 namespace OpenIPC_Config.Views;
 
-public partial class SetupTabView : UserControl
+public partial class SetupCameraButtonsView : UserControl
 {
-    public SetupTabView()
+    public SetupCameraButtonsView()
     {
         InitializeComponent();
         if (!Design.IsDesignMode)

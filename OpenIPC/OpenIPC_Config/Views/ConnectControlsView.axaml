@@ -78,8 +78,10 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Panel Grid.Column="0" Grid.Row="1"
-                   Background="{Binding PingStatusColor}"
-                   Height="30" Width="50"/>
+                   Background="{Binding PingStatusColor }"
+                   
+                   Height="30" Width="50"
+                   Margin="5,0,0,0"/>
             <Button Grid.Column="1" Grid.Row="1" Content="Connect"
                     IsEnabled="{Binding CanConnect }"
                     Command="{Binding ConnectCommand}" />

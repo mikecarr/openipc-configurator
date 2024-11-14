@@ -78,6 +78,11 @@
           <DependentUpon>WfbGSTabView.axaml</DependentUpon>
           <SubType>Code</SubType>
         </Compile>
+
+        <Compile Update="Views\SetupRadxaButtonsView.axaml.cs">
+          <DependentUpon>SetupRadxaButtonsView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 
 </Project>

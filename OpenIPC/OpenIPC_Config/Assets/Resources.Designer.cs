@@ -170,7 +170,21 @@ namespace OpenIPC_Config.Assets {
         {
             get { return ResourceManager.GetString("btnVRXMajestic", resourceCulture); }
         }
+        
+        public static string GenerateKeysToolTip
+        {
+            get { return ResourceManager.GetString("GenerateKeysToolTip", resourceCulture); }
+        }
 
+        public static string SendGsKeyToolTip
+        {
+            get { return ResourceManager.GetString("SendGsKeyToolTip", resourceCulture); }
+        }
+        public static string RecvGsKeyToolTip
+        {
+            get { return ResourceManager.GetString("RecvGsKeyToolTip", resourceCulture); }
+        }
+        
         
         
     }

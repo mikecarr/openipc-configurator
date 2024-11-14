@@ -133,4 +133,13 @@ Step 9: Reboot OpenIPC_Config camera</value>
     <data name="btnVRXMajestic" xml:space="preserve">
         <value>Enables Mavlink Telemetry function of OpenIPC</value>
     </data>
+    <data name="GenerateKeysToolTip" xml:space="preserve">
+        <value>Generate Keys</value>
+    </data>
+    <data name="SendGsKeyToolTip" xml:space="preserve">
+        <value />
+    </data>
+    <data name="RecvGsKeyToolTip" xml:space="preserve">
+        <value />
+    </data>
 </root>
