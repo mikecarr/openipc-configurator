@@ -75,7 +75,7 @@
                           IsEnabled="{Binding CanConnect}"
                           HorizontalAlignment="Stretch" />
 
-                <Panel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Height="30" Background="Blue" />
+                <Panel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Height="30"  />
 
 
                 <Button Grid.Row="5" Grid.Column="0" Content="Send drone.key"
@@ -89,10 +89,10 @@
                                     ToolTip.Tip="{x:Static assets:Resources.RecvDroneKeyToolTip}"
                                     HorizontalAlignment="Stretch" />
                 
-                <TextBlock Grid.Row="6" Text="Device Checksum"/>
+                <TextBlock Grid.Row="6"  FontWeight="Bold" Text="Device Checksum"/>
                 <TextBlock Grid.Row="7" Grid.ColumnSpan="2"
-                           Text="{Binding KeyChecksum}"
-                           />
+                           TextWrapping="Wrap"
+                           Text="{Binding KeyChecksum} "/>
 
 
             </Grid>

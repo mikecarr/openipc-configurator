@@ -50,7 +50,7 @@
                                     ToolTip.Tip="{x:Static assets:Resources.RecvGsKeyToolTip}"
                                     HorizontalAlignment="Stretch" />
                 
-                <TextBlock Grid.Row="6" Text="Device Checksum"/>
+                <TextBlock Grid.Row="6" FontWeight="Bold" Text="Device Checksum"/>
                 <TextBlock Grid.Row="7" Grid.ColumnSpan="2"
                            Text="{Binding KeyChecksum}"
                            />
