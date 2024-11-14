@@ -438,7 +438,7 @@ public class CameraSettingsTabViewModel : ViewModelBase
     public async Task SaveRestartMajesticCommand()
     {
         Log.Debug("Preparing to Save Majestic file.");
-        var majesticYamlContent = await _sshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.MajesticFileLoc);
+        var majesticYamlContent = await _sshClientService.DownloadFileAsync(DeviceConfig.Instance, Models.OpenIPC.MajesticFileLoc);
 
         try
         {
