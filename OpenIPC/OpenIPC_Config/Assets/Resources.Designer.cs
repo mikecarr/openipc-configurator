@@ -184,7 +184,10 @@ namespace OpenIPC_Config.Assets {
         {
             get { return ResourceManager.GetString("RecvGsKeyToolTip", resourceCulture); }
         }
-        
+        public static string btnSaveAndRestartWfbText
+        {
+            get { return ResourceManager.GetString("btnSaveAndRestartWfbText", resourceCulture); }
+        }
         
         
     }

@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia;
-using MsBox.Avalonia.Enums;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
@@ -15,28 +13,10 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
-public partial class WfbGSTabViewModel : ObservableObject
+public partial class WfbGSTabViewModel : ViewModelBase
 {
-    private readonly ISshClientService _sshClientService;
-    
-    IEventAggregator _eventAggregator;
-    
-    [ObservableProperty] private bool _canConnect;
-    
-    [ObservableProperty] private ObservableCollection<string> _frequencies;
-    [ObservableProperty] private ObservableCollection<int> _power;
-    
-    [ObservableProperty] private string _selectedFrequencyString;
-    [ObservableProperty] private int _selectedPower;
-    
-    [ObservableProperty] private string _wifiRegion;
-    [ObservableProperty] private string _gsMavlink;
-    [ObservableProperty] private string _gsVideo;
-    
-    
     private readonly Dictionary<int, string> _frequencyMapping = new()
     {
-        
         { 1, "2412 MHz [1]" },
         { 2, "2417 MHz [2]" },
         { 3, "2422 MHz [3]" },
@@ -81,67 +61,74 @@ public partial class WfbGSTabViewModel : ObservableObject
         { 177, "5885 MHz [177]" }
     };
 
-    private WfbGsConfigParser _wfbGsConfigParser;
-    private WifiConfigParser _wifiConfigParser;
-    
+    private readonly ISshClientService _sshClientService;
+
+    [ObservableProperty] private bool _canConnect;
+
+    private readonly IEventAggregator _eventAggregator;
+
+    [ObservableProperty] private ObservableCollection<string> _frequencies;
+    [ObservableProperty] private string _gsMavlink;
+    [ObservableProperty] private string _gsVideo;
+    [ObservableProperty] private ObservableCollection<int> _power;
+
+    [ObservableProperty] private string _selectedFrequencyString;
+    [ObservableProperty] private int _selectedPower;
+
+    private readonly WfbGsConfigParser _wfbGsConfigParser;
+    private readonly WifiConfigParser _wifiConfigParser;
+
+    [ObservableProperty] private string _wifiRegion;
+
     public WfbGSTabViewModel()
     {
         _wfbGsConfigParser = new WfbGsConfigParser();
         _wifiConfigParser = new WifiConfigParser();
-        
-        
+
+
         InitializeCollections();
         _eventAggregator = App.EventAggregator;
         _eventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>().Subscribe(OnRadxaContentUpdateChange);
-        
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-        
-        _sshClientService = new SshClientService(_eventAggregator);
 
+        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
+
+        _sshClientService = new SshClientService(_eventAggregator);
     }
 
-    
+
     private void OnAppMessage(AppMessage appMessage)
     {
-        if (appMessage.CanConnect)
-        {
-            CanConnect = appMessage.CanConnect;
-            //Log.Information($"CanConnect {CanConnect.ToString()}");
-        }
-
+        if (appMessage.CanConnect) CanConnect = appMessage.CanConnect;
+        //Log.Information($"CanConnect {CanConnect.ToString()}");
     }
-    
+
     public int GetChannelNumber(string frequencyString)
     {
         foreach (var kvp in _frequencyMapping)
-        {
             if (kvp.Value.Equals(frequencyString, StringComparison.OrdinalIgnoreCase))
-            {
                 return kvp.Key;
-            }
-        }
 
         Log.Warning($"Frequency string '{frequencyString}' not found in 5.8 GHz frequency mapping.");
         return -1; // Return -1 or another sentinel value to indicate not found
     }
-    
+
     /// <summary>
     /// //frequency 
     //power
     //region
     /// </summary>
     [RelayCommand]
-    private async void RestartWfb()
+    private async Task RestartWfb()
     {
         //await MessageBoxManager.GetMessageBoxStandard("Warning", "Not implemented yet", ButtonEnum.Ok).ShowAsync();
         Log.Information("Restart WFB button clicked");
 
         // /etc/wifibroadcast.cfg
         await UpdateWifiBroadcastCfg();
-        
+
         // /etc/modprobe.d/wfb.conf
         await UpdateModprobeWfbConf();
-        
+
         await MessageBoxManager.GetMessageBoxStandard("Success", "Saved!").ShowAsync();
     }
 
@@ -149,10 +136,10 @@ public partial class WfbGSTabViewModel : ObservableObject
     {
         try
         {
-            _wfbGsConfigParser.TxPower = _selectedPower.ToString();
+            _wfbGsConfigParser.TxPower = SelectedPower.ToString();
             // Update the parser's properties based on user input
             var updatedConfigString = _wfbGsConfigParser.GetUpdatedConfigString();
-            
+
             if (string.IsNullOrEmpty(updatedConfigString))
             {
                 await MessageBoxManager.GetMessageBoxStandard("Error", "Updated configuration is empty").ShowAsync();
@@ -160,7 +147,8 @@ public partial class WfbGSTabViewModel : ObservableObject
             }
 
             // Upload the updated configuration file
-            _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastModProbeFileLoc, updatedConfigString);
+            _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastModProbeFileLoc,
+                updatedConfigString);
             Log.Information("Configuration file updated and uploaded successfully.");
         }
         catch (Exception e)
@@ -169,6 +157,7 @@ public partial class WfbGSTabViewModel : ObservableObject
             throw;
         }
     }
+
     private async Task UpdateWifiBroadcastCfg()
     {
         // update /etc/wifibroadcast.cfg
@@ -177,14 +166,14 @@ public partial class WfbGSTabViewModel : ObservableObject
             // Update the parser's properties based on user input
 
             _wifiConfigParser.WifiChannel = GetChannelNumber(SelectedFrequencyString);
-            _wifiConfigParser.WifiRegion = _wifiRegion;
-            _wifiConfigParser.GsMavlinkPeer = _gsMavlink;
-            _wifiConfigParser.GsVideoPeer = _gsVideo;
+            _wifiConfigParser.WifiRegion = WifiRegion;
+            _wifiConfigParser.GsMavlinkPeer = GsMavlink;
+            _wifiConfigParser.GsVideoPeer = GsVideo;
 
             // Get the updated configuration string
             // Generate the updated configuration string
-            string updatedConfigContent = _wifiConfigParser.GetUpdatedConfigString();
-            
+            var updatedConfigContent = _wifiConfigParser.GetUpdatedConfigString();
+
             if (string.IsNullOrEmpty(updatedConfigContent))
             {
                 await MessageBoxManager.GetMessageBoxStandard("Error", "Updated configuration is empty").ShowAsync();
@@ -192,7 +181,8 @@ public partial class WfbGSTabViewModel : ObservableObject
             }
 
             // Upload the updated configuration file
-            _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastFileLoc, updatedConfigContent);
+            _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastFileLoc,
+                updatedConfigContent);
             Log.Information("Configuration file updated and uploaded successfully.");
         }
         catch (Exception ex)
@@ -214,50 +204,30 @@ public partial class WfbGSTabViewModel : ObservableObject
         if (!string.IsNullOrEmpty(wifiBroadcastContent))
         {
             var configContent = radxaContentUpdatedMessage.WifiBroadcastContent;
-            
+
             _wifiConfigParser.ParseConfigString(configContent);
 
             var channel = _wifiConfigParser.WifiChannel;
-            
-            string frequencyString;
-            if (_frequencyMapping.TryGetValue(channel, out frequencyString))
-            {
-                SelectedFrequencyString = frequencyString;
-            }
-            
-            var wifiRegion = _wifiConfigParser.WifiRegion;
-            if (!string.IsNullOrEmpty(wifiRegion))
-            {
-                WifiRegion = _wifiConfigParser.WifiRegion;
-            }
-            
-            var gsMavlink = _wifiConfigParser.GsMavlinkPeer;
-            if (!string.IsNullOrEmpty(gsMavlink))
-            {
-                GsMavlink = _wifiConfigParser.GsMavlinkPeer;
-            }
-            
-            var gsVideo = _wifiConfigParser.GsVideoPeer;
-            if (!string.IsNullOrEmpty(gsVideo))
-            {
-                GsVideo = _wifiConfigParser.GsVideoPeer;
-            }
-            
 
+            string frequencyString;
+            if (_frequencyMapping.TryGetValue(channel, out frequencyString)) SelectedFrequencyString = frequencyString;
+
+            var wifiRegion = _wifiConfigParser.WifiRegion;
+            if (!string.IsNullOrEmpty(wifiRegion)) WifiRegion = _wifiConfigParser.WifiRegion;
+
+            var gsMavlink = _wifiConfigParser.GsMavlinkPeer;
+            if (!string.IsNullOrEmpty(gsMavlink)) GsMavlink = _wifiConfigParser.GsMavlinkPeer;
+
+            var gsVideo = _wifiConfigParser.GsVideoPeer;
+            if (!string.IsNullOrEmpty(gsVideo)) GsVideo = _wifiConfigParser.GsVideoPeer;
         }
-        
+
         var wfbConfContent = radxaContentUpdatedMessage.WfbConfContent;
         if (!string.IsNullOrEmpty(wfbConfContent))
         {
             _wfbGsConfigParser.ParseConfigString(wfbConfContent);
             var power = _wfbGsConfigParser.TxPower;
-            if (int.TryParse(power, out var parsedPower))
-            {
-                SelectedPower = parsedPower;    
-            }
-            
+            if (int.TryParse(power, out var parsedPower)) SelectedPower = parsedPower;
         }
     }
-    
-   
 }

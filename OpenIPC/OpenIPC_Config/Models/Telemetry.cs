@@ -28,7 +28,6 @@ public static class Telemetry
     public const string Value = "value";
     public const string TelemetryConf = "telemetry.conf";
     public const string RcChannel = "channels";
-    
 }
 
 // ### unit: drone or gs

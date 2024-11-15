@@ -9,8 +9,8 @@ namespace OpenIPC_Config.Logging;
 
 public class EventAggregatorSink : ILogEventSink
 {
-    private readonly IFormatProvider _formatProvider;
     private readonly IEventAggregator _eventAggregator;
+    private readonly IFormatProvider _formatProvider;
 
     public EventAggregatorSink(IEventAggregator eventAggregator, IFormatProvider formatProvider = null)
     {

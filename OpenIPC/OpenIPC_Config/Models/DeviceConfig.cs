@@ -1,81 +1,100 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using OpenIPC_Config.Events;
 using Prism.Events;
 
-namespace OpenIPC_Config.Models
+namespace OpenIPC_Config.Models;
+
+public class DeviceConfig : INotifyPropertyChanged
 {
-    public class DeviceConfig : INotifyPropertyChanged
+    private static DeviceConfig _instance;
+    private string _hostname;
+    private string _ipAddress;
+    private string _keyChksum;
+    private string _password;
+    private int _port;
+
+    private string _username;
+
+    public DeviceConfig()
     {
-        public DeviceConfig()
+        Username = "root";
+    }
+
+    public IEventAggregator EventAggregator { get; set; }
+    public static DeviceConfig Instance => _instance ??= new DeviceConfig();
+
+    public string Username
+    {
+        get => _username;
+        set
         {
-            Username = "root";
+            _username = value;
+            OnPropertyChanged();
         }
-        
-        public IEventAggregator EventAggregator { get; set; }
+    }
 
-        private static DeviceConfig _instance;
-        public static DeviceConfig Instance => _instance ??= new DeviceConfig();
-
-        private string _username;
-        private string _password;
-        private string _ipAddress;
-        private string _hostname;
-        private int _port;
-        private string _keyChksum;
-
-        public string Username
+    public string Password
+    {
+        get => _password;
+        set
         {
-            get => _username;
-            set { _username = value; OnPropertyChanged(); }
+            _password = value;
+            OnPropertyChanged();
         }
+    }
 
-        public string Password
+    public string IpAddress
+    {
+        get => _ipAddress;
+        set
         {
-            get => _password;
-            set { _password = value; OnPropertyChanged();  }
+            _ipAddress = value;
+            OnPropertyChanged();
         }
+    }
 
-        public string IpAddress
+    public string Hostname
+    {
+        get => _hostname;
+        set
         {
-            get => _ipAddress;
-            set { _ipAddress = value; OnPropertyChanged(); }
+            _hostname = value;
+            OnPropertyChanged();
         }
+    }
 
-        public string Hostname
+    public int Port
+    {
+        get => _port;
+        set
         {
-            get => _hostname;
-            set { _hostname = value; OnPropertyChanged();  }
+            _port = value;
+            OnPropertyChanged();
         }
-        
-        public int Port
+    }
+
+    public string KeyChksum
+    {
+        get => _keyChksum;
+        set
         {
-            get => _port;
-            set { _port = value; OnPropertyChanged();  }
+            _keyChksum = value;
+            OnPropertyChanged();
         }
-        
-        public string KeyChksum
-        {
-            get => _keyChksum;
-            set { _keyChksum = value; OnPropertyChanged();  }
-        }
+    }
 
-        public DeviceType DeviceType { get; set; }
+    public DeviceType DeviceType { get; set; }
 
-        // CanConnect property to determine connection eligibility
-        public bool CanConnect => 
-            !string.IsNullOrEmpty(Hostname) && 
-            !string.IsNullOrEmpty(IpAddress) && 
-            !string.IsNullOrEmpty(Password);
+    // CanConnect property to determine connection eligibility
+    public bool CanConnect =>
+        !string.IsNullOrEmpty(Hostname) &&
+        !string.IsNullOrEmpty(IpAddress) &&
+        !string.IsNullOrEmpty(Password);
 
-        public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        
-        
+    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

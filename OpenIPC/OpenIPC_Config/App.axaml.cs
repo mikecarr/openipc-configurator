@@ -5,21 +5,19 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using OpenIPC_Config.Logging;
 using OpenIPC_Config.ViewModels;
 using OpenIPC_Config.Views;
 using Prism.Events;
 using Serilog;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Linq;
-using Prism.Ioc;
 
 namespace OpenIPC_Config;
 
-public partial class App : Application
+public class App : Application
 {
     public static IEventAggregator EventAggregator { get; private set; }
 
@@ -28,18 +26,15 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
 
         EventAggregator = new EventAggregator();
-        
-
-        
     }
-    
 
-    void CreateAppSettings()
+
+    private void CreateAppSettings()
     {
         string configPath;
         string configDirectory;
 
-        string appName = Assembly.GetExecutingAssembly().GetName().Name;
+        var appName = Assembly.GetExecutingAssembly().GetName().Name;
         Log.Information($"Application name: {appName}, running on {RuntimeInformation.OSDescription}");
         if (OperatingSystem.IsAndroid())
         {
@@ -51,7 +46,6 @@ public partial class App : Application
         }
         else if (OperatingSystem.IsIOS())
         {
-            
             configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 appName);
             configPath = Path.Combine(configDirectory, "appsettings.json");
@@ -60,14 +54,16 @@ public partial class App : Application
         {
             configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 appName);
-            configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName,
+            configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                appName,
                 "appsettings.json");
         }
         else if (OperatingSystem.IsMacOS())
         {
             configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 appName);
-            configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName,
+            configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                appName,
                 "appsettings.json");
         }
         else // Assume Linux
@@ -87,24 +83,26 @@ public partial class App : Application
 
 
             File.WriteAllText(configPath, defaultSettings.ToString());
-            
+
             Thread.Sleep(2000);
-            
+
             Log.Information($"Default appsettings.json created at {configPath}");
         }
 
-        
+
         var configuration = new ConfigurationBuilder()
-            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
-            .AddJsonFile("appsettings.json",optional: true, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true)
+            .AddJsonFile(configPath, false, true)
+            .AddJsonFile("appsettings.json", true, true)
+            .AddJsonFile(
+                $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
+                true)
             .Build();
-            
+
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
             .WriteTo.Sink(new EventAggregatorSink(EventAggregator))
             .CreateLogger();
-        
+
         Log.Information($"Using appsettings.json from {configPath}");
         // Log.Logger = new LoggerConfiguration()
         //     .MinimumLevel.Debug()
@@ -112,7 +110,7 @@ public partial class App : Application
         //     //.ReadFrom.Configuration(configuration)
         //     .ReadFrom.AppSettings()
         //     .CreateLogger();
-        
+
         Log.Information("Starting up log");
     }
 
@@ -133,7 +131,8 @@ public partial class App : Application
                                 new JProperty("Name", "File"),
                                 new JProperty("Args",
                                     new JObject(
-                                        new JProperty("path", $"{OpenIPC_Config.Models.OpenIPC.AppDataConfigDirectory}/Logs/configurator.log")
+                                        new JProperty("path",
+                                            $"{Models.OpenIPC.AppDataConfigDirectory}/Logs/configurator.log")
                                     )
                                 )
                             )
@@ -153,7 +152,7 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         CreateAppSettings();
-        
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // Line below is needed to remove Avalonia data validation.
