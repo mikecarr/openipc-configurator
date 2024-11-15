@@ -1,6 +1,34 @@
-# Another Configurator
+# OpenIPC Configurator
 
+![OpenIPC](OpenIPC_Config/Assets/Icons/OpenIPC.png)
 
+A multi-platform configuration tool for OpenIPC cameras, built using Avalonia UI. The application provides a user-friendly interface for managing camera settings, viewing telemetry data, and setting up the camera.
+
+Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator)
+
+## Features
+
+* **Camera settings management**: configure camera settings such as resolution, frame rate, and exposure
+* **Telemetry**: view real-time telemetry data from the camera, including metrics such as temperature, voltage, and signal strength
+* **Setup wizards**: guided setup processes for configuring the camera and connecting to the network
+* **Multi-platform support**: run the application on Windows, macOS, and Linux platforms
+* **YAML-based configuration files**: easily edit and customize camera settings using YAML configuration files
+
+## Technical Details
+
+* **Built using Avalonia UI**, a cross-platform XAML-based UI framework
+* `.NET Core 3.1 or later`
+* **Supports multiple camera models and configurations**
+* **Includes logging and error handling** for troubleshooting and debugging
+
+## Files and Folders
+
+* `Views`: contains Avalonia UI views for the application, including camera settings, telemetry, and setup wizards
+* `ViewModels`: contains view models for the application, responsible for managing data and business logic
+* `Models`: contains data models for the application, representing camera settings and telemetry data
+* `Services`: contains application-wide services and utilities, such as logging and SSH clients
+* `Styles`: contains styles and resources for the application, including themes and fonts
+* `README.md`: this file, containing information about the project and its features
 
 ## App Logs
 * Android: /data/user/0/org.openipc.OpenIPC/files/.config/openipc-configurator.log
@@ -16,7 +44,7 @@ Based on your folder structure, here’s an explanation of each project and what
 ### Project Breakdown
 
 1. **OpenIPC**
-    - This appears to be the core or shared library project that other platform-specific projects reference.
+    - The core or shared library project that other platform-specific projects reference.
     - It likely contains shared code, models, services, or ViewModels that can be used across all platforms (Desktop, Android, Browser, iOS).
 
 2. **OpenIPC.Desktop**

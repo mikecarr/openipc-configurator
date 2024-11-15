@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using OpenIPC_Config.ViewModels;
 
-namespace OpenIPC;
+namespace OpenIPC_Config;
 
 public class ViewLocator : IDataTemplate
 {
