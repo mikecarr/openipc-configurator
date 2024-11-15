@@ -1,10 +1,9 @@
-using Serilog;
-
-namespace OpenIPC_Config.Services;
-
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Serilog;
+
+namespace OpenIPC_Config.Services;
 
 public class WfbConfigParser
 {
@@ -49,10 +48,7 @@ public class WfbConfigParser
             var trimmedLine = line.Trim();
 
             // Skip empty lines and comments
-            if (string.IsNullOrWhiteSpace(trimmedLine) || trimmedLine.StartsWith("#"))
-            {
-                continue;
-            }
+            if (string.IsNullOrWhiteSpace(trimmedLine) || trimmedLine.StartsWith("#")) continue;
 
             // Match key-value pairs
             var match = keyValueRegex.Match(trimmedLine);
@@ -80,72 +76,40 @@ public class WfbConfigParser
         Channel = channel;
 
         if (configDict.TryGetValue("txpower", out var txPower))
-        {
             TxPower = int.TryParse(txPower, out var value) ? value : 0;
-        }
 
         if (configDict.TryGetValue("driver_txpower_override", out var driverOverride))
-        {
             DriverTxPowerOverride = int.TryParse(driverOverride, out var value) ? value : 0;
-        }
 
         if (configDict.TryGetValue("bandwidth", out var bandwidth))
-        {
             Bandwidth = int.TryParse(bandwidth, out var value) ? value : 0;
-        }
 
-        if (configDict.TryGetValue("stbc", out var stbc))
-        {
-            Stbc = int.TryParse(stbc, out var value) ? value : 0;
-        }
+        if (configDict.TryGetValue("stbc", out var stbc)) Stbc = int.TryParse(stbc, out var value) ? value : 0;
 
-        if (configDict.TryGetValue("ldpc", out var ldpc))
-        {
-            Ldpc = int.TryParse(ldpc, out var value) ? value : 0;
-        }
+        if (configDict.TryGetValue("ldpc", out var ldpc)) Ldpc = int.TryParse(ldpc, out var value) ? value : 0;
 
         if (configDict.TryGetValue("mcs_index", out var mcsIndex))
-        {
             McsIndex = int.TryParse(mcsIndex, out var value) ? value : 0;
-        }
 
-        if (configDict.TryGetValue("stream", out var stream))
-        {
-            Stream = int.TryParse(stream, out var value) ? value : 0;
-        }
+        if (configDict.TryGetValue("stream", out var stream)) Stream = int.TryParse(stream, out var value) ? value : 0;
 
         if (configDict.TryGetValue("link_id", out var linkId))
-        {
             LinkId = long.TryParse(linkId, out var value) ? value : 0;
-        }
 
         if (configDict.TryGetValue("udp_port", out var udpPort))
-        {
             UdpPort = int.TryParse(udpPort, out var value) ? value : 0;
-        }
 
-        if (configDict.TryGetValue("rcv_buf", out var rcvBuf))
-        {
-            RcvBuf = int.TryParse(rcvBuf, out var value) ? value : 0;
-        }
+        if (configDict.TryGetValue("rcv_buf", out var rcvBuf)) RcvBuf = int.TryParse(rcvBuf, out var value) ? value : 0;
 
         configDict.TryGetValue("frame_type", out var frameType);
         FrameType = frameType;
 
-        if (configDict.TryGetValue("fec_k", out var fecK))
-        {
-            FecK = int.TryParse(fecK, out var value) ? value : 0;
-        }
+        if (configDict.TryGetValue("fec_k", out var fecK)) FecK = int.TryParse(fecK, out var value) ? value : 0;
 
-        if (configDict.TryGetValue("fec_n", out var fecN))
-        {
-            FecN = int.TryParse(fecN, out var value) ? value : 0;
-        }
+        if (configDict.TryGetValue("fec_n", out var fecN)) FecN = int.TryParse(fecN, out var value) ? value : 0;
 
         if (configDict.TryGetValue("pool_timeout", out var poolTimeout))
-        {
             PoolTimeout = int.TryParse(poolTimeout, out var value) ? value : 0;
-        }
 
         configDict.TryGetValue("guard_interval", out var guardInterval);
         GuardInterval = guardInterval;

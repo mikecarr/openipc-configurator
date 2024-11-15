@@ -13,7 +13,4 @@ public static class Majestic
     public const string ImageLuminance = "image.luminance";
     public const string ImageFlip = "image.flip";
     public const string ImageMirror = "image.mirror";
-    
-    
 }
-

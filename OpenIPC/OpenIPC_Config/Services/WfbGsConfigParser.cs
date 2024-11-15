@@ -1,18 +1,17 @@
-namespace OpenIPC_Config.Services;
-
-using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using Serilog;
+
+namespace OpenIPC_Config.Services;
 
 public class WfbGsConfigParser
 {
-    // Properties to store parsed values
-    public string TxPower { get; set; }
-
     // Store the original configuration content
     private string _originalConfigContent;
+
+    // Properties to store parsed values
+    public string TxPower { get; set; }
 
     // Method to parse configuration from a string
     public void ParseConfigString(string configContent)

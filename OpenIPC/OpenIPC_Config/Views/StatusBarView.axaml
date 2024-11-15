@@ -28,17 +28,17 @@
                 <Label FontWeight="Bold" Content="Hostname:" />
             </Border>
 
-            <Border BorderBrush="Gray"  BorderThickness="0" Grid.Row="0" Grid.Column="1">
-                <TextBlock  VerticalAlignment="Center" HorizontalAlignment="Stretch" Text="{Binding HostNameText}" />
+            <Border BorderBrush="Gray" BorderThickness="0" Grid.Row="0" Grid.Column="1">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Stretch" Text="{Binding HostNameText}" />
             </Border>
 
-            
+
             <Border BorderBrush="Gray" BorderThickness="0" Grid.Row="0" Grid.Column="2">
                 <Label FontWeight="Bold" Content="Status:" />
             </Border>
 
             <Border BorderBrush="Gray" BorderThickness="0" Grid.Row="0" Grid.Column="3">
-                <TextBlock  VerticalAlignment="Center" Width="100" Text="{Binding StatusText}" />
+                <TextBlock VerticalAlignment="Center" Width="100" Text="{Binding StatusText}" />
             </Border>
 
             <Border BorderBrush="Gray" BorderThickness="0" Grid.Row="0" Grid.Column="4">
@@ -46,7 +46,7 @@
             </Border>
 
             <Border BorderBrush="Gray" BorderThickness="0" Grid.Row="0" Grid.Column="5">
-                <TextBlock Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" Text="{Binding MessagesText}" />
+                <TextBlock VerticalAlignment="Center" Text="{Binding MessagesText}" />
             </Border>
         </Grid>
 

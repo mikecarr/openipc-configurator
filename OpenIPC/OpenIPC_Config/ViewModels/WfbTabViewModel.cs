@@ -16,25 +16,25 @@ namespace OpenIPC_Config.ViewModels;
 
 public class WfbTabViewModel : ReactiveObject
 {
-    private readonly IEventAggregator _eventAggregator;
-    
-    private readonly ISshClientService? _sshClientService;
-    
-    
-    public ObservableCollection<string> Frequencies58GHz { get; set; }
-    public ObservableCollection<string> Frequencies24GHz { get; set; }
+    private readonly Dictionary<int, string> _24frequencyMapping = new()
+    {
+        { 1, "2412 MHz [1]" },
+        { 2, "2417 MHz [2]" },
+        { 3, "2422 MHz [3]" },
+        { 4, "2427 MHz [4]" },
+        { 5, "2432 MHz [5]" },
+        { 6, "2437 MHz [6]" },
+        { 7, "2442 MHz [7]" },
+        { 8, "2447 MHz [8]" },
+        { 9, "2452 MHz [9]" },
+        { 10, "2457 MHz [10]" },
+        { 11, "2462 MHz [11]" },
+        { 12, "2467 MHz [12]" },
+        { 13, "2472 MHz [13]" },
+        { 14, "2484 MHz [14]" }
+    };
 
-    public ObservableCollection<int> Power58GHz { get; set; }
-    public ObservableCollection<int> Power24GHz { get; set; }
-    public ObservableCollection<int> MCSIndex { get; set; }
-    public ObservableCollection<int> STBC { get; set; }
-    public ObservableCollection<int> LDPC { get; set; }
-    public ObservableCollection<int> FecK { get; set; }
-    public ObservableCollection<int> FecN { get; set; }
-    public ICommand RestartWfbCommand { get; private set; }
 
-    
-    
     private readonly Dictionary<int, string> _58frequencyMapping = new()
     {
         { 36, "5180 MHz [36]" },
@@ -66,26 +66,61 @@ public class WfbTabViewModel : ReactiveObject
         { 173, "5865 MHz [173]" },
         { 177, "5885 MHz [177]" }
     };
-    
-    private readonly Dictionary<int, string> _24frequencyMapping = new()
-    {
-        { 1, "2412 MHz [1]" },
-        { 2, "2417 MHz [2]" },
-        { 3, "2422 MHz [3]" },
-        { 4, "2427 MHz [4]" },
-        { 5, "2432 MHz [5]" },
-        { 6, "2437 MHz [6]" },
-        { 7, "2442 MHz [7]" },
-        { 8, "2447 MHz [8]" },
-        { 9, "2452 MHz [9]" },
-        { 10, "2457 MHz [10]" },
-        { 11, "2462 MHz [11]" },
-        { 12, "2467 MHz [12]" },
-        { 13, "2472 MHz [13]" },
-        { 14, "2484 MHz [14]" }
-    };
-    
+
+    private readonly IEventAggregator _eventAggregator;
+
+    private readonly ISshClientService? _sshClientService;
+
+    private bool _canConnect;
+
+    private int _selectedChannel;
+
+    private int _selectedFecK;
+
+    private int _selectedFecN;
+
+    private string _selectedFrequency24String;
+
+    private string _selectedFrequency58String;
+
+    private int _selectedLdpc;
+
+    private int _selectedMcsIndex;
+
+    private int _selectedPower;
+
     private int _selectedPower24GHz;
+
+    private int _selectedStbc;
+
+    private string _wfbConfContent;
+
+    public WfbTabViewModel()
+    {
+        InitializeCollections();
+
+        _sshClientService = new SshClientService(_eventAggregator);
+        RestartWfbCommand = new RelayCommand(() => RestartWfb());
+
+        _eventAggregator = App.EventAggregator;
+
+        _eventAggregator.GetEvent<TabMessageEvent>().Subscribe(MessageReceived);
+        _eventAggregator.GetEvent<WfbConfContentUpdatedEvent>().Subscribe(WfbConfContentUpdated);
+        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
+    }
+
+
+    public ObservableCollection<string> Frequencies58GHz { get; set; }
+    public ObservableCollection<string> Frequencies24GHz { get; set; }
+
+    public ObservableCollection<int> Power58GHz { get; set; }
+    public ObservableCollection<int> Power24GHz { get; set; }
+    public ObservableCollection<int> MCSIndex { get; set; }
+    public ObservableCollection<int> STBC { get; set; }
+    public ObservableCollection<int> LDPC { get; set; }
+    public ObservableCollection<int> FecK { get; set; }
+    public ObservableCollection<int> FecN { get; set; }
+    public ICommand RestartWfbCommand { get; private set; }
 
     public int SelectedPower24GHz
     {
@@ -97,8 +132,6 @@ public class WfbTabViewModel : ReactiveObject
         }
     }
 
-    private int _selectedChannel;
-
     public int SelectedChannel
     {
         get => _selectedChannel;
@@ -108,8 +141,6 @@ public class WfbTabViewModel : ReactiveObject
             Log.Debug($"SelectedChannel updated to {value}");
         }
     }
-    
-    private int _selectedPower;
 
     public int SelectedPower
     {
@@ -121,8 +152,6 @@ public class WfbTabViewModel : ReactiveObject
         }
     }
 
-    private int _selectedLdpc;
-
     public int SelectedLdpc
     {
         get => _selectedLdpc;
@@ -132,8 +161,6 @@ public class WfbTabViewModel : ReactiveObject
             Log.Debug($"SelectedLdpc updated to {value}");
         }
     }
-
-    private int _selectedStbc;
 
     public int SelectedStbc
     {
@@ -145,8 +172,6 @@ public class WfbTabViewModel : ReactiveObject
         }
     }
 
-    private int _selectedMcsIndex;
-
     public int SelectedMcsIndex
     {
         get => _selectedMcsIndex;
@@ -156,8 +181,6 @@ public class WfbTabViewModel : ReactiveObject
             Log.Debug($"SelectedMcsIndex updated to {value}");
         }
     }
-
-    private int _selectedFecK;
 
     public int SelectedFecK
     {
@@ -169,8 +192,6 @@ public class WfbTabViewModel : ReactiveObject
         }
     }
 
-    private int _selectedFecN;
-
     public int SelectedFecN
     {
         get => _selectedFecN;
@@ -181,15 +202,11 @@ public class WfbTabViewModel : ReactiveObject
         }
     }
 
-    private string _selectedFrequency58String;
-
     public string SelectedFrequency58String
     {
         get => _selectedFrequency58String;
         set => this.RaiseAndSetIfChanged(ref _selectedFrequency58String, value);
     }
-
-    private string _selectedFrequency24String;
 
     public string SelectedFrequency24String
     {
@@ -197,46 +214,22 @@ public class WfbTabViewModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _selectedFrequency24String, value);
     }
 
-    private string _wfbConfContent;
     public string? WfbConfContent
     {
         get => _wfbConfContent;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _wfbConfContent, value);
-            //CanConnect = true;
-            //ParseWfbConfContent();
-        }
+        set => this.RaiseAndSetIfChanged(ref _wfbConfContent, value);
+        //CanConnect = true;
+        //ParseWfbConfContent();
     }
-    
-    private bool _canConnect;
+
     public bool CanConnect
     {
         get => _canConnect;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _canConnect, value);
-            //Log.Debug($"CanConnect {value}");
-        }
-    }
-    
-    public WfbTabViewModel()
-    {
-        InitializeCollections();
-        
-        _sshClientService = new SshClientService(_eventAggregator);
-        RestartWfbCommand = new RelayCommand(() => RestartWfb());
-        
-        _eventAggregator = App.EventAggregator;
-        
-        _eventAggregator.GetEvent<TabMessageEvent>().Subscribe(MessageReceived);
-        _eventAggregator.GetEvent<WfbConfContentUpdatedEvent>().Subscribe(WfbConfContentUpdated);
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
+        set => this.RaiseAndSetIfChanged(ref _canConnect, value);
+        //Log.Debug($"CanConnect {value}");
     }
 
-    
-    
-    
+
     private void WfbConfContentUpdated(WfbConfContentUpdatedMessage obj)
     {
         WfbConfContent = obj.Content;
@@ -281,16 +274,19 @@ public class WfbTabViewModel : ReactiveObject
 
         // make sure we are not uploading an empty string/file
         if (string.IsNullOrEmpty(updatedWfbConfContent))
-        {
             await MessageBoxManager.GetMessageBoxStandard("Error", "WfbConfContent is empty").ShowAsync();
-        }
 
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = $"Uploading new {Models.OpenIPC.WfbConfFileLoc}", DeviceConfig = DeviceConfig.Instance, UpdateLogView = true});
-        
+        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
+        {
+            Message = $"Uploading new {Models.OpenIPC.WfbConfFileLoc}", DeviceConfig = DeviceConfig.Instance,
+            UpdateLogView = true
+        });
+
         Log.Information($"Uploading new : {Models.OpenIPC.WfbConfFileLoc}");
         _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WfbConfFileLoc, WfbConfContent);
 
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Restarting Wfb", DeviceConfig = DeviceConfig.Instance, UpdateLogView = true});
+        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
+            { Message = "Restarting Wfb", DeviceConfig = DeviceConfig.Instance, UpdateLogView = true });
         Log.Information("Restarting Wfb");
         _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.WfbRestartCommand);
     }
@@ -317,10 +313,8 @@ public class WfbTabViewModel : ReactiveObject
         LDPC = new ObservableCollection<int> { 0, 1 };
         FecK = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
         FecN = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-
-
     }
-    
+
     // Method to parse the wfbConfContent
     private void ParseWfbConfContent()
     {
@@ -347,7 +341,7 @@ public class WfbTabViewModel : ReactiveObject
                         {
                             string frequencyString;
 
-                            if (_58frequencyMapping.TryGetValue(frequency, out frequencyString ))
+                            if (_58frequencyMapping.TryGetValue(frequency, out frequencyString))
                                 SelectedFrequency58String = frequencyString;
                             else if (_24frequencyMapping.TryGetValue(frequency, out frequencyString))
                                 SelectedFrequency24String = frequencyString;
@@ -367,6 +361,7 @@ public class WfbTabViewModel : ReactiveObject
                                 Power58GHz.Add(parsedPower);
                                 SelectedPower = parsedPower;
                             }
+
                         break;
                     case Wfb.Ldpc:
                         if (int.TryParse(value, out var parsedLdpc))
@@ -448,6 +443,7 @@ public class WfbTabViewModel : ReactiveObject
                                 FecN.Add(parsedFecN);
                                 SelectedFecN = parsedFecN;
                             }
+
                         break;
                     case Wfb.Channel:
                         if (int.TryParse(value, out var channel))
@@ -458,7 +454,6 @@ public class WfbTabViewModel : ReactiveObject
                             else if (_24frequencyMapping.TryGetValue(channel, out var frequency24String))
                                 SelectedFrequency24String = frequency24String;
                             // Handle unknown channel value
-                            
                         }
 
                         break;
@@ -470,17 +465,13 @@ public class WfbTabViewModel : ReactiveObject
             }
         }
     }
-    
+
     private void OnAppMessage(AppMessage appMessage)
     {
-        if (appMessage.CanConnect)
-        {
-            CanConnect = appMessage.CanConnect;
-            //Log.Information($"CanConnect {CanConnect.ToString()}");
-        }
-
+        if (appMessage.CanConnect) CanConnect = appMessage.CanConnect;
+        //Log.Information($"CanConnect {CanConnect.ToString()}");
     }
-    
+
     private string UpdateWfbConfContent(
         string wfbConfContent,
         string newFrequency58,

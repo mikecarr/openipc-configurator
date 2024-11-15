@@ -5,6 +5,4 @@ namespace OpenIPC_Config.Events;
 
 public class DeviceTypeChangeEvent : PubSubEvent<DeviceType>
 {
-
 }
-

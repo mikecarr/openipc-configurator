@@ -6,9 +6,8 @@
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450"
              x:Class="OpenIPC_Config.Views.LogViewer"
              x:DataType="vm:LogViewerViewModel">
-    
-    
-    
+
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -16,11 +15,11 @@
             <RowDefinition Height="Auto" />
 
         </Grid.RowDefinitions>
-        
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        
+
         <!-- <ListBox Grid.Row="0" BorderBrush="Black" BorderThickness="1" ItemsSource="{Binding LogMessages}" Height="400"> -->
         <!--     <ListBox.ItemTemplate> -->
         <!--         <DataTemplate> -->
@@ -28,11 +27,11 @@
         <!--         </DataTemplate> -->
         <!--     </ListBox.ItemTemplate> -->
         <!-- </ListBox> -->
-        <ListBox Grid.Row="0" BorderBrush="Black" BorderThickness="1" 
-                 ItemsSource="{Binding LogMessages}" 
+        <ListBox Grid.Row="0" BorderBrush="Black" BorderThickness="1"
+                 ItemsSource="{Binding LogMessages}"
                  HorizontalAlignment="Stretch"
                  VerticalAlignment="Stretch"
-                 
+
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -41,15 +40,15 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        
-        <Label Grid.Row="1" FontStyle="Italic" Content="Log File is also available in System Application Folder"/>
-        
+
+        <Label Grid.Row="1" FontStyle="Italic" Content="Log File is also available in System Application Folder" />
+
     </Grid>
-    
+
 
     <!--  -->
     <!-- <Button Content="Save Log" Command="{Binding SaveLogCommand}"  -->
     <!--         CommandParameter="{Binding  -->
     <!--             RelativeSource={RelativeSource AncestorType=Window}}" /> -->
-    
+
 </UserControl>
