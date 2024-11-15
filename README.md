@@ -6,6 +6,8 @@ A multi-platform configuration tool for OpenIPC cameras, built using Avalonia UI
 
 Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator)
 
+[Demo on YouTube](https://www.youtube.com/watch?v=iJXXMcnOC7w)
+
 ## Features
 
 * **Camera settings management**: configure camera settings such as resolution, frame rate, and exposure
