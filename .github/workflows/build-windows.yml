@@ -45,7 +45,7 @@ jobs:
 
       - name: Set Windows Icon
         run: |
-          rcedit "OpenIPC_Config.Desktop\bin\Release\net8.0\win-x64\publish\OpenIPC_Config.Desktop.exe" --set-icon "Assets\OpenIPC.ico"
+          rcedit "OpenIPC_Config.Desktop\bin\Release\net8.0\win-x64\publish\OpenIPC_Config.Desktop.exe" --set-icon "OpenIPC_Config\Assets\Icons\OpenIPC.ico"
         shell: cmd
 
       - name: Create Distribution Folder
