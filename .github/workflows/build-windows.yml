@@ -1,5 +1,7 @@
-name: Build Windows OpenIPC Config Avalonia App
+name: Build Windows OpenIPC Config Avalonia App  
 on:
+  # manual runs
+  workflow_dispatch:
   push:
     branches:
       - test-actions
