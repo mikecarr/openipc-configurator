@@ -28,6 +28,7 @@ jobs:
 
       - name: Install Android and iOS workloads
         run: |
+          dotnet workload install ios
           dotnet workload install android
           dotnet workload install wasi-experimental
 
