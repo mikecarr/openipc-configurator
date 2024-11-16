@@ -48,6 +48,9 @@ public class ConnectControlsViewModel : ViewModelBase
 
     private readonly ISshClientService _sshClientService;
 
+    private readonly TimeSpan _pingInterval = TimeSpan.FromSeconds(1);
+    private readonly TimeSpan _pingTimeout = TimeSpan.FromMilliseconds(500);
+
 
     public ConnectControlsViewModel()
     {
@@ -60,7 +63,7 @@ public class ConnectControlsViewModel : ViewModelBase
         ConnectCommand = new RelayCommand(() => Connect());
 
         _cancellationTokenSource = new CancellationTokenSource();
-        _dispatcherTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _dispatcherTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _dispatcherTimer.Tick += DispatcherTimer_Tick;
         _dispatcherTimer.Start();
 
@@ -161,49 +164,48 @@ public class ConnectControlsViewModel : ViewModelBase
 
     private async void DispatcherTimer_Tick(object sender, EventArgs e)
     {
-        await PingDeviceAsync();
+        await StartPingingAsync();
     }
 
-    private async Task PingDeviceAsync()
+    public async Task StartPingingAsync()
     {
-        while (!_cancellationTokenSource.IsCancellationRequested)
+        //_cancellationTokenSource = new CancellationTokenSource();
+
+        await Task.Run(async () =>
         {
-            try
+            while (!_cancellationTokenSource.IsCancellationRequested)
             {
-                var ipAddress = IPAddress.Parse(IpAddress);
-                var reply = await _ping.SendPingAsync(ipAddress, TimeSpan.FromSeconds(1), null, null,
-                    _cancellationTokenSource.Token);
-                //Log.Debug("Ping result: " + reply.Status.ToString());
-                //_eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Ping...." });
-
-                if (reply.Status == IPStatus.Success)
+                try
                 {
-                    await Dispatcher.UIThread.InvokeAsync(() => PingStatusColor = _onlineColorBrush);
-                    _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
+                    var ipAddress = IPAddress.Parse(IpAddress);
+                    var reply = await _ping.SendPingAsync(ipAddress, (int)_pingTimeout.TotalMilliseconds);
+                    Log.Debug("Ping!");
+                    if (reply.Status == IPStatus.Success)
+                    {
+                        await Dispatcher.UIThread.InvokeAsync(() => PingStatusColor = _onlineColorBrush);
+                        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
                         { Status = "Ping OK", DeviceConfig = _deviceConfig });
-
-                    // this should allow for the tabs to update
-                    _eventAggregator.GetEvent<DeviceTypeChangeEvent>().Publish(SelectedDeviceType);
-                }
-                else
-                {
-                    await Dispatcher.UIThread.InvokeAsync(() => PingStatusColor = _offlineColorBrush);
-                    _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
+                    }
+                    else
+                    {
+                        await Dispatcher.UIThread.InvokeAsync(() => PingStatusColor = _offlineColorBrush);
+                        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
                         { Status = "No device", DeviceConfig = _deviceConfig });
+                    }
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                // Handle exception
-                Log.Error($"Error pinging device: {ex.Message}");
-            }
+                catch (OperationCanceledException)
+                {
+                    // Gracefully exit when cancellation is requested
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Error pinging device: {ex.Message}");
+                }
 
-            await Task.Delay(TimeSpan.FromSeconds(1));
-        }
+                await Task.Delay(_pingInterval, _cancellationTokenSource.Token);
+            }
+        });
     }
 
     private void SetDefaults()
