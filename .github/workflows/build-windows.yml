@@ -2,7 +2,7 @@ name: Build Windows OpenIPC Config Avalonia App
 on:
   push:
     branches:
-      - test-actions
+      - stable
 jobs:
   build:
     name: Build and Package for ${{ matrix.os }}
