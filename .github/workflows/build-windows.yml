@@ -41,11 +41,11 @@ jobs:
         run: dotnet publish OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj -c Release -r ${{ matrix.arch }} --self-contained
 
       - name: List output directory
-        run: dir bin\Release\net8.0\win-x64\publish
+        run: dir "OpenIPC_Config.Desktop\bin\Release\net8.0\win-x64\publish"
 
       - name: Set Windows Icon
         run: |
-          rcedit "bin\Release\net8.0\win-x64\publish\OpenIPC-Config.exe" --set-icon "Assets\OpenIPC.ico"
+          rcedit "OpenIPC_Config.Desktop\bin\Release\net8.0\win-x64\publish\OpenIPC-Config.exe" --set-icon "Assets\OpenIPC.ico"
         shell: cmd
 
       - name: Create Distribution Folder
@@ -56,7 +56,8 @@ jobs:
 
       - name: Zip Windows App
         run: |
-          Compress-Archive -Path "bin\Release\net8.0\win-x64\publish\*" -DestinationPath "dist\OpenIPC-Config-win-x64.zip"
+          Compress-Archive -Path "OpenIPC_Config.Desktop\bin\Release\net8.0\win-x64\publish\*" -DestinationPath "dist\OpenIPC-Config-win-x64.zip"
+
         shell: pwsh
 
       - name: Upload Windows App Artifact
