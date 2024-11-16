@@ -1,0 +1,77 @@
+name: Build Ubuntu OpenIPC Config Avalonia App
+
+on:
+  push:
+    branches:
+      - stable
+
+jobs:
+  build:
+    name: Build and Package for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        include:
+          - os: ubuntu-latest
+            arch: x64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.404'
+
+      - name: Install Android and iOS workloads
+        run: |
+          dotnet workload install android
+          dotnet workload install wasi-experimental
+        
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet publish -c Release -r linux-x64 --self-contained
+
+      - name: List output directory
+        run: ls -al ./bin/Release/net8.0/linux-x64/publish
+
+      - name: Copy Assets to Publish Directory
+        run: |
+          PUBLISH_DIR="./bin/Release/net8.0/linux-x64/publish"
+          mkdir -p "${PUBLISH_DIR}/Assets"
+          cp -R ./Assets/* "${PUBLISH_DIR}/Assets/"
+
+      - name: Set up Icon and .desktop file
+        run: |
+          APP_NAME="OpenIPC-Config"
+          PUBLISH_DIR="./bin/Release/net8.0/linux-x64/publish"
+          ICON_PATH="${PUBLISH_DIR}/Assets/OpenIPC.png"
+          DESKTOP_FILE="${PUBLISH_DIR}/${APP_NAME}.desktop"
+          
+          # Ensure the icon is in the publish directory
+          cp ./Assets/OpenIPC.png "$ICON_PATH"
+
+          # Create .desktop file
+          cat << EOF > "$DESKTOP_FILE"
+          [Desktop Entry]
+          Name=OpenIPC Config
+          Exec=$PUBLISH_DIR/OpenIPC-Config
+          Icon=$ICON_PATH
+          Type=Application
+          Terminal=false
+          Categories=Utility;
+          EOF
+
+      - name: Zip Ubuntu App
+        run: |
+          zip -r OpenIPC-Config-ubuntu-x64.zip ./bin/Release/net8.0/linux-x64/publish/*
+
+      - name: Upload Ubuntu App Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenIPC-Config-ubuntu-x64
+          path: OpenIPC-Config-ubuntu-x64.zip

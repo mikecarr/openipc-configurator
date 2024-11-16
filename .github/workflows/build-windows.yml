@@ -1,0 +1,66 @@
+name: Build Windows OpenIPC Config Avalonia App
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test-actions
+
+jobs:
+  build:
+    name: Build and Package for ${{ matrix.os }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        arch: [win-x64, win-arm64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.404'
+
+      - name: Install Chocolatey
+        run: |
+          if (!(choco)) {
+            Set-ExecutionPolicy Bypass -Scope Process -Force;
+            iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'));
+          }
+
+      - name: Install rcedit
+        run: choco install rcedit -y
+
+      - name: Restore dependencies
+        run: dotnet restore --verbosity detailed
+
+      - name: Build project
+        run: dotnet publish -c Release -r ${{ matrix.arch }} --self-contained
+
+      - name: List output directory
+        run: dir "bin\Release\net8.0\${{ matrix.arch }}\publish"
+
+      - name: Set Windows Icon
+        run: |
+          rcedit "bin\Release\net8.0\${{ matrix.arch }}\publish\OpenIPC-Config.exe" --set-icon "Assets\OpenIPC.ico"
+        shell: cmd
+
+      - name: Create Distribution Folder
+        run: |
+          if (Test-Path dist) { Remove-Item -Recurse -Force dist }
+          mkdir dist
+        shell: pwsh
+
+      - name: Zip Windows App
+        run: |
+          Compress-Archive -Path "bin\Release\net8.0\${{ matrix.arch }}\publish\*" -DestinationPath "dist\OpenIPC-Config-${{ matrix.arch }}.zip"
+        shell: pwsh
+
+      - name: Upload Windows App Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: OpenIPC-Config-${{ matrix.arch }}
+          path: dist\OpenIPC-Config-${{ matrix.arch }}.zip

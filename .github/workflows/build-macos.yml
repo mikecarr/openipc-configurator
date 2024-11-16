@@ -1,0 +1,95 @@
+# Workflow for building and packaging a macOS Avalonia App
+# s damaged and can’t be opened. You should move it to the Trash.
+# run xattr -cr OpenIPC-Config.app
+# need code signing?
+name: Build MacOS OpenIPC Config Avalonia App
+on:
+  push:
+    branches:
+      - stable
+
+jobs:
+  build:
+    name: Build and Package for macOS
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-latest]
+        arch: [arm64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.404'
+
+      - name: Install Android and iOS workloads
+        run: |
+          dotnet workload install ios
+          dotnet workload install android
+          dotnet workload install wasi-experimental
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Publish project
+        run: dotnet publish -c Release -r osx-arm64 --self-contained
+
+      - name: Package as macOS .app
+        run: |
+          APP_NAME="OpenIPC-Config"
+          PUBLISH_DIR="./bin/Release/net8.0/osx-arm64/publish"
+          APP_DIR="${APP_NAME}.app"
+      
+          # Create the app bundle structure
+          mkdir -p "${APP_DIR}/Contents/MacOS"
+          mkdir -p "${APP_DIR}/Contents/Resources"
+      
+          # Copy the published binaries
+          cp -R "${PUBLISH_DIR}/"* "${APP_DIR}/Contents/MacOS/"
+      
+          # Copy the icon file
+          cp ./Assets/OpenIPC.icns "${APP_DIR}/Contents/Resources/${APP_NAME}.icns"
+      
+          # Create the Info.plist file with variable substitution
+          cat << EOF > "${APP_DIR}/Contents/Info.plist"
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>
+            <string>${APP_NAME}</string>
+            <key>CFBundleExecutable</key>
+            <string>${APP_NAME}</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.openipc.${APP_NAME}</string>
+            <key>CFBundleVersion</key>
+            <string>0.1</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>10.13</string>
+            <key>CFBundleIconFile</key>
+            <string>${APP_NAME}.icns</string>
+          </dict>
+          </plist>
+          EOF
+      
+          # Set executable permissions for the main binary
+          chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}"
+      
+          
+      - name: Zip .app Bundle
+        run: zip -r OpenIPC-Config-macos-arm64.zip OpenIPC-Config.app
+
+      - name: Upload macOS App Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenIPC-Config-macos-arm64
+          path: OpenIPC-Config-macos-arm64.zip
