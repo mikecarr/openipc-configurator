@@ -8,14 +8,13 @@ on:
       
 jobs:
   build:
-    name: Build and Package for ${{ matrix.os }}
+    name: Build and Package for ${{ matrix.os }} ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest]
-        include:
-          - os: windows-latest
-            arch: x64
+        arch: [win-x64, win-arm64]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,37 +23,34 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.404'
-          
-      - name: Install Android and iOS workloads
-        run: |
-          dotnet workload install android
-          dotnet workload install wasi-experimental
 
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Build project
-        run: dotnet publish -c Release -r win-x64 --self-contained
+        run: dotnet publish -c Release -r ${{ matrix.arch }} --self-contained
 
       - name: List output directory
-        run: dir bin\Release\net8.0\win-x64\publish
+        run: dir bin\Release\net8.0\${{ matrix.arch }}\publish
 
       - name: Install rcedit
         run: choco install rcedit
 
       - name: Set Windows Icon
         run: |
-          rcedit "bin\Release\net8.0\win-x64\publish\OpenIPC-Config.exe" --set-icon "Assets\OpenIPC.ico"
+          rcedit "bin\Release\net8.0\${{ matrix.arch }}\publish\OpenIPC-Config.exe" --set-icon "Assets\OpenIPC.ico"
         shell: cmd
 
       - name: Zip Windows App
         run: |
+          if (Test-Path dist) { Remove-Item -Recurse -Force dist }
           mkdir dist
-          Compress-Archive -Path "bin\Release\net8.0\win-x64\publish\*" -DestinationPath "dist\OpenIPC-Config-windows-x64.zip"
+          Compress-Archive -Path "bin\Release\net8.0\${{ matrix.arch }}\publish\*" -DestinationPath "dist\OpenIPC-Config-${{ matrix.arch }}.zip"
         shell: pwsh
 
       - name: Upload Windows App Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: OpenIPC-Config-windows-x64
-          path: dist\OpenIPC-Config-windows-x64.zip
+          name: OpenIPC-Config-${{ matrix.arch }}
+          path: dist\OpenIPC-Config-${{ matrix.arch }}.zip
+
