@@ -1,0 +1,100 @@
+name: Build and Package Avalonia App
+
+on:
+  push:
+    branches: 
+      - main
+      - refactor
+
+jobs:
+  build:
+    name: Build and Package for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: macos-latest
+            arch: arm64
+          - os: ubuntu-latest
+            arch: x64
+          - os: windows-latest
+            arch: x64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Publish and package project
+        run: |
+          DIST_DIR=./dist
+          APP_NAME="OpenIPC-Config"
+          PUBLISH_DIR="./bin/Release/net8.0"
+          
+          mkdir -p "$DIST_DIR"
+      
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            dotnet publish -c Release -r linux-x64 --self-contained
+            OUTPUT_DIR="${DIST_DIR}/${APP_NAME}_Linux"
+            mkdir -p "$OUTPUT_DIR"
+            cp -R "${PUBLISH_DIR}/linux-x64/publish/"* "$OUTPUT_DIR/"
+            zip -r "${DIST_DIR}/${APP_NAME}-linux-x64.zip" "$OUTPUT_DIR"
+          elif [ "${{ matrix.os }}" == "windows-latest" ]; then
+            dotnet publish -c Release -r win-x64 --self-contained
+            OUTPUT_DIR="${DIST_DIR}/${APP_NAME}_Windows"
+            mkdir -p "$OUTPUT_DIR"
+            cp -R "${PUBLISH_DIR}/win-x64/publish/"* "$OUTPUT_DIR/"
+            curl -L -o rcedit.exe https://github.com/electron/rcedit/releases/download/v1.1.1/rcedit-x64.exe
+            ./rcedit.exe "$OUTPUT_DIR/OpenIPC-Config.exe" --set-icon ./Assets/OpenIPC.ico
+            powershell -Command "Compress-Archive -Path ${OUTPUT_DIR}\* -DestinationPath ${DIST_DIR}\${APP_NAME}-windows-x64.zip"
+          else
+            dotnet publish -c Release -r osx-arm64 --self-contained
+            OUTPUT_DIR="${DIST_DIR}/${APP_NAME}_Mac"
+            mkdir -p "$OUTPUT_DIR/${APP_NAME}.app/Contents/MacOS"
+            mkdir -p "$OUTPUT_DIR/${APP_NAME}.app/Contents/Resources"
+            cp -R "${PUBLISH_DIR}/osx-arm64/publish/"* "$OUTPUT_DIR/${APP_NAME}.app/Contents/MacOS/"
+            cp ./Assets/OpenIPC.icns "$OUTPUT_DIR/${APP_NAME}.app/Contents/Resources/${APP_NAME}.icns"
+            # Info.plist creation
+            echo "
+            <?xml version=\"1.0\" encoding=\"UTF-8\"?>
+            <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+            <plist version=\"1.0\">
+            <dict>
+              <key>CFBundleName</key>
+              <string>${APP_NAME}</string>
+              <key>CFBundleExecutable</key>
+              <string>OpenIPC-Config</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.openipc.${APP_NAME}</string>
+              <key>CFBundleVersion</key>
+              <string>0.1</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>LSMinimumSystemVersion</key>
+              <string>10.13</string>
+              <key>CFBundleIconFile</key>
+              <string>${APP_NAME}.icns</string>
+            </dict>
+            </plist>
+            " > "$OUTPUT_DIR/${APP_NAME}.app/Contents/Info.plist"
+            zip -r "${DIST_DIR}/${APP_NAME}-macos-arm64.zip" "$OUTPUT_DIR/${APP_NAME}.app"
+          fi
+        shell: bash
+      
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: "${{ matrix.os }}-package"
+          path: "dist/*"
