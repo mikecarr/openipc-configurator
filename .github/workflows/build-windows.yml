@@ -25,12 +25,13 @@ jobs:
           dotnet-version: '8.0.404'
 
       - name: Install Chocolatey
+        shell: pwsh
         run: |
-          if (!(choco)) {
+          if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
             Set-ExecutionPolicy Bypass -Scope Process -Force;
             iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'));
           }
-
+          
       - name: Install rcedit
         run: choco install rcedit -y
 
