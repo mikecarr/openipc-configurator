@@ -92,6 +92,14 @@ For example:
   dotnet publish -c Release -r osx-arm64 --self-contained
 
 
+### Using Semantic Versioning
+
+When creating tags, follow semantic versioning:
+
+* v1.0.0: Initial release.
+* v1.0.1: Patch release (bug fixes).
+* v1.1.0: Minor release (new features, backwards compatible).
+* v2.0.0: Major release (breaking changes).
 
 
 
