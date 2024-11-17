@@ -356,6 +356,7 @@ public partial class SetupTabViewModel : ViewModelBase
     /// </param>
     public async Task DownloadStart()
     {
+        
         //TODO: add more checks here, this can brick a device
         //updateDeviceConfig();
         IsProgressBarVisible = true; // Show the progress bar when the download starts
@@ -421,7 +422,7 @@ public partial class SetupTabViewModel : ViewModelBase
                     }
                 }
             }
-
+            
             // Continue with the rest of the process
             DownloadProgress = 50;
             ProgressText = "Download complete, starting upload...";
@@ -445,15 +446,59 @@ public partial class SetupTabViewModel : ViewModelBase
             ProgressText = "Extraction complete, upgrading system...";
 
             // Step 5: Execute sysupgrade
+            
+            var msgBox = MessageBoxManager.GetMessageBoxStandard("Confirm",
+                $"This will download and update your camera to {SelectedFwVersion}, continue?", ButtonEnum.OkAbort);
+            
+            var result = await msgBox.ShowAsync();
+            if (result == ButtonResult.Abort)
+            {
+                Log.Debug("Upgrade Cancelled!");;
+                _eventAggregator.GetEvent<AppMessageEvent>().Publish(
+                    new AppMessage { Message = "Upgrade Cancelled!" });
+                return;
+            }
+
+            
             kernelPath = $"{Models.OpenIPC.RemoteTempFolder}/uImage.{sensorType}";
             rootfsPath = $"{Models.OpenIPC.RemoteTempFolder}/rootfs.squashfs.{sensorType}";
 
             //sysupgrade --kernel=/tmp/uImage.%4 --rootfs=/tmp/rootfs.squashfs.%4 -n
-            await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
-                $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
+            // await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+            //     $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
+            await PerformSystemUpgradeAsync(kernelPath, rootfsPath);
+            
             DownloadProgress = 100;
+            _eventAggregator.GetEvent<AppMessageEvent>().Publish(
+                new AppMessage { Message = "System upgrade complete!" });
             ProgressText = "System upgrade complete!";
         }
+        
+        
+    }
+    
+    
+    public async Task PerformSystemUpgradeAsync(string kernelPath, string rootfsPath)
+    {
+        ProgressText = "Starting system upgrade...";
+        DownloadProgress = 0;
+
+        Log.Information($"Running command: sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
+        await _sshClientService.ExecuteCommandWithProgressAsync(DeviceConfig.Instance,
+            $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n",
+            output =>
+            {
+                // Update the UI incrementally
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    ProgressText = output;
+                    DownloadProgress += 10; // Example progress increment
+                    Log.Information(output);
+                });
+            });
+
+        DownloadProgress = 100;
+        ProgressText = "System upgrade complete!";
     }
 
 

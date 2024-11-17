@@ -392,4 +392,72 @@ public class SshClientService : ISshClientService
                 }
         }
     }
+    
+    // This is used for sysupgrade commands
+    public async Task ExecuteCommandWithProgressAsync(DeviceConfig deviceConfig, string command, Action<string> updateProgress, CancellationToken cancellationToken = default)
+{
+    var connectionInfo = new ConnectionInfo(deviceConfig.IpAddress, deviceConfig.Port, deviceConfig.Username,
+        new PasswordAuthenticationMethod(deviceConfig.Username, deviceConfig.Password));
+
+    using var client = new SshClient(connectionInfo);
+    try
+    {
+        client.Connect();
+        if (!client.IsConnected)
+        {
+            updateProgress("Unable to connect to the host.");
+            return;
+        }
+
+        using var shellStream = client.CreateShellStream("commands", 80, 24, 800, 600, 1024);
+        shellStream.WriteLine(command);
+
+        var outputBuffer = new StringBuilder();
+        bool commandCompleted = false;
+
+        while (!cancellationToken.IsCancellationRequested && !commandCompleted)
+        {
+            if (!client.IsConnected)
+            {
+                updateProgress("Connection lost.");
+                break;
+            }
+
+            // Read available data
+            while (shellStream.DataAvailable)
+            {
+                var output = shellStream.ReadLine();
+                if (output != null)
+                {
+                    outputBuffer.AppendLine(output);
+                    updateProgress(output);
+
+                    // Check for the end condition
+                    if (output.Contains("Unconditional reboot"))
+                    {
+                        commandCompleted = true;
+                        updateProgress("Reboot detected. Command execution completed.");
+                        break;
+                    }
+                }
+            }
+
+            // Wait a bit before checking again to avoid a tight loop
+            await Task.Delay(100, cancellationToken);
+        }
+    }
+    catch (OperationCanceledException)
+    {
+        updateProgress("Operation canceled by user.");
+    }
+    catch (Exception ex)
+    {
+        updateProgress($"Error: {ex.Message}");
+    }
+    finally
+    {
+        client.Disconnect();
+    }
+}
+
 }
