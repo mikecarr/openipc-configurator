@@ -1,0 +1,23 @@
+name: Release Drafter
+
+on:
+  push:
+    branches:
+      - main
+      - stable
+      - test-actions
+  pull_request:
+    types: [opened, closed, reopened, edited, synchronized]
+    
+jobs:
+  update_release_draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Update Draft Release
+        uses: release-drafter/release-drafter@v5
+        with:
+#          config-name: .github/release-drafter.yml
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
