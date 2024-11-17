@@ -22,7 +22,7 @@ namespace OpenIPC_Config.ViewModels;
 
 public class ConnectControlsViewModel : ViewModelBase
 {
-    private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly CancellationTokenSource? _cancellationTokenSourc;
 
     private readonly DispatcherTimer _dispatcherTimer;
 
@@ -62,10 +62,14 @@ public class ConnectControlsViewModel : ViewModelBase
 
         ConnectCommand = new RelayCommand(() => Connect());
 
-        _cancellationTokenSource = new CancellationTokenSource();
-        _dispatcherTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-        _dispatcherTimer.Tick += DispatcherTimer_Tick;
-        _dispatcherTimer.Start();
+        // Initialize the cancellation token source if not already done
+        _cancellationTokenSource??= new CancellationTokenSource();
+        StartPingingAsync();
+        
+        // _cancellationTokenSource = new CancellationTokenSource();
+        // _dispatcherTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        // _dispatcherTimer.Tick += DispatcherTimer_Tick;
+        // _dispatcherTimer.Start();
 
         UpdateUIMessage("Ready");
     }
@@ -162,51 +166,61 @@ public class ConnectControlsViewModel : ViewModelBase
         SelectedDeviceType = settings.DeviceType;
     }
 
-    private async void DispatcherTimer_Tick(object sender, EventArgs e)
-    {
-        await StartPingingAsync();
-    }
+    // private async void DispatcherTimer_Tick(object sender, EventArgs e)
+    // {
+    //     await StartPingingAsync();
+    // }
+
+    private CancellationTokenSource _cancellationTokenSource;
 
     public async Task StartPingingAsync()
     {
-        //_cancellationTokenSource = new CancellationTokenSource();
 
         await Task.Run(async () =>
         {
-            while (!_cancellationTokenSource.IsCancellationRequested)
+            while (!_cancellationTokenSource.Token.IsCancellationRequested)
             {
                 try
                 {
                     var ipAddress = IPAddress.Parse(IpAddress);
                     var reply = await _ping.SendPingAsync(ipAddress, (int)_pingTimeout.TotalMilliseconds);
-                    Log.Debug("Ping!");
-                    if (reply.Status == IPStatus.Success)
+
+                    // Update the UI based on the ping result
+                    await Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        await Dispatcher.UIThread.InvokeAsync(() => PingStatusColor = _onlineColorBrush);
-                        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-                        { Status = "Ping OK", DeviceConfig = _deviceConfig });
-                    }
-                    else
-                    {
-                        await Dispatcher.UIThread.InvokeAsync(() => PingStatusColor = _offlineColorBrush);
-                        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-                        { Status = "No device", DeviceConfig = _deviceConfig });
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    // Gracefully exit when cancellation is requested
-                    break;
+                        if (reply.Status == IPStatus.Success)
+                        {
+                            PingStatusColor = _onlineColorBrush;
+                            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
+                                { Status = "Ping OK", DeviceConfig = _deviceConfig });
+                        }
+                        else
+                        {
+                            PingStatusColor = _offlineColorBrush;
+                            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
+                                { Status = "No device", DeviceConfig = _deviceConfig });
+                        }
+                    });
                 }
                 catch (Exception ex)
                 {
                     Log.Error($"Error pinging device: {ex.Message}");
                 }
 
-                await Task.Delay(_pingInterval, _cancellationTokenSource.Token);
+                // Wait for the specified interval or until cancellation
+                try
+                {
+                    await Task.Delay(_pingInterval, _cancellationTokenSource.Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    // Task was canceled, exit the loop
+                    break;
+                }
             }
         });
     }
+
 
     private void SetDefaults()
     {
