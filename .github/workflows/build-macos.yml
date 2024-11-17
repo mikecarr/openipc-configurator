@@ -38,7 +38,7 @@ jobs:
 
       - name: Package as macOS .app
         run: |
-          APP_NAME="OpenIPC-Config"
+          APP_NAME="OpenIPC_Config"
           PUBLISH_DIR="./OpenIPC_Config.Desktop/bin/Release/net8.0/osx-arm64/publish"
           APP_DIR="${APP_NAME}.app"
           
@@ -82,7 +82,7 @@ jobs:
           chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}.Desktop"
 
       - name: Remove Quarantine Flag
-        run: xattr -cr OpenIPC-Config.app
+        run: xattr -cr ${APP_NAME}.app
 
 #      - name: Code Sign the App (Optional)
 #        run: |
@@ -90,7 +90,7 @@ jobs:
 #          codesign --deep --force --verify --verbose --sign "$CODESIGN_CERT" OpenIPC-Config.app || echo "Code signing failed, skipping."
 
       - name: Zip .app Bundle
-        run: zip -r OpenIPC-Config-macos-arm64.zip OpenIPC-Config.app
+        run: zip -r OpenIPC-Config-macos-arm64.zip OpenIPC_Config.app
 
       - name: Upload macOS App Artifact
         uses: actions/upload-artifact@v3
