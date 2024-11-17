@@ -71,7 +71,7 @@
 
 
         <!-- Firmware Version Updates -->
-        <Border Grid.Row="9" Margin="5" BorderBrush="Blue" BorderThickness="1">
+        <Border Grid.Row="7" Margin="5" BorderBrush="Blue" BorderThickness="1">
             <Panel>
                 <Grid>
                     <Grid.RowDefinitions>
@@ -87,7 +87,7 @@
 
 
                     <!-- Select firmware version -->
-                    <Label Grid.Column="0" Grid.Row="7" Content="Version:" />
+                    <Label Grid.Column="0" Grid.Row="8" Content="Version:" />
 
                     <ComboBox Grid.Column="1" Grid.Row="8" PlaceholderText="Select OpenIPC Firmware Version"
                               FontSize="12"
@@ -113,7 +113,7 @@
 
 
         <!-- Steps Text -->
-        <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="7"
+        <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="7"
                    Text="{x:Static assets:Resources.StepsTextBox}"
                    Margin="0,5,0,0"
                    FontSize="10" />

@@ -78,7 +78,10 @@
         <Button Grid.Row="4" Grid.Column="3" Content="Upload INAV Fonts" Command="{Binding UploadINavCommand}"
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.UploadINavFontsToolTip}" />
-        <Button Grid.Row="5" Grid.Column="3" Content="Onboard REC" Command="{Binding OnBoardRecCommand}"
+        <Button Grid.Row="5" Grid.Column="3" Content="MSPOSD Extra" Command="{Binding MSPOSDExtraCommand}"
+                IsEnabled="{Binding CanConnect}"
+                ToolTip.Tip="{x:Static assets:Resources.UploadINavFontsToolTip}" />
+        <Button Grid.Row="6" Grid.Column="3" Content="Onboard REC" Command="{Binding OnBoardRecCommand}"
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.OnBoardRecToolTip}" />
 

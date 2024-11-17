@@ -53,9 +53,9 @@ public partial class TelemetryTabViewModel : ViewModelBase
         AddMavlinkCommand = new RelayCommand(() => AddMavlink());
         UploadMSPOSDCommand = new RelayCommand(() => UploadMSPOSD());
         UploadINavCommand = new RelayCommand(() => UploadINav());
+        MSPOSDExtraCommand = new RelayCommand(() => AddMSPOSDExtra());
         SaveAndRestartTelemetryCommand = new RelayCommand(() => SaveAndRestartTelemetry());
     }
-
     //private bool CanConnect { get; set; }
 
     // ObservableCollections
@@ -71,6 +71,8 @@ public partial class TelemetryTabViewModel : ViewModelBase
     public ICommand AddMavlinkCommand { get; private set; }
     public ICommand UploadMSPOSDCommand { get; private set; }
     public ICommand UploadINavCommand { get; private set; }
+    
+    public ICommand MSPOSDExtraCommand { get; private set; }
     public ICommand OnBoardRecCommand { get; private set; }
 
     public ICommand SaveAndRestartTelemetryCommand { get; private set; }
@@ -167,6 +169,22 @@ public partial class TelemetryTabViewModel : ViewModelBase
         Thread.Sleep(3000);
     }
 
+    private async void AddMSPOSDExtra()
+    {
+        // if "%1" == "mspextra" (
+        // 	plink -ssh root@%2 -pw %3 sed -i 's/echo \"Starting wifibroadcast service...\"/echo \"\&L70 \&F35 CPU:\&C \&B Temp:\&T\" ">"\/tmp\/MSPOSD.msg "\&"/' /etc/init.d/S98datalink
+        // 	plink -ssh root@%2 -pw %3 reboot	
+        // )
+        // 
+        Log.Debug("MSPOSDExtra executed"); 
+        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MSPOSDExtraCommand);
+        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
+        
+        //TODO: do we need to restart the camera?
+        //await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        
+    }
+    
     private async void UploadINav()
     {
         Log.Debug("UploadINavCommand executed");

@@ -89,9 +89,10 @@
                     ToolTip.Tip="{x:Static assets:Resources.RecvDroneKeyToolTip}"
                     HorizontalAlignment="Stretch" />
 
-            <TextBlock Grid.Row="6" FontWeight="Bold" Text="Device Checksum" />
+            <TextBlock Grid.Row="6" Text="Device Checksum" />
             <TextBlock Grid.Row="7" Grid.ColumnSpan="2"
                        TextWrapping="Wrap"
+                       MaxWidth="375"
                        Text="{Binding KeyChecksum} " />
 
 
