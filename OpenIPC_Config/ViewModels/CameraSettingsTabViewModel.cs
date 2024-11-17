@@ -390,7 +390,7 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         }
     }
 
-    public async Task SaveRestartMajesticCommand()
+    private async Task SaveRestartMajesticCommand()
     {
         Log.Debug("Preparing to Save Majestic file.");
         var majesticYamlContent =
@@ -415,9 +415,9 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
                 updatedFileContent = writer.ToString();
             }
 
-            await _sshClientService.UploadFileStringAsync(_deviceConfig, Models.OpenIPC.MajesticFileLoc,
+            await _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.MajesticFileLoc,
                 updatedFileContent);
-            await _sshClientService.ExecuteCommandAsync(_deviceConfig, DeviceCommands.MajesticRestartCommand);
+            await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MajesticRestartCommand);
             await Task.Delay(5000);
 
 
