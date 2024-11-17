@@ -6,7 +6,7 @@ name: Build MacOS OpenIPC Config Avalonia App
 on:
   push:
     branches:
-      - stable
+      - test-actions
 
 jobs:
   build:
@@ -44,7 +44,7 @@ jobs:
       - name: Package as macOS .app
         run: |
           APP_NAME="OpenIPC-Config"
-          PUBLISH_DIR="./bin/Release/net8.0/osx-arm64/publish"
+          PUBLISH_DIR="./OpenIPC_Config.Desktop/bin/Release/net8.0/osx-arm64/publish"
           APP_DIR="${APP_NAME}.app"
       
           # Create the app bundle structure
@@ -55,7 +55,7 @@ jobs:
           cp -R "${PUBLISH_DIR}/"* "${APP_DIR}/Contents/MacOS/"
       
           # Copy the icon file
-          cp ./Assets/OpenIPC.icns "${APP_DIR}/Contents/Resources/${APP_NAME}.icns"
+          cp ../OpenIPC_Config/Assets/OpenIPC.icns "${APP_DIR}/Contents/Resources/${APP_NAME}.icns"
       
           # Create the Info.plist file with variable substitution
           cat << EOF > "${APP_DIR}/Contents/Info.plist"

@@ -3,7 +3,7 @@ name: Build Ubuntu OpenIPC Config Avalonia App
 on:
   push:
     branches:
-      - test-actions
+      - stable
 
 jobs:
   build:
