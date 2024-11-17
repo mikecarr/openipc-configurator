@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:OpenIPC_Config.Views"
         mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="650"
-        MaxWidth="920"
+        MaxWidth="1020"
         MaxHeight="750"
         x:Class="OpenIPC_Config.Views.MainWindow"
         Icon="/Assets/Icons/OpenIPC.ico"
