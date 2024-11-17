@@ -46,12 +46,8 @@ public class OpenIPC
 
     public const string DroneKeyPath = "binaries/drone.key";
 
-    // Base application data folder path for your app
-    // public static readonly string LocalAppDataFolder = Path.Combine(
-    //     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
 
-
-    public static readonly string LocalFirmwareFolder = $"{LocalTempFolder}/firmware";
+    public static string LocalFirmwareFolder;
 
     public static string DeviceUsername = "root";
 
@@ -80,6 +76,7 @@ public class OpenIPC
             AppDataConfigPath = Path.Combine(AppDataConfigDirectory, "appsettings.json");
             DeviceSettingsConfigPath = Path.Combine(AppDataConfigDirectory, "openipc_config.json");
             LocalTempFolder = Path.Combine(AppDataConfigDirectory, "Temp");
+            LocalFirmwareFolder = Path.Combine(AppDataConfigDirectory, "firmware");
         }
         else if (OperatingSystem.IsIOS())
         {
@@ -89,6 +86,7 @@ public class OpenIPC
             AppDataConfigPath = Path.Combine(AppDataConfigDirectory, "appsettings.json");
             DeviceSettingsConfigPath = Path.Combine(AppDataConfigDirectory, "openipc_config.json");
             LocalTempFolder = Path.Combine(AppDataConfigDirectory, "Temp");
+            LocalFirmwareFolder = Path.Combine(AppDataConfigDirectory, "firmware");
         }
         else if (OperatingSystem.IsWindows())
         {
@@ -98,6 +96,7 @@ public class OpenIPC
                 appName, "appsettings.json");
             DeviceSettingsConfigPath = Path.Combine(AppDataConfigDirectory, "openipc_config.json");
             LocalTempFolder = Path.Combine(AppDataConfigDirectory, "Temp");
+            LocalFirmwareFolder = Path.Combine(AppDataConfigDirectory, "firmware");
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -107,6 +106,7 @@ public class OpenIPC
                 appName, "appsettings.json");
             DeviceSettingsConfigPath = Path.Combine(AppDataConfigDirectory, "openipc_config.json");
             LocalTempFolder = Path.Combine(AppDataConfigDirectory, "Temp");
+            LocalFirmwareFolder = Path.Combine(AppDataConfigDirectory, "firmware");
         }
         else // Assume Linux
         {
@@ -114,10 +114,14 @@ public class OpenIPC
             AppDataConfigPath = Path.Combine(AppDataConfigDirectory, "appsettings.json");
             DeviceSettingsConfigPath = Path.Combine(AppDataConfigDirectory, "openipc_config.json");
             LocalTempFolder = Path.Combine(AppDataConfigDirectory, "Temp");
+            LocalFirmwareFolder = Path.Combine(AppDataConfigDirectory, "firmware");
         }
 
+            
         // Ensure the config directory exists
         Directory.CreateDirectory(AppDataConfigDirectory);
         Directory.CreateDirectory(LocalTempFolder);
+        Directory.CreateDirectory(LocalFirmwareFolder);
+        
     }
 }

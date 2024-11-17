@@ -34,7 +34,9 @@ Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator
 
 ## App Logs
 * Android: /data/user/0/org.openipc.OpenIPC/files/.config/openipc-configurator.log
-* Mac: /Users/mcarr/Library/Application Support/openipc-configurator.log
+* Mac: Library/Application Support/OpenIPC_Config/Logs
+* Windows: %APPDATA%\OpenIPC_Config\Logs
+* Linux: ~/.config/openipc-configurator.log
 
 ## TODO:
 * Fix UI and views
