@@ -48,33 +48,33 @@
             <!-- -->
 
 
-            <Button Grid.Column="1" Grid.Row="1" Content="Sensor Driver Backup"
-                    Command="{Binding ScriptFilesBackupCommand}"
-                    IsEnabled="{Binding CanConnect}"
-                    ToolTip.Tip="{x:Static assets:Resources.SensorDriverBackupToolTip}"
-                    HorizontalAlignment="Stretch" />
+            <!-- <Button Grid.Column="1" Grid.Row="1" Content="Sensor Driver Backup" -->
+            <!--         Command="{Binding ScriptFilesBackupCommand}" -->
+            <!--         IsEnabled="{Binding CanConnect}" -->
+            <!--         ToolTip.Tip="{x:Static assets:Resources.SensorDriverBackupToolTip}" -->
+            <!--         HorizontalAlignment="Stretch" /> -->
 
             <Button Grid.Column="0" Grid.Row="2" Content="Sensor Bin Update"
                     Command="{Binding SensorFilesUpdateCommand}"
                     IsEnabled="{Binding CanConnect}"
                     ToolTip.Tip="{x:Static assets:Resources.SensorBinUpdateToolTip}"
                     HorizontalAlignment="Stretch" />
-
-
-            <Button Grid.Row="2" Grid.Column="1" Content="Sensor Driver Update"
-                    Command="{Binding SensorDriverUpdateCommand}"
-                    IsEnabled="{Binding CanConnect}"
-                    ToolTip.Tip="{x:Static assets:Resources.SensorDriverUpdateToolTip}"
-                    HorizontalAlignment="Stretch" />
-
-            <TextBox Grid.Row="3" Grid.Column="1" Text="sensor_imx415_mipi.ko" HorizontalAlignment="Stretch" />
-            <!-- <Label Grid.Column="0" Grid.Row="5" Content="Select Sensor:" /> -->
             <ComboBox Grid.Row="3" Grid.Column="0" x:Name="sensorComboBox" PlaceholderText="Select Sensor"
                       ItemsSource="{Binding LocalSensors}"
                       SelectedItem="{Binding SelectedSensor, Mode=TwoWay}"
                       IsEnabled="{Binding CanConnect}"
                       HorizontalAlignment="Stretch" />
 
+
+            <!-- <Button Grid.Row="2" Grid.Column="1" Content="Sensor Driver Update" -->
+            <!--         Command="{Binding SensorDriverUpdateCommand}" -->
+            <!--         IsEnabled="{Binding CanConnect}" -->
+            <!--         ToolTip.Tip="{x:Static assets:Resources.SensorDriverUpdateToolTip}" -->
+            <!--         HorizontalAlignment="Stretch" /> -->
+
+            <!-- <TextBox Grid.Row="3" Grid.Column="1" Text="sensor_imx415_mipi.ko" HorizontalAlignment="Stretch" /> -->
+            <!-- <Label Grid.Column="0" Grid.Row="5" Content="Select Sensor:" /> -->
+            
             <Panel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Height="30" />
 
 
