@@ -82,7 +82,7 @@ jobs:
           chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}.Desktop"
 
       - name: Remove Quarantine Flag
-        run: xattr -cr ${APP_NAME}.app
+        run: xattr -cr OpenIPC_Config.app
 
 #      - name: Code Sign the App (Optional)
 #        run: |
