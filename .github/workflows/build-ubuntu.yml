@@ -25,16 +25,11 @@ jobs:
         with:
           dotnet-version: '8.0.404'
 
-      - name: Install Android and iOS workloads
-        run: |
-          dotnet workload install android
-          dotnet workload install wasi-experimental
-        
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj
 
       - name: Build project
-        run: dotnet publish -c Release -r linux-x64 --self-contained
+        run: dotnet publish OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj -c Release -r linux-x64 --self-contained
 
       - name: List output directory
         run: ls -al ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-x64/publish
