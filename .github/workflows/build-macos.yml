@@ -1,8 +1,5 @@
-# Workflow for building and packaging a macOS Avalonia App
-# s damaged and can’t be opened. You should move it to the Trash.
-# run xattr -cr OpenIPC-Config.app
-# need code signing?
 name: Build MacOS OpenIPC Config Avalonia App
+
 on:
   push:
     branches:
@@ -26,38 +23,35 @@ jobs:
         with:
           dotnet-version: '8.0.404'
 
-      - name: Install Android and iOS workloads
-        run: |
-          dotnet workload install ios
-          dotnet workload install android
-          dotnet workload install wasi-experimental
+      - name: Install iOS Workloads (Optional)
+        run: dotnet workload install ios
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj
 
       - name: Build project
-        run: dotnet build --configuration Release
+        run: dotnet build OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj --configuration Release
 
       - name: Publish project
-        run: dotnet publish -c Release -r osx-arm64 --self-contained
+        run: dotnet publish OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj -c Release -r osx-arm64 --self-contained
 
       - name: Package as macOS .app
         run: |
           APP_NAME="OpenIPC-Config"
           PUBLISH_DIR="./OpenIPC_Config.Desktop/bin/Release/net8.0/osx-arm64/publish"
           APP_DIR="${APP_NAME}.app"
-      
+          
           # Create the app bundle structure
           mkdir -p "${APP_DIR}/Contents/MacOS"
           mkdir -p "${APP_DIR}/Contents/Resources"
-      
+          
           # Copy the published binaries
           cp -R "${PUBLISH_DIR}/"* "${APP_DIR}/Contents/MacOS/"
-      
+          
           # Copy the icon file
-          cp ../OpenIPC_Config/Assets/OpenIPC.icns "${APP_DIR}/Contents/Resources/${APP_NAME}.icns"
-      
-          # Create the Info.plist file with variable substitution
+          cp ./OpenIPC_Config/Assets/Icons/OpenIPC.icns "${APP_DIR}/Contents/Resources/${APP_NAME}.icns"
+          
+          # Create the Info.plist file
           cat << EOF > "${APP_DIR}/Contents/Info.plist"
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -80,16 +74,23 @@ jobs:
           </dict>
           </plist>
           EOF
-      
+          
           # Set executable permissions for the main binary
           chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}"
-      
-          
+
+      - name: Remove Quarantine Flag
+        run: xattr -cr OpenIPC-Config.app
+
+#      - name: Code Sign the App (Optional)
+#        run: |
+#          CODESIGN_CERT="Developer ID Application: YOUR_CERT_NAME"
+#          codesign --deep --force --verify --verbose --sign "$CODESIGN_CERT" OpenIPC-Config.app || echo "Code signing failed, skipping."
+
       - name: Zip .app Bundle
         run: zip -r OpenIPC-Config-macos-arm64.zip OpenIPC-Config.app
 
       - name: Upload macOS App Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: OpenIPC-Config-macos-arm64
           path: OpenIPC-Config-macos-arm64.zip
