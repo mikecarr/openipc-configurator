@@ -38,7 +38,7 @@ jobs:
         run: |
           PUBLISH_DIR="./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-x64/publish"
           mkdir -p "${PUBLISH_DIR}/Assets"
-          cp -R ./Assets/* "${PUBLISH_DIR}/Assets/"
+          cp -R ./OpenIPC_Config/Assets/* "${PUBLISH_DIR}/Assets/"
 
       - name: Set up Icon and .desktop file
         run: |
