@@ -83,7 +83,7 @@
             <!-- </Border> -->
 
             <!-- <Border Grid.Row="2" Margin="5" BorderBrush="Blue" BorderThickness="1"> -->
-            <Panel Grid.Row="2" VerticalAlignment="Bottom">
+            <Panel Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
                 <views:StatusBarView />
             </Panel>
             <!-- </Border> -->
