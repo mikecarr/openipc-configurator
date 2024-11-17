@@ -369,13 +369,13 @@ public partial class SetupTabViewModel : ViewModelBase
             SelectedFwVersion == "ssc338q_fpv_openipc-urllc-aio-nor" ||
             SelectedFwVersion == "ssc338q_fpv_runcam-wifilink-nor")
         {
-            url = $"https://github.com/OpenIPC_Config/builder/releases/download/latest/{SelectedFwVersion}.tgz";
+            url = $"https://github.com/OpenIPC/builder/releases/download/latest/{SelectedFwVersion}.tgz";
             var aioPattern = "^[^_]+";
             sensorType = ExtractValue($"{SelectedFwVersion}", aioPattern);
         }
         else
         {
-            url = $"https://github.com/OpenIPC_Config/firmware/releases/download/latest/{SelectedFwVersion}.tgz";
+            url = $"https://github.com/OpenIPC/firmware/releases/download/latest/{SelectedFwVersion}.tgz";
             var openipcPattern = @"openipc\.([^-]+)";
             sensorType = ExtractValue($"{SelectedFwVersion}", openipcPattern);
         }
