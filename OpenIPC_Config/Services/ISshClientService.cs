@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenIPC_Config.Models;
@@ -41,4 +42,8 @@ public interface ISshClientService
     // Uploads a specific binary file by file type and name using SCP
     Task UploadBinaryAsync(DeviceConfig deviceConfig, string remoteDirectory, Models.OpenIPC.FileType fileType,
         string fileName);
+
+    // Executes a command on the remote device asynchronously with progress updates
+    Task ExecuteCommandWithProgressAsync(DeviceConfig deviceConfig, string command,
+        Action<string> updateProgress, CancellationToken cancellationToken = default);
 }
