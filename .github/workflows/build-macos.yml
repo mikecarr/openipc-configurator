@@ -61,7 +61,7 @@ jobs:
             <key>CFBundleName</key>
             <string>${APP_NAME}</string>
             <key>CFBundleExecutable</key>
-            <string>${APP_NAME}</string>
+            <string>${APP_NAME}.Desktop</string>
             <key>CFBundleIdentifier</key>
             <string>com.openipc.${APP_NAME}</string>
             <key>CFBundleVersion</key>
