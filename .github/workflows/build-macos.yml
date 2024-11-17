@@ -104,9 +104,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v1.0.0
-          release_name: "OpenIPC Config v1.0.0"
-          body: "Release notes for version 1.0.0"
+          tag_name: ${{ github.ref_name }}
+          release_name: "Release ${{ github.ref_name }}"
+          generate_release_notes: true
           draft: false
           prerelease: false
       - name: Upload Release Asset
