@@ -29,46 +29,46 @@ public partial class SetupTabViewModel : ViewModelBase
     [ObservableProperty] private int _downloadProgress;
 
     private readonly IEventAggregator _eventAggregator;
-    private ICommand _firmwareUpdateCommand;
+    
     [ObservableProperty] public ObservableCollection<string> _firmwareVersions;
-    private ICommand _generateKeysCommand;
+    
     [ObservableProperty] private bool _isCamera;
     [ObservableProperty] private bool _isGS;
-
-
     [ObservableProperty] private bool _isProgressBarVisible;
     [ObservableProperty] private bool _isRadxa;
     [ObservableProperty] private string _keyChecksum;
-
-
     [ObservableProperty] public ObservableCollection<string> _localSensors;
-    private ICommand _offlineUpdateCommand;
     [ObservableProperty] private string _progressText;
+    [ObservableProperty] private string _scanIpLabel;
+    [ObservableProperty] private string _scanIPResultTextBox;
+    [ObservableProperty] private string _scanMessages;
+    [ObservableProperty] private string _selectedFwVersion;
+    [ObservableProperty] private string _selectedSensor;
+    
+    private ICommand _firmwareUpdateCommand;
+    private ICommand _generateKeysCommand;
+    private ICommand _offlineUpdateCommand;
     private ICommand _recvDroneKeyCommand;
     private ICommand _recvGSKeyCommand;
     private ICommand _resetCameraCommand;
     private ICommand _scanCommand;
-    [ObservableProperty] private string _scanIPLabel;
-    [ObservableProperty] private string _scanIPResultTextBox;
-    [ObservableProperty] private string _scanMessages;
     private ICommand _scriptFilesBackupCommand;
     private ICommand _scriptFilesRestoreCommand;
-    [ObservableProperty] private string _selectedFwVersion;
-    [ObservableProperty] private string _selectedSensor;
     private ICommand _sendDroneKeyCommand;
     private ICommand _sendGSKeyCommand;
     private ICommand _sensorDriverUpdateCommand;
     private ICommand _sensorFilesBackupCommand;
     private ICommand _sensorFilesUpdateCommand;
-
     public ICommand ShowProgressBarCommand;
-
+    
 
     public SetupTabViewModel()
     {
         InitializeCollections();
 
         KeyChecksum = string.Empty;
+
+        ScanIpLabel = "192.168.1.";
 
         ShowProgressBarCommand = new RelayCommand(() => IsProgressBarVisible = true);
 
@@ -150,8 +150,7 @@ public partial class SetupTabViewModel : ViewModelBase
         // load sensor files from local folder
         var directoryPath = Models.OpenIPC.LocalSensorsFolder;
         PopulateSensorFileNames(directoryPath);
-
-        ScanIPLabel = "192.168.1.";
+        
 
         FirmwareVersions = new ObservableCollection<string>
         {
@@ -298,7 +297,7 @@ public partial class SetupTabViewModel : ViewModelBase
 
         for (var i = 0; i < 254; i++)
         {
-            var host = ScanIPLabel + i;
+            var host = ScanIpLabel + i;
             Log.Debug($"Scanning {host}()");
 
             // Use async ping operation

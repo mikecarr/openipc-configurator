@@ -37,8 +37,9 @@
 Do not touch anything until finished</TextBlock>
 
 
-            <TextBox Grid.Row="2" Grid.Column="0" Text="192.168.0.1"
-                     DataContext="{Binding ScanIPLabel}" />
+            <TextBox Grid.Row="2" Grid.Column="0"
+                     Text="{Binding ScanIpLabel, Mode=TwoWay}" />
+                     
             <!-- -->
             <!-- <TextBlock Grid.Row="1" Grid.Column="0" Text="Text IP" DataContext="{Binding ScanIPDescription}" /> -->
 
