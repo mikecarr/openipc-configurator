@@ -1,5 +1,9 @@
 name: Build and Release OpenIPC Config App
 
+permissions:
+  contents: write
+  actions: read
+  
 on:
   workflow_dispatch:
   push:
