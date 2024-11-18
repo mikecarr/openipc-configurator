@@ -1,0 +1,220 @@
+name: Build and Release OpenIPC Config App
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - stable
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        arch: [x64, arm64]
+    #      matrix:
+    #        os: [ ubuntu-latest ]
+    #        arch: [ x64, arm64 ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Read Version from VERSION File
+        id: get_version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Restore dependencies
+        run: dotnet restore OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj
+
+      - name: Build project
+        run: dotnet build OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj --configuration Release
+
+      - name: Publish Project
+        run: |
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            dotnet publish OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj -c Release -r win-x64 --self-contained
+            dotnet publish OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj -c Release -r win-arm64 --self-contained
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            dotnet publish OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj -c Release -r osx-x64 --self-contained
+            dotnet publish OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj -c Release -r osx-arm64 --self-contained
+          else
+            dotnet publish OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj -c Release -r linux-x64 --self-contained
+            dotnet publish OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj -c Release -r linux-arm64 --self-contained
+          fi
+        shell: bash
+      
+      # Packaging macOS .app bundle
+      - name: Package macOS .app
+        if: matrix.os == 'macos-latest'
+        run: |
+          APP_NAME="OpenIPC_Config"
+          PUBLISH_DIR="./OpenIPC_Config.Desktop/bin/Release/net8.0/osx-${{ matrix.arch }}/publish"
+          APP_DIR="${APP_NAME}.app"
+          
+          mkdir -p "${APP_DIR}/Contents/MacOS"
+          mkdir -p "${APP_DIR}/Contents/Resources"
+          cp -R "${PUBLISH_DIR}/"* "${APP_DIR}/Contents/MacOS/"
+          cp ./OpenIPC_Config/Assets/Icons/OpenIPC.icns "${APP_DIR}/Contents/Resources/${APP_NAME}.icns"
+
+          cat << EOF > "${APP_DIR}/Contents/Info.plist"
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>
+            <string>${APP_NAME}</string>
+            <key>CFBundleExecutable</key>
+            <string>${APP_NAME}.Desktop</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.openipc.${APP_NAME}</string>
+            <key>CFBundleVersion</key>
+            <string>${{ env.VERSION }}</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>10.13</string>
+            <key>CFBundleIconFile</key>
+            <string>${APP_NAME}.icns</string>
+          </dict>
+          </plist>
+          EOF
+
+          chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}.Desktop"
+
+      - name: Remove Quarantine Flag (macOS only)
+        if: matrix.os == 'macos-latest'
+        run: xattr -cr OpenIPC_Config.app
+
+      # Linux Icon and Packaging
+      - name: Set up Icon and .desktop file
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          APP_NAME="OpenIPC-Config"
+          PUBLISH_DIR="./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-x64/publish"
+          ICON_PATH="${PUBLISH_DIR}/Assets/OpenIPC.png"
+          DESKTOP_FILE="${PUBLISH_DIR}/${APP_NAME}.desktop"
+          
+          # Ensure the icon is in the publish directory
+          cp ./OpenIPC_Config/Assets/Icons/OpenIPC.png "$ICON_PATH"
+
+          # Create .desktop file
+          cat << EOF > "$DESKTOP_FILE"
+          [Desktop Entry]
+          Name=OpenIPC Config
+          Exec=$PUBLISH_DIR/OpenIPC-Config.Desktop
+          Icon=$ICON_PATH
+          Type=Application
+          Terminal=false
+          Categories=Utility;
+          EOF
+      
+      # Windows Icon and Packaging
+      - name: Set Windows Icon and Package
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $PUBLISH_DIR = "./OpenIPC_Config.Desktop/bin/Release/net8.0/win-${{ matrix.arch }}/publish"
+          
+          $ICON_PATH = "./OpenIPC_Config/Assets/Icons/OpenIPC.ico"
+
+          # Install rcedit to modify the Windows executable icon
+          choco install rcedit -y
+          rcedit "$PUBLISH_DIR/OpenIPC_Config.Desktop.exe" --set-icon "$ICON_PATH"
+
+          # Zip the Windows build
+          Compress-Archive -Path "$PUBLISH_DIR\*" -DestinationPath "OpenIPC-Config-windows-${{ matrix.arch }}.zip"
+        env:
+          DOTNET_ROOT: C:\Program Files\dotnet
+          VERSION: 0.0.1
+
+      - name: Zip .app Bundle for MacOS and Linux
+        run: |
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            zip -r OpenIPC-Config-macos-${{ matrix.arch }}.zip OpenIPC_Config.app/
+          elif [[ "${{ runner.os }}" == "Linux" ]]; then
+            zip -r OpenIPC-Config-linux-${{ matrix.arch }}.zip ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish/*
+          fi
+        shell: bash
+      
+      # Upload Artifacts
+      - name: Upload macOS Artifact
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenIPC-Config-macos-${{ matrix.arch }}
+          path: OpenIPC-Config-macos-${{ matrix.arch }}.zip
+
+      - name: Upload Windows Artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenIPC-Config-windows-${{ matrix.arch }}
+          path: OpenIPC-Config-windows-${{ matrix.arch }}.zip
+
+      - name: Upload Ubuntu Artifact
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenIPC-Config-linux-${{ matrix.arch }}
+          path: OpenIPC-Config-linux-${{ matrix.arch }}.zip
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read Version from VERSION File
+        id: get_version
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+        shell: bash
+
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: .
+
+      - name: List Downloaded Files
+        run: ls -R .
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.VERSION }}
+          release_name: "OpenIPC Config v${{ env.VERSION }}"
+          body: |
+            ## What's Changed
+            - Automatically generated release for version v${{ env.VERSION }}.
+            - Includes builds for macOS (x64, arm64), Windows (x64, arm64) and Linux (Ubuntu) (x64, arm64)..
+          draft: false
+          prerelease: false
+
+      - name: Upload All Release Assets
+        run: |
+          find . -name "OpenIPC-Config-*.zip" -print | while read -r asset; do
+            if [[ -f "$asset" ]]; then
+              echo "Uploading $asset"
+              gh release upload "v${{ env.VERSION }}" "$asset" --clobber
+            fi
+          done
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
