@@ -52,7 +52,8 @@
 
             <TextBlock Grid.Row="6" FontWeight="Bold" Text="Device Checksum" />
             <TextBlock Grid.Row="7" Grid.ColumnSpan="2"
-                       Text="{Binding KeyChecksum}" />
+                       Text="{Binding KeyChecksum}" 
+                       Foreground="{Binding ChkSumStatusColor}" />
 
 
         </Grid>

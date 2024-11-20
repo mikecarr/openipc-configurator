@@ -44,6 +44,7 @@
 
         <TextBox Grid.Row="3" Grid.Column="1"
                  Text="{Binding GsMavlink, Mode=TwoWay}" />
+        
         <TextBox Grid.Row="4" Grid.Column="1"
                  Text="{Binding GsVideo, Mode=TwoWay}" />
 

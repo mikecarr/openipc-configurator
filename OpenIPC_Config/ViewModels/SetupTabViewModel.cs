@@ -28,6 +28,8 @@ public partial class SetupTabViewModel : ViewModelBase
     [ObservableProperty] private bool _canConnect;
     [ObservableProperty] private int _downloadProgress;
 
+    [ObservableProperty] private string _chkSumStatusColor;
+
     private readonly IEventAggregator _eventAggregator;
     
     [ObservableProperty] public ObservableCollection<string> _firmwareVersions;
@@ -68,6 +70,8 @@ public partial class SetupTabViewModel : ViewModelBase
 
         KeyChecksum = string.Empty;
 
+        ChkSumStatusColor = "Green";
+
         ScanIpLabel = "192.168.1.";
 
         ShowProgressBarCommand = new RelayCommand(() => IsProgressBarVisible = true);
@@ -97,7 +101,7 @@ public partial class SetupTabViewModel : ViewModelBase
 
 
     public ICommand FirmwareUpdateCommand =>
-        _firmwareUpdateCommand ??= new RelayCommand(FirmwareUpdate);
+        _firmwareUpdateCommand ??= new RelayCommand(SysUpgradeFirmwareUpdate);
 
     public ICommand SendDroneKeyCommand =>
         _sendDroneKeyCommand ??= new RelayCommand(SendDroneKey);
@@ -135,7 +139,17 @@ public partial class SetupTabViewModel : ViewModelBase
         if (_deviceContentUpdatedMessage != null)
             if (_deviceContentUpdatedMessage.DeviceConfig != null)
                 if (!string.IsNullOrEmpty(_deviceContentUpdatedMessage.DeviceConfig.KeyChksum))
+                {
                     KeyChecksum = _deviceContentUpdatedMessage.DeviceConfig.KeyChksum;
+                    if(KeyChecksum != OpenIPC.KeyMD5Sum)
+                    {
+                        ChkSumStatusColor = "Red";
+                    }
+                    else
+                    {
+                        ChkSumStatusColor = "Green";
+                    }
+                }
     }
 
     private void OnAppMessage(AppMessage appMessage)
@@ -504,7 +518,7 @@ public partial class SetupTabViewModel : ViewModelBase
     }
 
 
-    private async void FirmwareUpdate()
+    private async void SysUpgradeFirmwareUpdate()
     {
         Log.Debug("FirmwareUpdate executed");
         // if "%1" == "sysup" (

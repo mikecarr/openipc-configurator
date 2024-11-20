@@ -93,6 +93,7 @@
             <TextBlock Grid.Row="7" Grid.ColumnSpan="2"
                        TextWrapping="Wrap"
                        MaxWidth="375"
+                       Foreground="{Binding ChkSumStatusColor}"
                        Text="{Binding KeyChecksum} " />
 
 
