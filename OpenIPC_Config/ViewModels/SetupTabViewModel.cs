@@ -258,7 +258,7 @@ public partial class SetupTabViewModel : ViewModelBase
 
         ProgressText = "Starting upload...";
         DownloadProgress = 50;
-        _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteSensorsFolder,
+        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteSensorsFolder,
             Models.OpenIPC.FileType.Sensors, selectedSensor);
 
         ProgressText = "Updating Majestic file...";
@@ -266,7 +266,7 @@ public partial class SetupTabViewModel : ViewModelBase
         // update majestic file
         // what is .video0.sensorConfig used for?
         //_sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"yaml-cli -s .video0.sensorConfig {OpenIPC_Config.RemoteSensorsFolder}/{selectedSensor}");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
             $"yaml-cli -s .isp.sensorConfig {Models.OpenIPC.RemoteSensorsFolder}/{selectedSensor}");
 
         // echo y | pscp -scp -pw %3 sensors/%4 root@%2:/etc/sensors/ 
@@ -275,6 +275,9 @@ public partial class SetupTabViewModel : ViewModelBase
 
         //_sshClientService.UploadDirectoryAsync(DeviceConfig.Instance, OpenIPC_Config.LocalSensorsFolder,
         // OpenIPC_Config.RemoteSensorsFolder);
+        ProgressText = "Restarting Majestic...";
+        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,DeviceCommands.MajesticRestartCommand);
+        
         ProgressText = "Done updating sensor...";
         DownloadProgress = 100;
     }
