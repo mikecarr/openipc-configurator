@@ -36,6 +36,7 @@
         <ComboBox Grid.Row="1" Grid.Column="1" Width="250" ItemsSource="{Binding Fps}"
                   SelectedItem="{Binding SelectedFps, 
                   Mode=TwoWay}" />
+        
         <TextBlock Grid.Row="2" Grid.Column="1" FontSize="12"
                    Text="{Binding DroneKeyChecksum}" />
 

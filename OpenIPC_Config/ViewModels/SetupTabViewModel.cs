@@ -28,6 +28,8 @@ public partial class SetupTabViewModel : ViewModelBase
     [ObservableProperty] private bool _canConnect;
     [ObservableProperty] private int _downloadProgress;
 
+    [ObservableProperty] private string _chkSumStatusColor;
+
     private readonly IEventAggregator _eventAggregator;
     
     [ObservableProperty] public ObservableCollection<string> _firmwareVersions;
@@ -68,6 +70,8 @@ public partial class SetupTabViewModel : ViewModelBase
 
         KeyChecksum = string.Empty;
 
+        ChkSumStatusColor = "Green";
+
         ScanIpLabel = "192.168.1.";
 
         ShowProgressBarCommand = new RelayCommand(() => IsProgressBarVisible = true);
@@ -97,7 +101,7 @@ public partial class SetupTabViewModel : ViewModelBase
 
 
     public ICommand FirmwareUpdateCommand =>
-        _firmwareUpdateCommand ??= new RelayCommand(FirmwareUpdate);
+        _firmwareUpdateCommand ??= new RelayCommand(SysUpgradeFirmwareUpdate);
 
     public ICommand SendDroneKeyCommand =>
         _sendDroneKeyCommand ??= new RelayCommand(SendDroneKey);
@@ -135,7 +139,17 @@ public partial class SetupTabViewModel : ViewModelBase
         if (_deviceContentUpdatedMessage != null)
             if (_deviceContentUpdatedMessage.DeviceConfig != null)
                 if (!string.IsNullOrEmpty(_deviceContentUpdatedMessage.DeviceConfig.KeyChksum))
+                {
                     KeyChecksum = _deviceContentUpdatedMessage.DeviceConfig.KeyChksum;
+                    if(KeyChecksum != OpenIPC.KeyMD5Sum)
+                    {
+                        ChkSumStatusColor = "Red";
+                    }
+                    else
+                    {
+                        ChkSumStatusColor = "Green";
+                    }
+                }
     }
 
     private void OnAppMessage(AppMessage appMessage)
@@ -258,7 +272,7 @@ public partial class SetupTabViewModel : ViewModelBase
 
         ProgressText = "Starting upload...";
         DownloadProgress = 50;
-        _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteSensorsFolder,
+        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteSensorsFolder,
             Models.OpenIPC.FileType.Sensors, selectedSensor);
 
         ProgressText = "Updating Majestic file...";
@@ -266,7 +280,7 @@ public partial class SetupTabViewModel : ViewModelBase
         // update majestic file
         // what is .video0.sensorConfig used for?
         //_sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"yaml-cli -s .video0.sensorConfig {OpenIPC_Config.RemoteSensorsFolder}/{selectedSensor}");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
             $"yaml-cli -s .isp.sensorConfig {Models.OpenIPC.RemoteSensorsFolder}/{selectedSensor}");
 
         // echo y | pscp -scp -pw %3 sensors/%4 root@%2:/etc/sensors/ 
@@ -275,6 +289,9 @@ public partial class SetupTabViewModel : ViewModelBase
 
         //_sshClientService.UploadDirectoryAsync(DeviceConfig.Instance, OpenIPC_Config.LocalSensorsFolder,
         // OpenIPC_Config.RemoteSensorsFolder);
+        ProgressText = "Restarting Majestic...";
+        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,DeviceCommands.MajesticRestartCommand);
+        
         ProgressText = "Done updating sensor...";
         DownloadProgress = 100;
     }
@@ -501,7 +518,7 @@ public partial class SetupTabViewModel : ViewModelBase
     }
 
 
-    private async void FirmwareUpdate()
+    private async void SysUpgradeFirmwareUpdate()
     {
         Log.Debug("FirmwareUpdate executed");
         // if "%1" == "sysup" (

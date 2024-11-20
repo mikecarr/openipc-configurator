@@ -25,6 +25,8 @@ public interface ISshClientService
     Task UploadFileStringAsync(DeviceConfig deviceConfig, string remotePath, string fileContent);
 
     // Downloads a file from the remote device and returns its content as a string
+    Task<byte[]> DownloadFileBytesAsync(DeviceConfig deviceConfig, string remotePath);
+    
     Task<string> DownloadFileAsync(DeviceConfig deviceConfig, string remotePath);
 
     // Downloads a file from the remote path to the local path asynchronously using SCP

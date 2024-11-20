@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -9,6 +11,7 @@ using Avalonia.Layout;
 using Avalonia.Logging;
 using Avalonia.Media;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -20,7 +23,7 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
-public class ConnectControlsViewModel : ViewModelBase
+public partial class ConnectControlsViewModel : ViewModelBase
 {
     private readonly CancellationTokenSource? _cancellationTokenSourc;
 
@@ -30,7 +33,6 @@ public class ConnectControlsViewModel : ViewModelBase
     private readonly SolidColorBrush _offlineColorBrush = new(Colors.Red);
     private readonly SolidColorBrush _onlineColorBrush = new(Colors.Green);
     private readonly Ping _ping = new();
-
 
     private bool _canConnect;
 
@@ -412,11 +414,19 @@ public class ConnectControlsViewModel : ViewModelBase
             _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Downloading gskey" });
 
             var gsKeyContent =
-                await _sshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.RemoteGsKeyPath);
+                await _sshClientService.DownloadFileBytesAsync(_deviceConfig, Models.OpenIPC.RemoteGsKeyPath);
 
-            if (!string.IsNullOrEmpty(gsKeyContent))
+            if (gsKeyContent != null)
             {
-                var droneKey = Utilities.ComputeSha256Hash(gsKeyContent);
+                var droneKey = Utilities.ComputeMd5Hash(gsKeyContent);
+                if (droneKey != OpenIPC.KeyMD5Sum)
+                {
+                    Log.Warning("GS key MD5 checksum mismatch");
+                }
+                else
+                {
+                    Log.Information("GS key MD5 checksum matched default key");
+                }
 
                 var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
                 _deviceConfig = DeviceConfig.Instance;
@@ -484,11 +494,15 @@ public class ConnectControlsViewModel : ViewModelBase
         {
             // get /home/radxa/scripts/screen-mode
             var droneKeyContent =
-                await _sshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.RemoteDroneKeyPath);
+                await _sshClientService.DownloadFileBytesAsync(_deviceConfig, Models.OpenIPC.RemoteDroneKeyPath);
 
-            if (!string.IsNullOrEmpty(droneKeyContent))
+            
+            
+            if (droneKeyContent != null)
             {
-                var droneKey = Utilities.ComputeSha256Hash(droneKeyContent);
+                //byte[] fileBytes = Encoding.UTF8.GetBytes(droneKeyContent);
+                
+                var droneKey = Utilities.ComputeMd5Hash(droneKeyContent);
 
                 var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
                 _deviceConfig = DeviceConfig.Instance;

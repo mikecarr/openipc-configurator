@@ -207,6 +207,7 @@ jobs:
             ## What's Changed
             - Automatically generated release for version v${{ env.VERSION }}.
             - Includes builds for macOS (x64, arm64), Windows (x64, arm64) and Linux (Ubuntu) (x64, arm64)..
+            - IOS Users, must run 'xattr -cr OpenIPC_Config.app' to remove the quarantine flag. Until this is properly signed.
           draft: false
           prerelease: false
 

@@ -8,6 +8,13 @@ Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator
 
 [Demo on YouTube](https://www.youtube.com/watch?v=iJXXMcnOC7w)
 
+## TODO:
+* Fix UI and views
+* Cleanup code
+* Add more features
+* Android and IOS versions coming soon!
+
+
 ## Features
 
 * **Camera settings management**: configure camera settings such as resolution, frame rate, and exposure
@@ -38,10 +45,6 @@ Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator
 * Windows: %APPDATA%\OpenIPC_Config\Logs
 * Linux: ~/.config/openipc-configurator.log
 
-## TODO:
-* Fix UI and views
-* Cleanup code
-* Add more features
 
 Based on your folder structure, here’s an explanation of each project and what it likely targets:
 
