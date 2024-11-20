@@ -193,6 +193,44 @@ public class SshClientService : ISshClientService
             }
         });
     }
+    
+    public async Task<byte[]> DownloadFileBytesAsync(DeviceConfig deviceConfig, string remotePath)
+    {
+        Log.Information($"Downloading file from '{remotePath}' on {deviceConfig.IpAddress}.");
+
+        byte[] fileContent = Array.Empty<byte>(); // Initialize an empty byte array
+
+        await Task.Run(() =>
+        {
+            var connectionInfo = new ConnectionInfo(deviceConfig.IpAddress, deviceConfig.Port, deviceConfig.Username,
+                new PasswordAuthenticationMethod(deviceConfig.Username, deviceConfig.Password));
+            using (var client = new ScpClient(connectionInfo))
+            {
+                try
+                {
+                    client.Connect();
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        // Download the file content into a MemoryStream using ScpClient
+                        client.Download(remotePath, memoryStream);
+                        fileContent = memoryStream.ToArray(); // Get the file content as a byte array
+                        Log.Information("File downloaded successfully.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Error downloading file: {ex.Message}");
+                }
+                finally
+                {
+                    client.Disconnect();
+                }
+            }
+        });
+
+        return fileContent; // Return the file content as a byte array
+    }
+
 
     /// <summary>
     ///     Downloads a file from the device at <paramref name="remotePath" /> and returns its content as a string.
@@ -203,9 +241,9 @@ public class SshClientService : ISshClientService
     public async Task<string> DownloadFileAsync(DeviceConfig deviceConfig, string remotePath)
     {
         Log.Information($"Downloading file from '{remotePath}' on {deviceConfig.IpAddress}.");
-
+    
         var fileContent = string.Empty;
-
+    
         await Task.Run(() =>
         {
             var connectionInfo = new ConnectionInfo(deviceConfig.IpAddress, deviceConfig.Port, deviceConfig.Username,
@@ -234,7 +272,7 @@ public class SshClientService : ISshClientService
                 }
             }
         });
-
+    
         return fileContent; // Return the content of the file
     }
 
@@ -283,8 +321,9 @@ public class SshClientService : ISshClientService
     {
         try
         {
-            var fileContent = await DownloadFileAsync(deviceConfig, remotePath);
-            if (fileContent.Length != 0) File.WriteAllText(localPath, fileContent);
+            var fileContentBytes = await DownloadFileAsync(deviceConfig, remotePath);
+            
+            if (fileContentBytes.Length != 0) File.WriteAllText(localPath, fileContentBytes);
         }
         catch (Exception ex)
         {

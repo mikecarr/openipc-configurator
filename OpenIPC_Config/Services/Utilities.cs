@@ -13,6 +13,27 @@ public static class Utilities
         return output;
     }
 
+    public static string ComputeMd5Hash(byte[] rawData)
+    {
+        // Use MD5 to compute the hash
+        using (var md5Hash = MD5.Create())
+        {
+            // Compute the hash for the byte array
+            var bytes = md5Hash.ComputeHash(rawData);
+
+            // Convert the bytes to a hexadecimal string
+            var builder = new StringBuilder();
+            foreach (var b in bytes)
+            {
+                builder.Append(b.ToString("x2"));
+            }
+
+            return builder.ToString();
+        }
+    }
+
+
+
     public static string ComputeSha256Hash(string rawData)
     {
         // Create a SHA256 instance
