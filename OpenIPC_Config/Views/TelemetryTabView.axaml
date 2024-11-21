@@ -77,7 +77,7 @@
                 ToolTip.Tip="{x:Static assets:Resources.MSPOSDToolTip}" />
         <Button Grid.Row="4" Grid.Column="3" Content="Upload INAV Fonts" Command="{Binding UploadINavCommand}"
                 IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.UploadINavFontsToolTip}" />
+                ToolTip.Tip="{x:Static assets:Resources.MSPOSDToolTip}" />
         <Button Grid.Row="5" Grid.Column="3" Content="MSPOSD Extra" Command="{Binding MSPOSDExtraCommand}"
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.UploadINavFontsToolTip}" />
