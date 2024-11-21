@@ -142,12 +142,40 @@ Step 9: Reboot OpenIPC_Config camera</value>
         <value>Generate Keys</value>
     </data>
     <data name="SendGsKeyToolTip" xml:space="preserve">
-        <value/>
+        <value>Send the encrypted key to the designated IP</value>
     </data>
     <data name="RecvGsKeyToolTip" xml:space="preserve">
-        <value/>
+        <value>Receive gs.key from the designated IP</value>
     </data>
     <data name="btnSaveAndRestartWfbText" xml:space="preserve">
         <value>Save &amp; Restart WFB</value>
+    </data>
+    
+
+    <data name="FpvEnabledToolTip" xml:space="preserve">
+        <value>Enables 3A algorithm with less cpu load and enables FPV section for other functions below.</value>
+    </data>
+    <data name="FpvNoiseLevelToolTip" xml:space="preserve">
+        <value>FPV Noise Level</value>
+    </data>
+    <data name="FpvRoiQpToolTip" xml:space="preserve">
+        <value>Enables Focus mode with better quality in the center of the image compared to the sides.</value>
+    </data>
+    <data name="FpvRefEnhanceToolTip" xml:space="preserve">
+        <value>Encoder stream error correction. The value represents number of frames between recovery frames.
+            
+If you set 90fps GOP: 1 , real gop is 90 and if you set value to 9 the correction works 10 times a second.</value>
+    </data>
+    <data name="FpvRefPredToolTip" xml:space="preserve">
+        <value>If you set TRUE it's softer correction with better image quality, if FALSE stronger correction but it affects the image quality more. TRUE setting is recommended.</value>
+    </data>
+    <data name="FpvIntraLineToolTip" xml:space="preserve">
+        <value>FPV intraLine</value>
+    </data>
+    <data name="FpvIntraQpToolTip" xml:space="preserve">
+        <value>Experimental, encodes without IDR frames, can't be recorded without special plugin.</value>
+    </data>
+    <data name="FpvRoiRectToolTip" xml:space="preserve">
+        <value>FPV roiRect - (Left x Top x H x W )</value>
     </data>
 </root>

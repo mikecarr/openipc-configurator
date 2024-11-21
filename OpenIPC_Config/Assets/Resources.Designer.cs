@@ -189,6 +189,39 @@ namespace OpenIPC_Config.Assets {
             get { return ResourceManager.GetString("btnSaveAndRestartWfbText", resourceCulture); }
         }
         
+        public static string FpvEnabledToolTip
+        {
+            get { return ResourceManager.GetString("FpvEnabledToolTip", resourceCulture); }  
+        }
+        public static string FpvNoiseLevelToolTip
+        {
+            get { return ResourceManager.GetString("FpvNoiseLevelToolTip", resourceCulture); }  
+        }
+        public static string FpvRoiQpToolTip
+        {
+            get { return ResourceManager.GetString("FpvRoiQpToolTip", resourceCulture); }  
+        }
+        public static string FpvRefEnhanceToolTip
+        {
+            get { return ResourceManager.GetString("FpvRefEnhanceToolTip", resourceCulture); }
+        }
+        public static string FpvRefPredToolTip
+        {
+            get { return ResourceManager.GetString("FpvRefPredToolTip", resourceCulture); }
+        }
+        public static string FpvIntraLineToolTip
+        {
+            get { return ResourceManager.GetString("FpvIntraLineToolTip", resourceCulture); }
+        }
+        public static string FpvIntraQpToolTip
+        {
+            get { return ResourceManager.GetString("FpvIntraQpToolTip", resourceCulture); }
+        }
+        public static string FpvRoiRectToolTip
+        {
+            get { return ResourceManager.GetString("FpvRoiRectToolTip", resourceCulture); }
+        }
+        
         
     }
 }

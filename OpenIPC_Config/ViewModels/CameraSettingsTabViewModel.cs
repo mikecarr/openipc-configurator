@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -39,6 +40,22 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
     
     [ObservableProperty] public ObservableCollection<string> _resolution;
     [ObservableProperty] private ObservableCollection<string> _saturation;
+    
+    [ObservableProperty] private ObservableCollection<string> _fpvEnabled;
+    [ObservableProperty] private ObservableCollection<string> _fpvNoiseLevel;
+    [ObservableProperty] private ObservableCollection<string> _fpvRoiQp;
+    [ObservableProperty] private ObservableCollection<string> _fpvRefEnhance;
+    [ObservableProperty] private ObservableCollection<string> _fpvRefPred;
+    [ObservableProperty] private ObservableCollection<string> _fpvIntraLine;
+    [ObservableProperty] private ObservableCollection<string> _fpvIntraQp;
+    
+    [ObservableProperty] private string _combinedFpvRoiRectValue;
+
+    [ObservableProperty] private ObservableCollection<string> _fpvRoiRectLeft = new ObservableCollection<string> {"" };
+    [ObservableProperty] private ObservableCollection<string> _fpvRoiRectTop = new ObservableCollection<string> { ""};
+    [ObservableProperty] private ObservableCollection<string> _fpvRoiRectHeight = new ObservableCollection<string> {"" };
+    [ObservableProperty] private ObservableCollection<string> _fpvRoiRectWidth = new ObservableCollection<string> {"" };
+
 
     [ObservableProperty] private string _selectedBitrate;
 
@@ -62,7 +79,22 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
     [ObservableProperty] private string _selectedResolution;
 
     [ObservableProperty] private string _selectedSaturation;
-
+    
+    [ObservableProperty] private string _selectedFpvEnabled;
+    
+    [ObservableProperty] private string _selectedFpvNoiseLevel;
+    
+    [ObservableProperty] private string _selectedFpvRoiQp;
+    
+    [ObservableProperty] private string _selectedFpvRefEnhance;
+    
+    [ObservableProperty] private string _selectedFpvRefPred;
+    
+    [ObservableProperty] private string _selectedFpvIntraLine;
+    
+    [ObservableProperty] private string _selectedFpvIntraQp;
+    
+    
     private readonly Dictionary<string, string> _yamlConfig = new();
 
 
@@ -81,6 +113,8 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
     }
 
     public ICommand RestartMajesticCommand { get; private set; }
+
+
 
 
     private async void RestartMajestic()
@@ -179,6 +213,87 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         ParseYamlConfig(majesticContent);
     }
 
+    partial void OnSelectedFpvEnabledChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SlectedFpvEnabledChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvEnabled, value);
+    }
+    
+    partial void OnSelectedFpvNoiseLevelChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvNoiseLevelChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvNoiseLevel, value);
+    }
+    
+    partial void OnSelectedFpvRoiQpChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvRoiQpChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvRoiQp, value);
+    }
+    
+    partial void OnSelectedFpvRefEnhanceChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvRefEnhanceChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvRefEnhance, value);
+    }
+    
+    partial void OnSelectedFpvRefPredChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvRefPredChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvRefPred, value);
+    }
+    
+    partial void OnSelectedFpvIntraLineChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvIntraLineChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvIntraLine, value);
+    }
+    
+    partial void OnSelectedFpvIntraQpChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvIntraQpChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvIntraQp, value);
+    }
+    
+    
+    partial void OnFpvRoiRectLeftChanged(ObservableCollection<string> value)
+    {
+        Log.Debug($"SelectedFpvRoiRectLeftChanged updated to {value[0]}");
+        UpdateCombinedValue();
+    }
+    
+    partial void OnFpvRoiRectTopChanged(ObservableCollection<string> value)
+    {
+        Log.Debug($"SelectedFpvRoiRectTopChanged updated to {value}");
+        UpdateCombinedValue();
+    }
+    
+    partial void OnFpvRoiRectHeightChanged(ObservableCollection<string> value)
+    {
+        Log.Debug($"SelectedFpvRoiRectHeightChanged updated to {value}");
+        UpdateCombinedValue();
+    }
+    
+    partial void OnFpvRoiRectWidthChanged(ObservableCollection<string> value)
+    {
+        Log.Debug($"SelectedFpvRoiRectWidthChanged updated to {value}");
+        UpdateCombinedValue();
+    }
+
+    private void UpdateCombinedValue()
+    {
+        CombinedFpvRoiRectValue = $"{FpvRoiRectLeft[0]}x{FpvRoiRectTop[0]}x{FpvRoiRectHeight[0]}x{FpvRoiRectWidth[0]}";
+        Log.Debug($"Combined value updated to {CombinedFpvRoiRectValue}");
+        UpdateYamlConfig(Majestic.FpvRoiRect, CombinedFpvRoiRectValue);
+    }
+    
     private void InitializeCollections()
     {
         Resolution = new ObservableCollection<string>
@@ -206,6 +321,24 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
             { "1", "5", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100" };
         Flip = new ObservableCollection<string> { "true", "false" };
         Mirror = new ObservableCollection<string> { "true", "false" };
+        
+        FpvEnabled = new ObservableCollection<string> { "true", "false" };
+        FpvNoiseLevel = new ObservableCollection<string> { "0", "1", "2" };
+        
+        // Create an ObservableCollection with values from -30 to 30
+        FpvRoiQp = new ObservableCollection<string>(Enumerable.Range(-30, 61).Select(i => i.ToString()));
+        
+        FpvRefEnhance = new ObservableCollection<string>(Enumerable.Range(0, 10).Select(i => i.ToString()));
+        
+        FpvRefPred = new ObservableCollection<string> { "true", "false" };
+        
+        FpvIntraLine = new ObservableCollection<string>(Enumerable.Range(0, 10).Select(i => i.ToString()));
+        FpvIntraQp = new ObservableCollection<string>{ "true", "false" };
+
+
+        FpvRoiRectLeft = new ObservableCollection<string> { "" };
+
+
     }
 
     // YAML parsing and updating methods (unchanged)
@@ -383,6 +516,109 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
                     }
 
                     break;
+                case Majestic.FpvEnabled:
+                    if (Mirror?.Contains(value) ?? false)
+                    {
+                        SelectedFpvEnabled = value;
+                    }
+                    else
+                    {
+                        FpvEnabled.Add(value);
+                        SelectedFpvEnabled = value;
+                    }
+
+                    break;
+                case Majestic.FpvNoiseLevel:
+                    if (FpvNoiseLevel?.Contains(value) ?? false)
+                    {
+                        SelectedFpvNoiseLevel = value;
+                    }
+                    else
+                    {
+                        FpvNoiseLevel.Add(value);
+                        SelectedFpvNoiseLevel = value;
+                    }
+
+                    break;
+                case Majestic.FpvRoiQp:
+                    if (FpvRoiQp?.Contains(value) ?? false)
+                    {
+                        SelectedFpvRoiQp = value;
+                    }
+                    else
+                    {
+                        FpvRoiQp.Add(value);
+                        SelectedFpvRoiQp = value;
+                    }
+
+                    break;
+                case Majestic.FpvRefEnhance:
+                    if (FpvRefEnhance?.Contains(value) ?? false)
+                    {
+                        SelectedFpvRefEnhance = value;
+                    }
+                    else
+                    {
+                        FpvRefEnhance.Add(value);
+                        SelectedFpvRefEnhance = value;
+                    }
+
+                    break;
+                case Majestic.FpvRefPred:
+                    if (FpvRefPred?.Contains(value) ?? false)
+                    {
+                        SelectedFpvRefPred = value;
+                    }
+                    else
+                    {
+                        FpvRefPred.Add(value);
+                        SelectedFpvRefPred = value;
+                    }
+
+                    break;
+                case Majestic.FpvIntraLine:
+                    if (FpvIntraLine?.Contains(value) ?? false)
+                    {
+                        SelectedFpvIntraLine = value;
+                    }
+                    else
+                    {
+                        FpvIntraLine.Add(value);
+                        SelectedFpvIntraLine = value;
+                    }
+
+                    break;
+                case Majestic.FpvIntraQp:
+                    if (FpvIntraQp?.Contains(value) ?? false)
+                    {
+                        SelectedFpvIntraQp = value;
+                    }
+                    else
+                    {
+                        FpvIntraQp.Add(value);
+                        SelectedFpvIntraQp = value;
+                    }
+
+                    break;
+                case Majestic.FpvRoiRect:
+                    // Parse the value and assign to individual properties
+                    var parts = value.Split('x');
+                    if (parts.Length == 4)
+                    {
+                        // Update ObservableCollection values
+                        // Update the first element of each ObservableCollection
+                        if (FpvRoiRectLeft.Count > 0) FpvRoiRectLeft[0] = parts[0];
+                        if (FpvRoiRectTop.Count > 0) FpvRoiRectTop[0] = parts[1];
+                        if (FpvRoiRectHeight.Count > 0) FpvRoiRectHeight[0] = parts[2];
+                        if (FpvRoiRectWidth.Count > 0) FpvRoiRectWidth[0] = parts[3];
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid format for FpvRoiRect value: {value}");
+                    }
+
+                    break;
+                
                 default:
                     Log.Debug($"Unknown key: {fullKey}");
                     break;
