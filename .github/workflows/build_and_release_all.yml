@@ -144,15 +144,26 @@ jobs:
         env:
           DOTNET_ROOT: C:\Program Files\dotnet
           VERSION: 0.0.1
-
-
     
       - name: Zip .app Bundle for MacOS and Linux
         run: |
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             DMG_NAME="OpenIPC-Config-macos-${{ matrix.arch }}.dmg"
             APP_NAME="OpenIPC_Config.app"
-            hdiutil create -volname "OpenIPC Config" -srcfolder "${APP_NAME}" -ov -format UDZO "${DMG_NAME}"
+            BUILD_DIR="OpenIPC-Config-macos-${{ matrix.arch }}-dmg-build"
+            
+            # Create a temporary folder for the .dmg contents
+            mkdir -p "${BUILD_DIR}"
+            cp -R "${APP_NAME}" "${BUILD_DIR}/"
+            
+            # Create an alias to the Applications folder
+            ln -s /Applications "${BUILD_DIR}/Applications"
+            
+            # Create the .dmg with the Applications alias
+            hdiutil create -volname "OpenIPC Config" -srcfolder "${BUILD_DIR}" -ov -format UDZO "${DMG_NAME}"
+            
+            # Clean up the temporary build folder
+            rm -rf "${BUILD_DIR}"
           elif [[ "${{ runner.os }}" == "Linux" ]]; then
             zip -r OpenIPC-Config-linux-${{ matrix.arch }}.zip ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish/*
           fi
