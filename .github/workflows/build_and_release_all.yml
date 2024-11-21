@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - test
+      - release-notes
 
 jobs:
   build:
