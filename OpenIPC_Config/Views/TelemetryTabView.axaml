@@ -87,9 +87,9 @@
 
 
         <!-- Onboard REC Toggle with RadioButtons -->
-        <RadioButton Grid.Row="5" Grid.Column="4" Content="ON" IsChecked="{Binding IsOnboardRecOn}"
+        <RadioButton Grid.Row="6" Grid.Column="4" Content="ON" IsChecked="{Binding IsOnboardRecOn}"
                      ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" Padding="3" />
-        <RadioButton Grid.Row="5" Grid.Column="5" Content="OFF" IsChecked="{Binding IsOnboardRecOff}"
+        <RadioButton Grid.Row="6" Grid.Column="5" Content="OFF" IsChecked="{Binding IsOnboardRecOff}"
                      ToolTip.Tip="{x:Static assets:Resources.RecOffToolTip}" Padding="3" />
 
 
