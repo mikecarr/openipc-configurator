@@ -3,12 +3,14 @@ name: Build and Release OpenIPC Config App
 permissions:
   contents: write
   actions: read
-  
+      
 on:
   workflow_dispatch:
   push:
-    branches:
-      - release-notes
+    tags:
+      - 'release-v*'       # Trigger for tags that start with 'v', e.g., v1.0.0, v2.1.3
+    # branches:
+    #   - release-notes
 
 jobs:
   build:
@@ -36,7 +38,8 @@ jobs:
       - name: Read Version from VERSION File
         id: get_version
         run: |
-          VERSION=$(cat VERSION)
+          VERSION=${GITHUB_REF#refs/tags/}
+          #VERSION=$(cat VERSION)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
         shell: bash
 
@@ -201,7 +204,8 @@ jobs:
       - name: Read Version from VERSION File
         id: get_version
         run: |
-          VERSION=$(cat VERSION)
+          #VERSION=$(cat VERSION)
+          VERSION=${GITHUB_REF#refs/tags/}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
         shell: bash
 
@@ -214,21 +218,21 @@ jobs:
       - name: List Downloaded Files
         run: ls -R .
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release with Release Notes
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ env.VERSION }}
-          release_name: "OpenIPC Config v${{ env.VERSION }}"
+          release_name: "OpenIPC Configurator ${{ env.VERSION }}"
           body: |
             ## What's Changed
-            - Automatically generated release for version v${{ env.VERSION }}.
+            - Automatically generated release for version ${{ env.VERSION }}.
             - Includes builds for macOS (x64, arm64), Windows (x64, arm64) and Linux (Ubuntu) (x64, arm64)..
             - IOS Users, must run 'xattr -cr OpenIPC_Config.app' to remove the quarantine flag. Until this is properly signed.
           draft: false
-          prerelease: false
+          prerelease: true
 
       - name: Upload All Release Assets
         run: |
