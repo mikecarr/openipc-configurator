@@ -15,8 +15,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-        arch: [x64, arm64]
+        os: [macos-latest]
+        arch: [arm64]
+
+        # os: [macos-latest, windows-latest, ubuntu-latest]
+        # arch: [x64, arm64]
     #      matrix:
     #        os: [ ubuntu-latest ]
     #        arch: [ x64, arm64 ]
@@ -197,7 +200,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: OpenIPC-Config-macos-${{ matrix.arch }}
+          name: OpenIPC-Config-macos-${{ matrix.arch }}.dmg
           path: OpenIPC-Config-macos-${{ matrix.arch }}.zip
 
       - name: Upload Windows Artifact
