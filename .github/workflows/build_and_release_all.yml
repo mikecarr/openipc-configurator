@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - stable
+      - test
 
 jobs:
   build:
@@ -94,6 +94,48 @@ jobs:
           EOF
 
           chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}.Desktop"
+      - name: Create macOS .dmg
+        if: matrix.os == 'macos-latest'
+        run: |
+          DMG_NAME="OpenIPC-Config-macos-${{ matrix.arch }}.dmg"
+          APP_NAME="OpenIPC_Config.app"
+          PUBLISH_DIR="./OpenIPC_Config.Desktop/bin/Release/net8.0/osx-${{ matrix.arch }}/publish"
+      
+          # Create the .app directory if not already done
+          mkdir -p "${APP_NAME}/Contents/MacOS"
+          mkdir -p "${APP_NAME}/Contents/Resources"
+          cp -R "${PUBLISH_DIR}/"* "${APP_NAME}/Contents/MacOS/"
+          cp ./OpenIPC_Config/Assets/Icons/OpenIPC.icns "${APP_NAME}/Contents/Resources/${APP_NAME}.icns"
+      
+          # Generate Info.plist
+          cat << EOF > "${APP_NAME}/Contents/Info.plist"
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>
+            <string>${APP_NAME}</string>
+            <key>CFBundleExecutable</key>
+            <string>${APP_NAME}.Desktop</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.openipc.${APP_NAME}</string>
+            <key>CFBundleVersion</key>
+            <string>${{ env.VERSION }}</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>10.13</string>
+            <key>CFBundleIconFile</key>
+            <string>${APP_NAME}.icns</string>
+          </dict>
+          </plist>
+          EOF
+      
+          # Create the DMG file
+          hdiutil create -volname "OpenIPC Config" -srcfolder "${APP_NAME}" -ov -format UDZO "${DMG_NAME}"
+      
+          # Remove quarantine attribute from .app
+          xattr -cr "${APP_NAME}"
 
       - name: Remove Quarantine Flag (macOS only)
         if: matrix.os == 'macos-latest'
