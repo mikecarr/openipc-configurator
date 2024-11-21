@@ -201,7 +201,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OpenIPC-Config-macos-${{ matrix.arch }}.dmg
-          path: OpenIPC-Config-macos-${{ matrix.arch }}.zip
+          path: OpenIPC-Config-macos-${{ matrix.arch }}.dmg
 
       - name: Upload Windows Artifact
         if: matrix.os == 'windows-latest'
@@ -259,6 +259,12 @@ jobs:
       - name: Upload All Release Assets
         run: |
           find . -name "OpenIPC-Config-*.zip" -print | while read -r asset; do
+            if [[ -f "$asset" ]]; then
+              echo "Uploading $asset"
+              gh release upload "v${{ env.VERSION }}" "$asset" --clobber
+            fi
+          done
+          find . -name "OpenIPC-Config-*.dmg" -print | while read -r asset; do
             if [[ -f "$asset" ]]; then
               echo "Uploading $asset"
               gh release upload "v${{ env.VERSION }}" "$asset" --clobber
