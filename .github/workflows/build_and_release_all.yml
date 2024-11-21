@@ -239,13 +239,13 @@ jobs:
           find . -name "OpenIPC-Config-*.zip" -print | while read -r asset; do
             if [[ -f "$asset" ]]; then
               echo "Uploading $asset"
-              gh release upload "v${{ env.VERSION }}" "$asset" --clobber
+              gh release upload "${{ env.VERSION }}" "$asset" --clobber
             fi
           done
           find . -name "OpenIPC-Config-*.dmg" -print | while read -r asset; do
             if [[ -f "$asset" ]]; then
               echo "Uploading $asset"
-              gh release upload "v${{ env.VERSION }}" "$asset" --clobber
+              gh release upload "${{ env.VERSION }}" "$asset" --clobber
             fi
           done
         shell: bash
