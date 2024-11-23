@@ -169,7 +169,8 @@ jobs:
             # Clean up the temporary build folder
             rm -rf "${BUILD_DIR}"
           elif [[ "${{ runner.os }}" == "Linux" ]]; then
-            ls -al
+            ls -al ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish/*
+            
             zip -r OpenIPC-Config-linux-${{ matrix.arch }}.zip ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish/*
           fi
         shell: bash
