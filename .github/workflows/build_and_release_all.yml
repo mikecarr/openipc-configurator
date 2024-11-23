@@ -227,24 +227,31 @@ jobs:
 
       - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: ${{ env.VERSION }}
-          name: "Release ${{ env.VERSION }}"
-          body: |
-            ## Info
-            - Automatically generated release for version ${{ env.VERSION }}.
-            - Includes builds for macOS (x64, arm64), Windows (x64, arm64), and Linux (Ubuntu) (x64, arm64).
-            - iOS Users, must run 'xattr -cr OpenIPC_Config.app' to remove the quarantine flag until this is properly signed.
-            
-            ## Changelog
-            ${{ steps.create-release-notes.outputs.release-notes }}
+          draft: true
+          generate_release_notes: true
           files: |
-            OpenIPC-Config-*.zip
-            OpenIPC-Config-*.dmg
-          draft: false
-          prerelease: false
+            ./OpenIPC-Config-*/OpenIPC-Config-*.zip
+            ./OpenIPC-Config-*/OpenIPC-Config-*.dmg
+
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # with:
+        #   tag_name: ${{ env.VERSION }}
+        #   name: "Release ${{ env.VERSION }}"
+        #   body: |
+        #     ## Info
+        #     - Automatically generated release for version ${{ env.VERSION }}.
+        #     - Includes builds for macOS (x64, arm64), Windows (x64, arm64), and Linux (Ubuntu) (x64, arm64).
+        #     - iOS Users, must run 'xattr -cr OpenIPC_Config.app' to remove the quarantine flag until this is properly signed.
+            
+        #   files: |
+        #     ./OpenIPC-Config-*/OpenIPC-Config-*.zip
+        #     ./OpenIPC-Config-*/OpenIPC-Config-*.dmg
+
+        #   draft: false
+        #   prerelease: false
       # - uses: johnyherangi/create-release-notes@main
       #   id: create-release-notes
       #   env:
