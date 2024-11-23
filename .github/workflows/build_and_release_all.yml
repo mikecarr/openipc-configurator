@@ -150,6 +150,7 @@ jobs:
     
       - name: Zip .app Bundle for MacOS and Linux
         run: |
+          echo "Runner OS: ${{ runner.os }}"
           if [[ "${{ runner.os }}" == "macOS" ]]; then
             DMG_NAME="OpenIPC-Config-macos-${{ matrix.arch }}.dmg"
             APP_NAME="OpenIPC_Config.app"
