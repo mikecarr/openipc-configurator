@@ -218,6 +218,11 @@ jobs:
       - name: List Downloaded Files
         run: ls -R .
 
+      - uses: johnyherangi/create-release-notes@main
+        id: create-release-notes
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create GitHub Release with Release Notes
         id: create_release
         uses: actions/create-release@v1
@@ -231,8 +236,9 @@ jobs:
             - Automatically generated release for version ${{ env.VERSION }}.
             - Includes builds for macOS (x64, arm64), Windows (x64, arm64) and Linux (Ubuntu) (x64, arm64)..
             - IOS Users, must run 'xattr -cr OpenIPC_Config.app' to remove the quarantine flag. Until this is properly signed.
+            body: ${{ steps.create-release-notes.outputs.release-notes }}
           draft: false
-          prerelease: true
+          prerelease: false
 
       - name: Upload All Release Assets
         run: |
