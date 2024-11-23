@@ -169,10 +169,12 @@ jobs:
             # Clean up the temporary build folder
             rm -rf "${BUILD_DIR}"
           elif [[ "${{ runner.os }}" == "Linux" ]]; then
-            cd ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish
-            
-            zip -r OpenIPC-Config-linux-${{ matrix.arch }}.zip ./*
-            mv OpenIPC-Config-linux-arm64.zip ../../../..
+
+            mkdir -p OpenIPC-Config-linux-${{ matrix.arch }}
+            cp -r ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish/* OpenIPC-Config-linux-${{ matrix.arch }}/
+            zip -r OpenIPC-Config-linux-${{ matrix.arch }}.zip OpenIPC-Config-linux-${{ matrix.arch }}
+             echo "directory created"
+             ls -al
             # zip -r OpenIPC-Config-linux-${{ matrix.arch }}.zip ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish/*
           fi
         shell: bash
