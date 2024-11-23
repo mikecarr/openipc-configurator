@@ -17,7 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [ubuntu-latest]
         arch: [arm64]
 
         # os: [macos-latest, windows-latest, ubuntu-latest]
@@ -169,6 +169,7 @@ jobs:
             rm -rf "${BUILD_DIR}"
           elif [[ "${{ runner.os }}" == "Linux" ]]; then
             zip -r OpenIPC-Config-linux-${{ matrix.arch }}.zip ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish/*
+
           fi
         shell: bash
       
