@@ -241,8 +241,8 @@ jobs:
             ## Changelog
             ${{ steps.create-release-notes.outputs.release-notes }}
           files: |
-            ./OpenIPC-Config-*.zip
-            ./OpenIPC-Config-*.dmg
+            OpenIPC-Config-*.zip
+            OpenIPC-Config-*.dmg
           draft: false
           prerelease: false
       # - uses: johnyherangi/create-release-notes@main
