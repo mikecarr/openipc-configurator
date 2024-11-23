@@ -30,7 +30,7 @@ public partial class MainViewModel : ViewModelBase
 
     private void onDeviceTypeChangeEvent(DeviceType deviceTypeEvent)
     {
-        if (deviceTypeEvent == DeviceType.Radxa)
+        if (deviceTypeEvent == DeviceType.Radxa || deviceTypeEvent == DeviceType.NVR)
             IsVRXEnabled = true;
         // var targetTab = MainView.TabControlInstance.Items
         //     .OfType<TabItem>()
