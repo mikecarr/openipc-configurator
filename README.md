@@ -104,6 +104,15 @@ When creating tags, follow semantic versioning:
 * v1.1.0: Minor release (new features, backwards compatible).
 * v2.0.0: Major release (breaking changes).
 
+* Release
+```
+#git tag -d v0.1.1
+git tag v0.1.1
+git push origin v0.1.1
+
+
+```
+
 
 
 IOS:
