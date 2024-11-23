@@ -223,11 +223,10 @@ jobs:
       #   env:
       #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Changelog
-        uses: Bullrich/generate-release-changelog@master
-        id: Changelog
+      - uses: johnyherangi/create-release-notes@main
+        id: create-release-notes
         env:
-          REPO: ${{ github.repository }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release with Release Notes
         id: create_release
@@ -236,15 +235,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.VERSION }}
-          release_name: "OpenIPC Configurator ${{ env.VERSION }}"
+          release_name: "Release ${{ env.VERSION }}"
           body: |
-            ## What's New
+            ## Info
             - Automatically generated release for version ${{ env.VERSION }}.
             - Includes builds for macOS (x64, arm64), Windows (x64, arm64) and Linux (Ubuntu) (x64, arm64)..
             - IOS Users, must run 'xattr -cr OpenIPC_Config.app' to remove the quarantine flag. Until this is properly signed.
             
             ## Changelog
-            ${{ steps.Changelog.outputs.changelog }}
+            ${{ steps.create-release-notes.outputs.release-notes }}
           draft: false
           prerelease: false
 
