@@ -9,12 +9,6 @@
              x:DataType="vm:CameraSettingsTabViewModel">
 
 
-    <!-- Add styles and resources for this window -->
-    <UserControl.Styles>
-        <StyleInclude Source="/Styles/Styles.axaml" />
-    </UserControl.Styles>
-
-
     <StackPanel Orientation="Vertical" Spacing="5" Margin="10">
 
         <Grid>
@@ -144,7 +138,7 @@
         </Grid>
         
         <!-- Restart Majestic Button -->
-        <Button Content="Restart Majestic" HorizontalAlignment="Left" Margin="10"
+        <Button Content="Save &amp; Restart Majestic" HorizontalAlignment="Left" Margin="10"
                 Command="{Binding RestartMajesticCommand}"
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.RestartMajesticToolTip}" />

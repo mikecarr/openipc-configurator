@@ -94,7 +94,7 @@
 
 
         <!-- Save and Restart Button at the bottom left -->
-        <Button Grid.Row="6" Grid.Column="0" Content="Save" HorizontalAlignment="Left"
+        <Button Grid.Row="6" Grid.Column="0" Content="Save &amp; Restart" HorizontalAlignment="Left"
                 Command="{Binding SaveAndRestartTelemetryCommand}"
                 IsEnabled="{Binding CanConnect}" />
     </Grid>
