@@ -2,9 +2,9 @@
 
 
 # Define the project names and paths
-desktop_project="OpenIPC/OpenIPC_Config.Desktop"
-android_project="OpenIPC/OpenIPC_Config.Android"
-ios_project="OpenIPC/OpenIPC_Config.iOS"
+desktop_project="OpenIPC_Config.Desktop"
+android_project="OpenIPC_Config.Android"
+ios_project="OpenIPC_Config.iOS"
 
 # Build output directory
 output_dir="build"

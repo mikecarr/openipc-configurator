@@ -3,116 +3,78 @@
              xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
              xmlns:models="clr-namespace:OpenIPC_Config.Models"
              xmlns:services="clr-namespace:OpenIPC_Config.Services"
-
              x:Class="OpenIPC_Config.Views.ConnectControlsView"
              x:DataType="vm:ConnectControlsViewModel">
-
 
     <UserControl.Resources>
         <services:EnumToBoolConverter x:Key="EnumToBoolConverter" />
     </UserControl.Resources>
 
-
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+    <!-- Root Grid -->
+    <Grid >
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <!-- <RowDefinition Height="Auto"/> -->
-            <!-- <RowDefinition Height="Auto"/> -->
+            <RowDefinition Height="Auto" /> <!-- Input Fields + Radio Buttons -->
+            <RowDefinition Height="Auto" /> <!-- Connect Button -->
         </Grid.RowDefinitions>
 
+        <!-- Input Fields and Radio Buttons -->
+        <WrapPanel Grid.Row="0"
+                   Margin="5"
+                   Orientation="{DynamicResource PlatformOrientation}"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Top">
 
-        <!-- <Grid Grid.Row="0" Grid.Column="0" Margin="10"> -->
-        <!--     <Grid.RowDefinitions> -->
-        <!--         <RowDefinition Height="Auto" /> -->
-        <!--         <RowDefinition Height="Auto" /> -->
-        <!--         <RowDefinition Height="Auto" /> -->
-        <!--         <RowDefinition Height="Auto" /> -->
-        <!--     </Grid.RowDefinitions> -->
-        <!--     <Grid.ColumnDefinitions> -->
-        <!--         <ColumnDefinition Width="Auto" /> -->
-        <!--         <ColumnDefinition Width="Auto" /> -->
-        <!--         <ColumnDefinition Width="Auto" /> -->
-        <!--         <ColumnDefinition Width="Auto" /> -->
-        <!--         <ColumnDefinition Width="Auto" /> -->
-        <!--     </Grid.ColumnDefinitions> -->
-        <!--     <Label Grid.Column="0" Grid.Row="0" Content="IP Address" /> -->
-        <!--     <TextBox Grid.Column="1" Grid.Row="0" Width="150"  Text="{Binding IpAddress}" /> -->
-        <!--     <Label Grid.Column="2" Grid.Row="0" Content="Password" /> -->
-        <!--     <TextBox Grid.Column="3" Grid.Row="0" Width="150" PasswordChar="*" Text="{Binding Password}" /> -->
-        <!-- </Grid> -->
-
-        <StackPanel x:Name="LayoutRoot" Margin="10" Orientation="Vertical">
-            <StackPanel Orientation="Vertical">
+            <!-- IP Address -->
+            <StackPanel Margin="5">
                 <Label Content="IP Address" />
-                <TextBox Width="150" Height="30" Text="{Binding IpAddress}" />
+                <TextBox MinWidth="150" Height="30" Text="{Binding IpAddress}" />
             </StackPanel>
-            <StackPanel Orientation="Vertical">
+
+            <!-- Port -->
+            <StackPanel Margin="5">
                 <Label Content="Port" />
-                <TextBox Width="150" Height="30" Text="{Binding Port}" />
+                <TextBox MinWidth="100" Height="30" Text="{Binding Port}" />
             </StackPanel>
-            <StackPanel Orientation="Vertical">
+
+            <!-- Password -->
+            <StackPanel Margin="5">
                 <Label Content="Password" />
-                <TextBox Width="150" Height="30" PasswordChar="*" Text="{Binding Password}" />
+                <TextBox MinWidth="150" Height="30" PasswordChar="*" Text="{Binding Password}" />
             </StackPanel>
-        </StackPanel>
 
+            <!-- Radio Buttons -->
+            <StackPanel Orientation="Horizontal" Margin="5" VerticalAlignment="Center">
+                <RadioButton Margin="5" Content="None" 
+                             IsChecked="{Binding SelectedDeviceType, 
+                             Converter={StaticResource EnumToBoolConverter}, 
+                             ConverterParameter={x:Static models:DeviceType.None}}" />
+                <RadioButton Margin="5" Content="Camera" 
+                             IsChecked="{Binding SelectedDeviceType, 
+                             Converter={StaticResource EnumToBoolConverter}, 
+                             ConverterParameter={x:Static models:DeviceType.Camera}}" />
+                <RadioButton Margin="5" Content="Radxa" 
+                             IsChecked="{Binding SelectedDeviceType, 
+                             Converter={StaticResource EnumToBoolConverter}, 
+                             ConverterParameter={x:Static models:DeviceType.Radxa}}" />
+                <RadioButton Margin="5" Content="NVR" 
+                             IsChecked="{Binding SelectedDeviceType, 
+                             Converter={StaticResource EnumToBoolConverter}, 
+                             ConverterParameter={x:Static models:DeviceType.NVR}}" />
+            </StackPanel>
+        </WrapPanel>
 
-        <Grid Grid.Row="2" Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <!-- Connect Button -->
+        <Grid Grid.Row="1" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Panel Grid.Column="0" Grid.Row="1"
-                   Background="{Binding PingStatusColor }"
-
-                   Height="30" Width="50"
-                   Margin="5,0,0,0" />
-            <Button Grid.Column="1" Grid.Row="1" Content="Connect"
-                    IsEnabled="{Binding CanConnect }"
+            <Panel Grid.Column="0" Background="{Binding PingStatusColor}" 
+                   Height="30" Width="50" Margin="5" />
+            <Button Grid.Column="1" Content="Connect"
+                    HorizontalAlignment="Left"
+                    IsEnabled="{Binding CanConnect}" 
                     Command="{Binding ConnectCommand}" />
-
-            <!-- <Panel Grid.Row="3" Grid.Column="0" Width="50" Background="Blue" /> -->
         </Grid>
-
-
-        <Grid Grid.Row="0" Grid.Column="4" HorizontalAlignment="Right">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <RadioButton Grid.Column="5" Grid.Row="0" Content="None"
-                         IsChecked="{Binding SelectedDeviceType,
-                         Converter={StaticResource EnumToBoolConverter},
-                         ConverterParameter={x:Static models:DeviceType.None}}" />
-            <RadioButton Grid.Column="5" Grid.Row="1" Content="Camera"
-                         IsChecked="{Binding SelectedDeviceType, 
-                         Converter={StaticResource EnumToBoolConverter}, 
-                         ConverterParameter={x:Static models:DeviceType.Camera}}" />
-            <RadioButton Grid.Column="5" Grid.Row="2" Content="Radxa"
-                         IsChecked="{Binding SelectedDeviceType, 
-                         Converter={StaticResource EnumToBoolConverter}, 
-                         ConverterParameter={x:Static models:DeviceType.Radxa}}" />
-            <RadioButton Grid.Column="5" Grid.Row="3" Content="NVR"
-                         IsChecked="{Binding SelectedDeviceType, 
-                         Converter={StaticResource EnumToBoolConverter}, 
-                         ConverterParameter={x:Static models:DeviceType.NVR}}" />
-        </Grid>
-
-
     </Grid>
-
 </UserControl>

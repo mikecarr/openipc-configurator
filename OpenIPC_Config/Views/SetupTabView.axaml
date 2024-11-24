@@ -9,10 +9,6 @@
              x:Class="OpenIPC_Config.Views.SetupTabView"
              x:DataType="vm:SetupTabViewModel">
 
-    <UserControl.Styles>
-        <StyleInclude Source="/Styles/Styles.axaml" />
-    </UserControl.Styles>
-
 
     <!-- Main Content -->
     <!-- <Border BorderThickness="1"  BorderBrush="blue"> -->
