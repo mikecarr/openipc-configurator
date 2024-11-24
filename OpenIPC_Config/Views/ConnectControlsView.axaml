@@ -108,7 +108,7 @@
                          ConverterParameter={x:Static models:DeviceType.Radxa}}" />
             <RadioButton Grid.Column="5" Grid.Row="3" Content="NVR"
                          IsChecked="{Binding SelectedDeviceType, 
-                         Converter={StaticResource EnumToBoolConverter}, 
+                         Converter={StaticResource EnumToBoolConverter},
                          ConverterParameter={x:Static models:DeviceType.NVR}}" />
         </Grid>
 
