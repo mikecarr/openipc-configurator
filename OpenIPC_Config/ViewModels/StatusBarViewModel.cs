@@ -30,7 +30,7 @@ public partial class StatusBarViewModel : ViewModelBase
 
     private void UpdateStatus(AppMessage appMessage)
     {
-        Log.Debug(appMessage.ToString());
+        Log.Verbose(appMessage.ToString());
 
 
         if (!string.IsNullOrEmpty(appMessage.Status)) StatusText = appMessage.Status;

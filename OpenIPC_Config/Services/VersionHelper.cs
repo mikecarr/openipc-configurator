@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using Serilog;
 
 namespace OpenIPC_Config.Services;
 
@@ -22,7 +23,7 @@ public static class VersionHelper
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error reading VERSION file: {ex.Message}");
+                    Log.Error($"Error reading VERSION file: {ex.Message}");
                 }
             }
         }

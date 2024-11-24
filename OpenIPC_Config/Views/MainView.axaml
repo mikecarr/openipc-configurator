@@ -79,7 +79,7 @@
         
         
         <!-- Footer (Status Bar) -->
-        <Border Grid.Row="3" Grid.ColumnSpan="2" Margin="5" BorderBrush="Blue" BorderThickness="1">
+        <Border Grid.Row="3" Grid.ColumnSpan="2" Margin="5"  BorderThickness="1">
             <views:StatusBarView />
         </Border>
     </Grid>

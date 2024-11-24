@@ -194,13 +194,13 @@ public partial class ConnectControlsViewModel : ViewModelBase
                         {
                             PingStatusColor = _onlineColorBrush;
                             _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-                                { Status = "Ping OK", DeviceConfig = _deviceConfig });
+                                { Status = "Ping OK", DeviceConfig = _deviceConfig, UpdateLogView = false});
                         }
                         else
                         {
                             PingStatusColor = _offlineColorBrush;
                             _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-                                { Status = "No device", DeviceConfig = _deviceConfig });
+                                { Status = "No device", DeviceConfig = _deviceConfig,UpdateLogView = false });
                         }
                     });
                 }
@@ -241,7 +241,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
     private void UpdateUIMessage(string message)
     {
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = message });
+        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = message});
     }
 
     private void CheckIfCanConnect()
