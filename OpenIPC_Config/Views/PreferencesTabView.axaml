@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
+             mc:Ignorable="d"
+             x:Class="OpenIPC_Config.Views.PreferencesTabView"
+             x:DataType="vm:PreferencesTabViewModel">
+    
+    <StackPanel Margin="10" Spacing="10">
+        <!-- Dark Mode Toggle -->
+        <CheckBox Content="Dark Mode"
+                  IsChecked="{Binding IsDarkMode}"
+                  Command="{Binding ToggleDarkModeCommand}" />
+
+        <!-- Check for Updates -->
+        <Button Content="Get Latest Updates"
+                Command="{Binding GetLatestUpdatesCommand}" />
+
+        <!-- Check for New Version -->
+        <Button Content="Check for New Version"
+                Command="{Binding CheckForNewVersionCommand}" />
+        <TextBlock Text="Current Version: {Binding CurrentVersion}" />
+        <TextBlock Text="Latest Version: {Binding LatestVersion}" />
+
+        <!-- File Details -->
+        <TextBlock Text="Files and Checksums" FontSize="16" FontWeight="Bold" />
+        <ListBox ItemsSource="{Binding FileDetails}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" /> <!-- File Name -->
+                            <ColumnDefinition Width="150" /> <!-- Date Created -->
+                            <ColumnDefinition Width="250" /> <!-- Checksum -->
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding FileName}" Grid.Column="0" />
+                        <TextBlock Text="{Binding DateCreated}" Grid.Column="1" />
+                        <TextBlock Text="{Binding Checksum}" Grid.Column="2" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </StackPanel>
+</UserControl>

@@ -10,29 +10,32 @@ public static class VersionHelper
 {
     public static string GetAppVersion()
     {
-        // Check if running in a local development environment
-        if (IsDevelopment())
+        try
         {
-            // Try to read the version from the VERSION file
-            var versionFilePath = Path.Combine(AppContext.BaseDirectory, "VERSION");
-            if (File.Exists(versionFilePath))
+            // Check if running in a local development environment
+            if (IsDevelopment())
             {
-                try
+                // Try to read the version from the VERSION file
+                var versionFilePath = Path.Combine(AppContext.BaseDirectory, "VERSION");
+                if (File.Exists(versionFilePath))
                 {
                     return File.ReadAllText(versionFilePath).Trim();
                 }
-                catch (Exception ex)
-                {
-                    Log.Error($"Error reading VERSION file: {ex.Message}");
-                }
             }
-        }
 
-        // Fallback to the assembly version
-        return Assembly.GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion ?? "Unknown Version";
+            // Fallback to the assembly version
+            return Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                .InformationalVersion ?? "Unknown Version";
+        }
+        catch (Exception ex)
+        {
+            // Log the error and return a default version
+            Log.Error($"Failed to get app version: {ex}");
+            return "Unknown Version";
+        }
     }
+
 
     private static bool IsDevelopment()
     {

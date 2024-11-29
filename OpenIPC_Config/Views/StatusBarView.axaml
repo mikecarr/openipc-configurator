@@ -51,12 +51,12 @@
                 <TextBlock VerticalAlignment="Center" Text="{Binding MessageText}" />
             </Border>
             
-            <Border BorderBrush="Gray" BorderThickness="0" Grid.Row="0" Grid.Column="6" Width="150">
-                <Label Content="OpenIPC" HorizontalContentAlignment="Right" Foreground="Blue" />
+            <Border BorderBrush="White" BorderThickness="0" Grid.Row="0" Grid.Column="6" Width="150">
+                <Label Content="OpenIPC" HorizontalContentAlignment="Right" />
             </Border>
             
-            <Border BorderBrush="Gray" BorderThickness="0" Grid.Row="0" Grid.Column="7" Width="150" HorizontalAlignment="Right">
-                <Label Content="{Binding AppVersionText}" Foreground="Blue"/>
+            <Border BorderBrush="White" BorderThickness="0" Grid.Row="0" Grid.Column="7" HorizontalAlignment="Right">
+                <Label Content="{Binding AppVersionText}" />
             </Border>
         </Grid>
 
