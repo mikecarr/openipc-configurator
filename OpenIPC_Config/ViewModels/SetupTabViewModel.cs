@@ -490,7 +490,6 @@ public partial class SetupTabViewModel : ViewModelBase
             ProgressText = "System upgrade complete!";
         }
         
-        
     }
     
     
@@ -622,7 +621,7 @@ public partial class SetupTabViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error(e.ToString());
             throw;
         }
 

@@ -23,14 +23,22 @@ public partial class StatusBarViewModel : ViewModelBase
         _eventAggregator = App.EventAggregator;
         _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(UpdateStatus);
 
-        _appVersionText = VersionHelper.GetAppVersion();
+        _appVersionText = GetFormattedAppVersion();
     }
 
+    private string GetFormattedAppVersion()
+    {
+        var fullVersion = VersionHelper.GetAppVersion();
+
+        // Extract the first part of the version (e.g., "1.0.0")
+        var truncatedVersion = fullVersion.Split('+')[0]; // Handles semantic versions like "1.0.0+buildinfo"
+        return truncatedVersion.Length > 10 ? truncatedVersion.Substring(0, 10) : truncatedVersion;
+    }
     
 
     private void UpdateStatus(AppMessage appMessage)
     {
-        Log.Debug(appMessage.ToString());
+        Log.Verbose(appMessage.ToString());
 
 
         if (!string.IsNullOrEmpty(appMessage.Status)) StatusText = appMessage.Status;

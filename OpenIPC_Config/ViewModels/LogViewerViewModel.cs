@@ -80,6 +80,9 @@ public class LogViewerViewModel : ViewModelBase
     {
         var formattedMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
 
-        if (message.UpdateLogView) LogMessages.Insert(0, formattedMessage);
+        if (message.UpdateLogView)
+        {
+            LogMessages.Insert(0, formattedMessage);
+        }
     }
 }

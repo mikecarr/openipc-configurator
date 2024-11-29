@@ -26,7 +26,7 @@ public static class DeviceCommands
 
     public const string ResetCameraCommand = "firstboot";
 
-    public const string GetHostname = "hostname";
+    public const string GetHostname = "hostname -s";
 
     public const string GenerateKeys = "wfb_keygen";
 

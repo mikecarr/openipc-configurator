@@ -153,7 +153,7 @@ public partial class WfbGSTabViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Log.Error(e.ToString());
             throw;
         }
     }

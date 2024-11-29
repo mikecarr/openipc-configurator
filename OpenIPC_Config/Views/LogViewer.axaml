@@ -8,6 +8,7 @@
              x:Class="OpenIPC_Config.Views.LogViewer"
              x:DataType="vm:LogViewerViewModel">
 
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" /> <!-- Label -->
@@ -35,10 +36,12 @@
                  HorizontalAlignment="Stretch">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding}"
-                               TextWrapping="Wrap"
-                               FontSize="12"
-                               Margin="2,0" />
+                    <Grid HorizontalAlignment="Stretch">
+                        <TextBlock Text="{Binding}"
+                                   TextWrapping="Wrap"
+                                   FontSize="12"
+                                   Margin="0,0" />
+                    </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

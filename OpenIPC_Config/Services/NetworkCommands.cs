@@ -29,11 +29,11 @@ public class NetworkCommands : INetworkCommands
         // Check the status of the ping request
         if (reply.Status == IPStatus.Success)
         {
-            Log.Debug($"Ping successful: {reply.Status}");
+            Log.Verbose($"Ping successful: {reply.Status}");
             return Task.FromResult(true);
         }
 
-        Log.Debug($"Ping failed: {reply.Status}");
+        Log.Verbose($"Ping failed: {reply.Status}");
         return Task.FromResult(false);
     }
 }
