@@ -65,11 +65,7 @@
                 </ScrollViewer>
             </TabItem>
             
-            <TabItem Header="Preferences">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <views:PreferencesTabView />
-                </ScrollViewer>
-            </TabItem>
+            
         </TabControl>
     <!-- </Border> -->
 
