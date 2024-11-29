@@ -162,7 +162,8 @@ public partial class SetupTabViewModel : ViewModelBase
     private void InitializeCollections()
     {
         // load sensor files from local folder
-        var directoryPath = Models.OpenIPC.LocalSensorsFolder;
+        var directoryPath = Path.Combine(OpenIPC.GetBinariesPath(), "sensors");
+        //var directoryPath = OpenIPC.LocalSensorsFolder;
         PopulateSensorFileNames(directoryPath);
         
 
@@ -229,6 +230,8 @@ public partial class SetupTabViewModel : ViewModelBase
     {
         try
         {
+            Log.Debug($"Directory path: {directoryPath}");
+            
             var files = Directory.GetFiles(directoryPath);
             LocalSensors = new ObservableCollection<string>(files.Select(f => Path.GetFileName(f)));
         }
