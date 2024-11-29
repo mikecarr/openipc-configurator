@@ -26,12 +26,12 @@ public class OpenIPC
     public const string ScreenModeFileLoc = "/config/scripts/screen-mode";
 
 
-    public const string LocalBackUpFolder = "binaries";
-    public const string LocalBinariesFolder = "binaries";
-    public const string LocalSensorsFolder = "binaries/sensors";
-    public const string LocalFontsFolder = "binaries/fonts";
-    public const string LocalBetaFlightFontsFolder = "binaries/fonts/bf";
-    public const string LocalINavFontsFolder = "binaries/fonts/inav";
+    
+    // public const string LocalBinariesFolder = "binaries";
+    // public const string LocalSensorsFolder = "binaries/sensors";
+    // public const string LocalFontsFolder = "binaries/fonts";
+    // public const string LocalBetaFlightFontsFolder = "binaries/fonts/bf";
+    // public const string LocalINavFontsFolder = "binaries/fonts/inav";
 
     public const string KeyMD5Sum = "24767056dc165963fe6db7794aee12cd";
 //    public const string LocalFwFolder = "binaries/fw";
@@ -49,7 +49,8 @@ public class OpenIPC
 
 
     public static string LocalFirmwareFolder;
-
+    public static string LocalBackUpFolder;
+    
     public static string DeviceUsername = "root";
 
     static OpenIPC()
@@ -65,6 +66,27 @@ public class OpenIPC
 
     public static string DeviceSettingsConfigPath { get; private set; }
 
+    public static string GetBinariesPath()
+    {
+        string basePath;
+
+        // Determine the base path for the binaries folder
+        if (OperatingSystem.IsMacOS())
+        {
+            // macOS: binaries will be inside the app bundle's resources folder
+            basePath = AppContext.BaseDirectory; // Gets the app's execution directory
+            return Path.Combine(basePath, "binaries");
+        }
+        else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+        {
+            // Windows and Linux: binaries are alongside the app
+            basePath = AppContext.BaseDirectory;
+            return Path.Combine(basePath, "binaries");
+        }
+
+        throw new PlatformNotSupportedException("Unsupported platform");
+    }
+    
     private static void InitializePaths()
     {
         var appName = Assembly.GetExecutingAssembly().GetName().Name;
@@ -88,6 +110,7 @@ public class OpenIPC
             DeviceSettingsConfigPath = Path.Combine(AppDataConfigDirectory, "openipc_config.json");
             LocalTempFolder = Path.Combine(AppDataConfigDirectory, "Temp");
             LocalFirmwareFolder = Path.Combine(AppDataConfigDirectory, "firmware");
+            LocalBackUpFolder =  Path.Combine(AppDataConfigDirectory, "backup");
         }
         else if (OperatingSystem.IsWindows())
         {
@@ -98,6 +121,7 @@ public class OpenIPC
             DeviceSettingsConfigPath = Path.Combine(AppDataConfigDirectory, "openipc_config.json");
             LocalTempFolder = Path.Combine(AppDataConfigDirectory, "Temp");
             LocalFirmwareFolder = Path.Combine(AppDataConfigDirectory, "firmware");
+            LocalBackUpFolder =  Path.Combine(AppDataConfigDirectory, "backup");
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -108,6 +132,7 @@ public class OpenIPC
             DeviceSettingsConfigPath = Path.Combine(AppDataConfigDirectory, "openipc_config.json");
             LocalTempFolder = Path.Combine(AppDataConfigDirectory, "Temp");
             LocalFirmwareFolder = Path.Combine(AppDataConfigDirectory, "firmware");
+            LocalBackUpFolder =  Path.Combine(AppDataConfigDirectory, "backup");
         }
         else // Assume Linux
         {
@@ -116,6 +141,7 @@ public class OpenIPC
             DeviceSettingsConfigPath = Path.Combine(AppDataConfigDirectory, "openipc_config.json");
             LocalTempFolder = Path.Combine(AppDataConfigDirectory, "Temp");
             LocalFirmwareFolder = Path.Combine(AppDataConfigDirectory, "firmware");
+            LocalBackUpFolder =  Path.Combine(AppDataConfigDirectory, "backup");
         }
 
             

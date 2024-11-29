@@ -131,7 +131,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
         var msposdFile = "msposd_star6e";
 
         // Get all files in the binaries folder
-        var binariesFolderPath = Path.Combine(Environment.CurrentDirectory, Models.OpenIPC.LocalBinariesFolder);
+        var binariesFolderPath = OpenIPC.GetBinariesPath();
 
         var files = Directory.GetFiles(binariesFolderPath).Where(f => f.Contains(msposdFile));
 
@@ -200,6 +200,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
         Log.Debug("UploadINavCommand executed");
         // upload betaflight fonts
         await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
+        
         await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
             Models.OpenIPC.FileType.iNavFonts, "font.png");
         await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,

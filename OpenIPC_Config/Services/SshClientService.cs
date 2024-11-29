@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MsBox.Avalonia;
 using OpenIPC_Config.Models;
 using Prism.Events;
 using Renci.SshNet;
@@ -285,7 +286,8 @@ public class SshClientService : ISshClientService
     public async Task UploadBinaryAsync(DeviceConfig deviceConfig, string remoteDirectory,
         Models.OpenIPC.FileType fileType, string fileName)
     {
-        var binariesFolderPath = Path.Combine(Environment.CurrentDirectory, "binaries");
+        var binariesFolderPath = OpenIPC.GetBinariesPath();
+        Log.Debug($"Binaries folder path: {binariesFolderPath}");
         var filePath = string.Empty;
         var remoteFilePath = string.Empty;
 
@@ -309,11 +311,17 @@ public class SshClientService : ISshClientService
                 break;
         }
 
+        Log.Debug($"file path: {filePath}");
         if (File.Exists(filePath))
         {
             Log.Information($"Uploading {fileName} to {remoteFilePath}...");
             await UploadFileAsync(deviceConfig, filePath, remoteFilePath);
             Log.Information($"Uploaded {fileName} successfully.");
+        }
+        else
+        {
+            var msgBox = MessageBoxManager.GetMessageBoxStandard("Error", $"File {fileName} not found.");
+            msgBox.ShowAsync();
         }
     }
 
