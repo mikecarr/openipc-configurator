@@ -21,6 +21,8 @@ public class EventAggregatorSink : ILogEventSink
     public void Emit(LogEvent logEvent)
     {
         var message = logEvent.RenderMessage(_formatProvider);
+        
+        
         _eventAggregator.GetEvent<LogMessageEvent>().Publish(message);
     }
 }

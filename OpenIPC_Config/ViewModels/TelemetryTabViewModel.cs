@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicData.Binding;
 using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
@@ -127,7 +128,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
     {
         Log.Debug("UploadMSPOSDCommand executed");
 
-        var msposdFile = "msposd";
+        var msposdFile = "msposd_star6e";
 
         // Get all files in the binaries folder
         var binariesFolderPath = Path.Combine(Environment.CurrentDirectory, Models.OpenIPC.LocalBinariesFolder);
@@ -145,7 +146,8 @@ public partial class TelemetryTabViewModel : ViewModelBase
         // killall -q msposd
         await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "killall -q msposd");
         // upload msposd
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteBinariesFolder, "msposd");
+        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteBinariesFolder, "msposd_star6e");
+        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "mv /usr/bin/msposd_star6e /usr/bin/msposd");
         // chmod +x /usr/bin/msposd
         await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x /usr/bin/msposd");
 
@@ -166,7 +168,11 @@ public partial class TelemetryTabViewModel : ViewModelBase
         // reboot
         await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
 
-        Thread.Sleep(3000);
+        //Thread.Sleep(3000);
+        
+        var MsgBox = MessageBoxManager
+            .GetMessageBoxStandard("Done!", "MSPOSD setup, wait for device to restart!", ButtonEnum.Ok);
+        await MsgBox.ShowAsync();
     }
 
     private async void AddMSPOSDExtra()
@@ -182,6 +188,10 @@ public partial class TelemetryTabViewModel : ViewModelBase
         
         //TODO: do we need to restart the camera?
         //await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        
+        var MsgBox = MessageBoxManager
+            .GetMessageBoxStandard("Done!", "Please wait fir datalink to restart!", ButtonEnum.Ok);
+        await MsgBox.ShowAsync();
         
     }
     

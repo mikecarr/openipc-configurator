@@ -50,7 +50,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="binaries\"/>
         <Folder Include="binaries\fonts\"/>
     </ItemGroup>
 
@@ -69,6 +68,10 @@
             <AutoGen>True</AutoGen>
             <DependentUpon>Resources.resx</DependentUpon>
         </Compile>
+
+<!--        <Compile Update="Views\PreferencesTabView.axaml.cs">-->
+<!--          <DependentUpon>PreferencesTabView.axaml</DependentUpon>-->
+<!--        </Compile>-->
 
 <!--                <Compile Update="Views\WfbGSTabView.axaml.cs">-->
 <!--                  <DependentUpon>WfbGSTabView.axaml</DependentUpon>-->

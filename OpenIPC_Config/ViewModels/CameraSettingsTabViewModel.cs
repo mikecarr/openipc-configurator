@@ -38,7 +38,7 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
 
     [ObservableProperty] private ObservableCollection<string> _mirror;
     
-    [ObservableProperty] public ObservableCollection<string> _resolution;
+    [ObservableProperty] private ObservableCollection<string> _resolution;
     [ObservableProperty] private ObservableCollection<string> _saturation;
     
     [ObservableProperty] private ObservableCollection<string> _fpvEnabled;
