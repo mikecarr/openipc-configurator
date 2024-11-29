@@ -1,15 +1,10 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:OpenIPC_Config.Views"
-        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="650"
-        MaxWidth="1020"
-        MaxHeight="750"
         x:Class="OpenIPC_Config.Views.MainWindow"
-        Icon="/Assets/Icons/OpenIPC.ico"
-        Title="OpenIPC_Config">
+        Title="OpenIPC FPV Config Tool"
+        Width="900" Height="850" MinWidth="600" MinHeight="800">
 
-
-    <views:MainView />
+    <!-- MainView is the content of the MainWindow -->
+    <views:MainView  />
 </Window>

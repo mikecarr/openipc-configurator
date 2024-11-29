@@ -87,14 +87,14 @@
 
 
         <!-- Onboard REC Toggle with RadioButtons -->
-        <RadioButton Grid.Row="5" Grid.Column="4" Content="ON" IsChecked="{Binding IsOnboardRecOn}"
+        <RadioButton Grid.Row="6" Grid.Column="4" Content="ON" IsChecked="{Binding IsOnboardRecOn}"
                      ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" Padding="3" />
-        <RadioButton Grid.Row="5" Grid.Column="5" Content="OFF" IsChecked="{Binding IsOnboardRecOff}"
+        <RadioButton Grid.Row="6" Grid.Column="5" Content="OFF" IsChecked="{Binding IsOnboardRecOff}"
                      ToolTip.Tip="{x:Static assets:Resources.RecOffToolTip}" Padding="3" />
 
 
         <!-- Save and Restart Button at the bottom left -->
-        <Button Grid.Row="6" Grid.Column="0" Content="Save" HorizontalAlignment="Left"
+        <Button Grid.Row="6" Grid.Column="0" Content="Save &amp; Restart" HorizontalAlignment="Left"
                 Command="{Binding SaveAndRestartTelemetryCommand}"
                 IsEnabled="{Binding CanConnect}" />
     </Grid>
