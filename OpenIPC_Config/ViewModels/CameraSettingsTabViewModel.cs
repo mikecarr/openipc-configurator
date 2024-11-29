@@ -685,13 +685,13 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
             if (currentNode.Children.ContainsKey(new YamlScalarNode(key)))
                 currentNode = (YamlMappingNode)currentNode.Children[new YamlScalarNode(key)];
             else
-                throw new KeyNotFoundException($"Key '{key}' not found in YAML.");
+                Log.Warning($"Key '{key}' not found in YAML.");
         }
 
         var lastKey = keys[^1];
         if (currentNode.Children.ContainsKey(new YamlScalarNode(lastKey)))
             currentNode.Children[new YamlScalarNode(lastKey)] = new YamlScalarNode(newValue);
         else
-            throw new KeyNotFoundException($"Key '{lastKey}' not found in YAML.");
+            Log.Warning($"Key '{lastKey}' not found in YAML.");
     }
 }
