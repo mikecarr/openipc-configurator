@@ -40,7 +40,7 @@ body:
       attributes:
           label: Context
           description: |
-              If your issue is about a certain type of entity, please provide the entity state/attribute. You can find it in the [developer tools](https://my.home-assistant.io/redirect/developer_states/). Otherwise, you can leave this section blank.
+              If your issue is about a certain config parameter enter config here .Otherwise, you can leave this section blank.
           value: |
               YAML state
               ```yaml
@@ -53,7 +53,6 @@ body:
           label: Environment
           description: |
               examples:
-                - **Brower**: Chrome
                 - **OpenIPC Configurator**: arm64 2.3.4
           value: |
               - Config Version:
