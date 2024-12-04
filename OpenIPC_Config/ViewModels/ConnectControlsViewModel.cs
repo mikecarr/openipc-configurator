@@ -33,19 +33,21 @@ public partial class ConnectControlsViewModel : ViewModelBase
     private readonly SolidColorBrush _offlineColorBrush = new(Colors.Red);
     private readonly SolidColorBrush _onlineColorBrush = new(Colors.Green);
     private readonly Ping _ping = new();
+    private DispatcherTimer _pingTimer;
 
     private bool _canConnect;
 
     private DeviceConfig _deviceConfig;
 
-    private string _ipAddress;
+    [ObservableProperty] private string _ipAddress;
 
-    private string _password;
+    [ObservableProperty] private string _password;
+
+    [ObservableProperty] private int _port = 22;
 
     private SolidColorBrush _pingStatusColor = new(Colors.Red);
 
-    private int _port = 22;
-
+    
     private DeviceType _selectedDeviceType;
 
     private readonly ISshClientService _sshClientService;
@@ -53,25 +55,15 @@ public partial class ConnectControlsViewModel : ViewModelBase
     private readonly TimeSpan _pingInterval = TimeSpan.FromSeconds(1);
     private readonly TimeSpan _pingTimeout = TimeSpan.FromMilliseconds(500);
 
-
     public ConnectControlsViewModel()
     {
         _sshClientService = new SshClientService(_eventAggregator);
         _eventAggregator = App.EventAggregator;
-
+        
         SetDefaults();
         LoadSettings();
 
         ConnectCommand = new RelayCommand(() => Connect());
-
-        // Initialize the cancellation token source if not already done
-        _cancellationTokenSource??= new CancellationTokenSource();
-        StartPingingAsync();
-        
-        // _cancellationTokenSource = new CancellationTokenSource();
-        // _dispatcherTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-        // _dispatcherTimer.Tick += DispatcherTimer_Tick;
-        // _dispatcherTimer.Start();
 
         UpdateUIMessage("Ready");
     }
@@ -90,33 +82,27 @@ public partial class ConnectControlsViewModel : ViewModelBase
         }
     }
 
-    public int Port
+    partial void OnPortChanged(int value)
     {
-        get => _port;
-        set
-        {
-            SetProperty(ref _port, value);
-            CheckIfCanConnect();
-        }
+        CheckIfCanConnect();
     }
 
-    public string? IpAddress
+    partial void OnPasswordChanged(string value)
     {
-        get => _ipAddress;
-        set
-        {
-            SetProperty(ref _ipAddress, value);
-            CheckIfCanConnect();
-        }
+        CheckIfCanConnect();
     }
 
-    public string? Password
+    partial void OnIpAddressChanged(string value)
     {
-        get => _password;
-        set
+        CheckIfCanConnect();
+        if (Utilities.IsValidIpAddress(IpAddress))
         {
-            SetProperty(ref _password, value);
-            CheckIfCanConnect();
+            Log.Debug("Valid IP address: {IpAddress}", IpAddress);
+            StartPingTimer();
+        }
+        else
+        {
+            StopPingTimer();
         }
     }
 
@@ -168,61 +154,6 @@ public partial class ConnectControlsViewModel : ViewModelBase
         SelectedDeviceType = settings.DeviceType;
     }
 
-    // private async void DispatcherTimer_Tick(object sender, EventArgs e)
-    // {
-    //     await StartPingingAsync();
-    // }
-
-    private CancellationTokenSource _cancellationTokenSource;
-
-    public async Task StartPingingAsync()
-    {
-
-        await Task.Run(async () =>
-        {
-            while (!_cancellationTokenSource.Token.IsCancellationRequested)
-            {
-                try
-                {
-                    var ipAddress = IPAddress.Parse(IpAddress);
-                    var reply = await _ping.SendPingAsync(ipAddress, (int)_pingTimeout.TotalMilliseconds);
-
-                    // Update the UI based on the ping result
-                    await Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        if (reply.Status == IPStatus.Success)
-                        {
-                            PingStatusColor = _onlineColorBrush;
-                            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-                                { Status = "Ping OK", DeviceConfig = _deviceConfig, UpdateLogView = false});
-                        }
-                        else
-                        {
-                            PingStatusColor = _offlineColorBrush;
-                            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-                                { Status = "No device", DeviceConfig = _deviceConfig,UpdateLogView = false });
-                        }
-                    });
-                }
-                catch (Exception ex)
-                {
-                    Log.Error($"Error pinging device: {ex.Message}");
-                }
-
-                // Wait for the specified interval or until cancellation
-                try
-                {
-                    await Task.Delay(_pingInterval, _cancellationTokenSource.Token);
-                }
-                catch (TaskCanceledException)
-                {
-                    // Task was canceled, exit the loop
-                    break;
-                }
-            }
-        });
-    }
-
 
     private void SetDefaults()
     {
@@ -248,12 +179,45 @@ public partial class ConnectControlsViewModel : ViewModelBase
     {
         Dispatcher.UIThread.InvokeAsync(() =>
         {
+            var isValidIp = Utilities.IsValidIpAddress(IpAddress);
             CanConnect = !string.IsNullOrWhiteSpace(Password)
-                         && !string.IsNullOrWhiteSpace(IpAddress)
+                         && isValidIp
                          && !SelectedDeviceType.Equals(DeviceType.None);
         });
     }
 
+    private void StartPingTimer()
+    {
+        if (_pingTimer == null)
+        {
+            _pingTimer = new DispatcherTimer
+            {
+                Interval = _pingInterval
+            };
+            _pingTimer.Tick += PingTimer_Tick;
+        }
+        _pingTimer.Start();
+    }
+
+    private void StopPingTimer()
+    {
+        _pingTimer?.Stop();
+    }
+
+    private async void PingTimer_Tick(object? sender, EventArgs e)
+    {
+        try
+        {
+            var reply = await _ping.SendPingAsync(IpAddress, (int)_pingTimeout.TotalMilliseconds);
+            PingStatusColor = reply.Status == IPStatus.Success ? _onlineColorBrush : _offlineColorBrush;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error occurred during ping");
+            PingStatusColor = _offlineColorBrush;
+        }
+    }
+    
     private async void Connect()
     {
         var appMessage = new AppMessage();
