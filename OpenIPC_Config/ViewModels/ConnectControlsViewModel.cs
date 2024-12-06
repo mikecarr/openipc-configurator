@@ -395,13 +395,18 @@ public partial class ConnectControlsViewModel : ViewModelBase
                     Log.Information("GS key MD5 checksum matched default key");
                 }
 
-                var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
-                _deviceConfig = DeviceConfig.Instance;
-                _deviceConfig.KeyChksum = droneKey;
-                deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
-
-                _eventAggregator?.GetEvent<DeviceContentUpdateEvent>()
-                    .Publish(deviceContentUpdatedMessage);
+                _eventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>()
+                    .Publish(new RadxaContentUpdatedMessage
+                    {
+                        DroneKeyContent = droneKey
+                    });
+                // var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
+                // _deviceConfig = DeviceConfig.Instance;
+                // _deviceConfig.KeyChksum = droneKey;
+                // deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
+                //
+                // _eventAggregator?.GetEvent<DeviceContentUpdateEvent>()
+                //     .Publish(deviceContentUpdatedMessage);
 
                 _eventAggregator.GetEvent<AppMessageEvent>()
                     .Publish(new AppMessage { Message = "Downloading gskey...done" });

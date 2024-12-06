@@ -34,6 +34,8 @@ public partial class VRXTabViewModel : ViewModelBase
     [ObservableProperty] private string _selectedResolution;
 
     [ObservableProperty] private string _wfbConfContent;
+    
+    private readonly ISshClientService _sshClientService;
 
     public VRXTabViewModel()
     {
@@ -41,7 +43,8 @@ public partial class VRXTabViewModel : ViewModelBase
         _eventAggregator.GetEvent<DeviceTypeChangeEvent>().Subscribe(onDeviceTypeChangeEvent);
         _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
         _eventAggregator.GetEvent<RadxaContentUpdateChangeEvent>().Subscribe(OnRadxaContentUpdateChange);
-
+        _sshClientService = new SshClientService(_eventAggregator);
+        
         InitializeCollections();
     }
 
@@ -104,16 +107,25 @@ public partial class VRXTabViewModel : ViewModelBase
 
         if (!string.IsNullOrEmpty(radxaContentUpdatedMessage.DroneKeyContent))
         {
-            //var droneKey = radxaContentUpdatedMessage.DroneKeyContent;
-            //DroneKeyChecksum = droneKey;
+            var droneKey = radxaContentUpdatedMessage.DroneKeyContent;
+            DroneKeyChecksum = droneKey;
         }
     }
 
     [RelayCommand]
     private async Task RestartWfb()
     {
-        await MessageBoxManager.GetMessageBoxStandard("Warning", "Not implemented yet").ShowAsync();
+        //await MessageBoxManager.GetMessageBoxStandard("Warning", "Not implemented yet").ShowAsync();
 
+        var resolution = SelectedResolution;
+        var fps = SelectedFps;
+        
+        //format 1920x1080@60
+        var screenMode = $"{resolution}@{fps}\n";
+        
+        //Task UploadFileStringAsync(DeviceConfig deviceConfig, string remotePath, string fileContent)
+        await _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.ScreenModeFileLoc, screenMode);
+        
         // update the files here
         // VRX
         // Resolution /config/scripts/screen-mode
