@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Linq;
+using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Views;
@@ -30,12 +32,22 @@ public partial class MainViewModel : ViewModelBase
 
     private void onDeviceTypeChangeEvent(DeviceType deviceTypeEvent)
     {
+
         if (deviceTypeEvent == DeviceType.Radxa || deviceTypeEvent == DeviceType.NVR)
+        {
             IsVRXEnabled = true;
-        // var targetTab = MainView.TabControlInstance.Items
-        //     .OfType<TabItem>()
-        //     .FirstOrDefault(tab => tab.Header?.ToString() == "WFB-GS");
+            var targetTab = MainView.TabControlInstance.Items
+                .OfType<TabItem>()
+                .FirstOrDefault(tab => tab.Header?.ToString() == "WFB-GS");
+            targetTab.IsSelected = true;
+        }
         else
+        {
             IsVRXEnabled = false;
+            var targetTab = MainView.TabControlInstance.Items
+                .OfType<TabItem>()
+                .FirstOrDefault(tab => tab.Header?.ToString() == "WFB");
+            targetTab.IsSelected = true;
+        }
     }
 }
