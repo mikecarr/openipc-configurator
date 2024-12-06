@@ -152,6 +152,9 @@ public partial class ConnectControlsViewModel : ViewModelBase
         IpAddress = settings.IpAddress;
         Password = settings.Password;
         SelectedDeviceType = settings.DeviceType;
+        
+        _eventAggregator.GetEvent<DeviceTypeChangeEvent>().Publish(SelectedDeviceType);
+        
     }
 
 
@@ -165,7 +168,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
     {
         // Insert logic to send a message based on the selected device type
         // For example, use an event aggregator, messenger, or direct call
-        //Log.Debug($"Device type selected: {deviceType}");
+        Log.Debug($"Device type selected: {deviceType}");
         //Console.WriteLine($"Device type selected: {deviceType}");
         _eventAggregator.GetEvent<DeviceTypeChangeEvent>().Publish(deviceType);
     }
