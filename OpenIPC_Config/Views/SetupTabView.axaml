@@ -67,7 +67,7 @@
 
 
         <!-- Firmware Version Updates -->
-        <Border Grid.Row="7" Margin="5" BorderBrush="Blue" BorderThickness="1">
+        <Border Grid.Row="7" Margin="5" BorderBrush="Blue" BorderThickness="1" IsVisible="{Binding IsCamera}">
             <Panel>
                 <Grid>
                     <Grid.RowDefinitions>
