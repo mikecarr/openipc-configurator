@@ -26,6 +26,7 @@ public class App : Application
         AvaloniaXamlLoader.Load(this);
 
         EventAggregator = new EventAggregator();
+        Log.Debug("************** EventAggregator initialized");
     }
 
 
@@ -93,6 +94,7 @@ public class App : Application
         var configuration = new ConfigurationBuilder()
             .AddJsonFile(configPath, false, true)
             .AddJsonFile("appsettings.json", true, true)
+            .AddJsonFile("appsettings.Development.json", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             .AddJsonFile(
                 $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
                 true)
