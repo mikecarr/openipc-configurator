@@ -473,8 +473,7 @@ public partial class SetupTabViewModel : ViewModelBase
             if (result == ButtonResult.Abort)
             {
                 Log.Debug("Upgrade Cancelled!");;
-                _eventAggregator.GetEvent<AppMessageEvent>().Publish(
-                    new AppMessage { Message = "Upgrade Cancelled!" });
+                UpdateUIMessage("Upgrade Cancelled!" );
                 return;
             }
 
@@ -488,8 +487,7 @@ public partial class SetupTabViewModel : ViewModelBase
             await PerformSystemUpgradeAsync(kernelPath, rootfsPath);
             
             DownloadProgress = 100;
-            _eventAggregator.GetEvent<AppMessageEvent>().Publish(
-                new AppMessage { Message = "System upgrade complete!" });
+            UpdateUIMessage("System upgrade complete!" );
             ProgressText = "System upgrade complete!";
         }
         
@@ -616,11 +614,11 @@ public partial class SetupTabViewModel : ViewModelBase
 
         try
         {
-            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Generating keys" });
+            UpdateUIMessage("Generating keys" );
             await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.BackUpGsKeysIfExist);
             await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GenerateKeys);
             await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.CopyGenerateKeys);
-            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Generating keys...done" });
+            UpdateUIMessage("Generating keys...done" );
         }
         catch (Exception e)
         {
@@ -634,15 +632,17 @@ public partial class SetupTabViewModel : ViewModelBase
     private void SendGSKey()
     {
         //TDOO: SendGSKey
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Sending keys..." });
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Sending keys...done" });
         throw new NotImplementedException();
+        UpdateUIMessage("Sending keys..." );
+        UpdateUIMessage("Sending keys...done");
+        
     }
 
     private void RecvGSKey()
     {
         //TDOO: RecvGSKey
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Receiving keys..." });
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Receiving keys...done" });
+        throw new NotImplementedException();
+        UpdateUIMessage("Receiving keys..." );
+        UpdateUIMessage("Receiving keys...done" );
     }
 }
