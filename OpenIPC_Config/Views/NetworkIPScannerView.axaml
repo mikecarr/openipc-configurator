@@ -29,7 +29,8 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" FontSize="12" Margin="0"
-                       Text="&lt;--- This is for controlling resolution/bitrate with TX controller." />
+                       Text="&lt;--- This is for controlling resolution/bitrate with TX controller." 
+                       IsVisible="{Binding IsCamera}" />
 
             <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" FontSize="12" Margin="5 5" xml:space="preserve">1. Type the IP subnet to scan (e.g. 192.168.0.)
 2. Press [SCAN]

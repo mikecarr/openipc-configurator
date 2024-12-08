@@ -39,10 +39,14 @@ Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator
 * `Styles`: contains styles and resources for the application, including themes and fonts
 * `README.md`: this file, containing information about the project and its features
 
+## Logging
+
+https://github.com/serilog/serilog/wiki/Configuration-Basics
+
 ## App Logs
 * Android: /data/user/0/org.openipc.OpenIPC/files/.config/openipc-configurator.log
-* Mac: Library/Application Support/OpenIPC_Config/Logs
-* Windows: %APPDATA%\OpenIPC_Config\Logs
+* Mac: "$HOME/Library/Application Support/OpenIPC_Config/Logs"
+* Windows: %APPDATA%\Local\OpenIPC_Config\Logs
 * Linux: ~/.config/openipc-configurator.log
 
 

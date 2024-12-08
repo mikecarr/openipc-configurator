@@ -41,4 +41,18 @@ public static class DeviceCommands
         // "sed -i 's/echo \\\"Starting wifibroadcast service...\\\"/echo \\\"\\&L70 \\&F35 CPU:\\&C \\&B Temp:\\&T\\\" > \\/tmp\\/MSPOSD.msg /' /etc/init.d/S98datalink";
         
     public static string DataLinkRestart = "/etc/init.d/S98datalink stop ;/etc/init.d/S98datalink start";
+    
+    
+    public const string GSMSPDisplayportCommand = @"sed -i '/pixelpilot --osd --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4/c\pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 ""&""' /config/scripts/stream.sh";
+    public const string GSMSPDisplayport2Command = @"sed -i '/pixelpilot --osd --screen-mode $SCREEN_MODE/c\pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE ""&""' /config/scripts/stream.sh";
+    
+    public const string GsMavExtended1 =  @"sed -i '/pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 ""&""/c\pixelpilot --osd --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 --osd-telem-lvl 2 ""&""' /config/scripts/stream.sh";
+    public const string GsMavExtended2 = @"sed -i '/pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE ""&""/c\pixelpilot --osd --screen-mode $SCREEN_MODE --osd-telem-lvl 2 ""&""' /config/scripts/stream.sh";
+
+    public const string GsMavBasic1 = @"sed -i '/pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 ""&""/c\pixelpilot --osd --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 --osd-telem-lvl 1 ""&""' /config/scripts/stream.sh";
+    public const string GsMavBasic2 = @"sed -i '/pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE ""&""/c\pixelpilot --osd --screen-mode $SCREEN_MODE --osd-telem-lvl 1 ""&""' /config/scripts/stream.sh";
+
+ 
+
+
 }

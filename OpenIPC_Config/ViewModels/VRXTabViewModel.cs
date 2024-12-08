@@ -1,5 +1,7 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia;
@@ -35,15 +37,23 @@ public partial class VRXTabViewModel : ViewModelBase
 
     [ObservableProperty] private string _wfbConfContent;
 
+    [ObservableProperty] private bool _isSimpleMavLinkOSD;
+    [ObservableProperty] private bool _isExtendedMavLinkOSD;
+    
+    private readonly ISshClientService _sshClientService;
+
     public VRXTabViewModel()
     {
         _eventAggregator = App.EventAggregator;
         _eventAggregator.GetEvent<DeviceTypeChangeEvent>().Subscribe(onDeviceTypeChangeEvent);
         _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
         _eventAggregator.GetEvent<RadxaContentUpdateChangeEvent>().Subscribe(OnRadxaContentUpdateChange);
-
+        _sshClientService = new SshClientService(_eventAggregator);
+        
         InitializeCollections();
     }
+
+    
 
     private void OnAppMessage(AppMessage appMessage)
     {
@@ -104,16 +114,23 @@ public partial class VRXTabViewModel : ViewModelBase
 
         if (!string.IsNullOrEmpty(radxaContentUpdatedMessage.DroneKeyContent))
         {
-            //var droneKey = radxaContentUpdatedMessage.DroneKeyContent;
-            //DroneKeyChecksum = droneKey;
+            var droneKey = radxaContentUpdatedMessage.DroneKeyContent;
+            DroneKeyChecksum = droneKey;
         }
     }
 
     [RelayCommand]
     private async Task RestartWfb()
     {
-        await MessageBoxManager.GetMessageBoxStandard("Warning", "Not implemented yet").ShowAsync();
-
+        var resolution = SelectedResolution;
+        var fps = SelectedFps;
+        
+        //format 1920x1080@60
+        var screenMode = $"{resolution}@{fps}\n";
+        
+        UpdateUIMessage("Uploading screen mode");
+        await _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.ScreenModeFileLoc, screenMode);
+        
         // update the files here
         // VRX
         // Resolution /config/scripts/screen-mode
@@ -125,12 +142,72 @@ public partial class VRXTabViewModel : ViewModelBase
     [RelayCommand]
     private async Task EnableVrxMajestic()
     {
-        await MessageBoxManager.GetMessageBoxStandard("Warning", "Not implemented yet").ShowAsync();
+        
+        if(IsSimpleMavLinkOSD)
+        {
+            try
+            {
+                //basic
+                UpdateUIMessage("Setting Simple Mavlink OSD");
+                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavBasic1);
+                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavBasic2);
+                UpdateUIMessage("Rebooting device");
+                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                throw;
+            }
+            
+        }
+        else
+        {
+            //extended
+            try
+            {
+                UpdateUIMessage("Setting Extended Mavlink OSD");
+                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavExtended1);
+                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavExtended2);
+                UpdateUIMessage("Rebooting device");
+                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                throw;
+            }
+
+        }
+        
+        //rBtnMode1 = Extended,mavgs
+        //rBtnMode2 = Simple, mavgs2
+        //if "%1" == "mavgs" (
+        // 	plink -ssh root@%2 -pw %3 sed -i '/pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 "&"/c\pixelpilot --osd --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 --osd-telem-lvl 2 "&"' /config/scripts/stream.sh
+        // 	plink -ssh root@%2 -pw %3 sed -i '/pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE "&"/c\pixelpilot --osd --screen-mode $SCREEN_MODE --osd-telem-lvl 2 "&"' /config/scripts/stream.sh
+        //         plink -ssh root@%2 -pw %3 reboot
+        // )
+        // 
+        // if "%1" == "mavgs2" (
+        // 	plink -ssh root@%2 -pw %3 sed -i '/pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 "&"/c\pixelpilot --osd --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 --osd-telem-lvl 1 "&"' /config/scripts/stream.sh
+        // 	plink -ssh root@%2 -pw %3 sed -i '/pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE "&"/c\pixelpilot --osd --screen-mode $SCREEN_MODE --osd-telem-lvl 1 "&"' /config/scripts/stream.sh
+        //         plink -ssh root@%2 -pw %3 reboot
+        // )
     }
 
     [RelayCommand]
     private async Task EnableVrxMSPDisplayport()
     {
-        await MessageBoxManager.GetMessageBoxStandard("Warning", "Not implemented yet").ShowAsync();
+        Log.Information("EnableVrxMSPDisplayport clicked");
+        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GSMSPDisplayportCommand);
+        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GSMSPDisplayport2Command);
+        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        Log.Information("EnableVrxMSPDisplaypor..done");
+        //mspgs
+        //plink -ssh root@%2 -pw %3 sed -i '/pixelpilot --osd --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4/c\pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 "&"' /config/scripts/stream.sh
+        //plink -ssh root@%2 -pw %3 sed -i '/pixelpilot --osd --screen-mode $SCREEN_MODE/c\pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE "&"' /config/scripts/stream.sh
+        //plink -ssh root@%2 -pw %3 reboot
+
+
     }
 }

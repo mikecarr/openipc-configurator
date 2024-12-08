@@ -152,6 +152,9 @@ public partial class ConnectControlsViewModel : ViewModelBase
         IpAddress = settings.IpAddress;
         Password = settings.Password;
         SelectedDeviceType = settings.DeviceType;
+        
+        _eventAggregator.GetEvent<DeviceTypeChangeEvent>().Publish(SelectedDeviceType);
+        
     }
 
 
@@ -165,14 +168,9 @@ public partial class ConnectControlsViewModel : ViewModelBase
     {
         // Insert logic to send a message based on the selected device type
         // For example, use an event aggregator, messenger, or direct call
-        //Log.Debug($"Device type selected: {deviceType}");
+        Log.Debug($"Device type selected: {deviceType}");
         //Console.WriteLine($"Device type selected: {deviceType}");
         _eventAggregator.GetEvent<DeviceTypeChangeEvent>().Publish(deviceType);
-    }
-
-    private void UpdateUIMessage(string message)
-    {
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = message});
     }
 
     private void CheckIfCanConnect()
@@ -228,7 +226,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         _deviceConfig.Port = Port;
         _deviceConfig.DeviceType = SelectedDeviceType;
 
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Getting hostname" });
+        UpdateUIMessage("Getting hostname");
 
         await getHostname(_deviceConfig);
         if (_deviceConfig.Hostname == string.Empty)
@@ -240,7 +238,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         if ((_deviceConfig.Hostname.Contains("radxa") && _deviceConfig.DeviceType != DeviceType.Radxa) ||
             (_deviceConfig.Hostname.Contains("openipc") && _deviceConfig.DeviceType != DeviceType.Camera))
         {
-            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Hostname Error!" });
+            UpdateUIMessage("Hostname Error!");
             var msBox = MessageBoxManager.GetMessageBoxStandard("Hostname Error!",
                 $"Hostname does not match device type! \nHostname: {_deviceConfig.Hostname} Device Type: {_selectedDeviceType}.\nPlease check device..\nOk to continue anyway\nCancel to quit",
                 ButtonEnum.OkCancel);
@@ -266,19 +264,15 @@ public partial class ConnectControlsViewModel : ViewModelBase
         {
             if (_deviceConfig.DeviceType == DeviceType.Camera)
             {
-                _eventAggregator.GetEvent<AppMessageEvent>()
-                    .Publish(new AppMessage { Message = "Processing Camera..." });
+                UpdateUIMessage("Processing Camera..." );
                 processCameraFiles();
-                _eventAggregator.GetEvent<AppMessageEvent>()
-                    .Publish(new AppMessage { Message = "Processing Camera...done" });
+                UpdateUIMessage("Processing Camera...done");
             }
             else if (_deviceConfig.DeviceType == DeviceType.Radxa)
             {
-                _eventAggregator.GetEvent<AppMessageEvent>()
-                    .Publish(new AppMessage { Message = "Processing Radxa..." });
+                UpdateUIMessage("Processing Radxa...");
                 processRadxaFiles();
-                _eventAggregator.GetEvent<AppMessageEvent>()
-                    .Publish(new AppMessage { Message = "Processing Radxa...done" });
+                UpdateUIMessage("Processing Radxa...done");
             }
         }
 
@@ -289,8 +283,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
     {
         try
         {
-            _eventAggregator.GetEvent<AppMessageEvent>()
-                .Publish(new AppMessage { Message = "Downloading wifibroadcast.cfg" });
+            UpdateUIMessage("Downloading wifibroadcast.cfg" );
 
             // get /etc/wifibroadcast.cfg
             var wifibroadcastContent =
@@ -322,8 +315,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
         try
         {
-            _eventAggregator.GetEvent<AppMessageEvent>()
-                .Publish(new AppMessage { Message = "Downloading modprod.d/wfb.conf" });
+            UpdateUIMessage("Downloading modprod.d/wfb.conf" );
             // get /etc/modprobe.d/wfb.conf
             var wfbModProbeContent =
                 await _sshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WifiBroadcastModProbeFileLoc);
@@ -349,8 +341,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
         try
         {
-            _eventAggregator.GetEvent<AppMessageEvent>()
-                .Publish(new AppMessage { Message = "Downloading screen-mode" });
+            UpdateUIMessage("Downloading screen-mode");
             // get /home/radxa/scripts/screen-mode
             var screenModeContent =
                 await _sshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.ScreenModeFileLoc);
@@ -375,7 +366,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
         try
         {
-            _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage { Message = "Downloading gskey" });
+            UpdateUIMessage("Downloading gskey" );
 
             var gsKeyContent =
                 await _sshClientService.DownloadFileBytesAsync(_deviceConfig, Models.OpenIPC.RemoteGsKeyPath);
@@ -392,16 +383,13 @@ public partial class ConnectControlsViewModel : ViewModelBase
                     Log.Information("GS key MD5 checksum matched default key");
                 }
 
-                var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
-                _deviceConfig = DeviceConfig.Instance;
-                _deviceConfig.KeyChksum = droneKey;
-                deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
+                _eventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>()
+                    .Publish(new RadxaContentUpdatedMessage
+                    {
+                        DroneKeyContent = droneKey
+                    });
 
-                _eventAggregator?.GetEvent<DeviceContentUpdateEvent>()
-                    .Publish(deviceContentUpdatedMessage);
-
-                _eventAggregator.GetEvent<AppMessageEvent>()
-                    .Publish(new AppMessage { Message = "Downloading gskey...done" });
+                UpdateUIMessage("Downloading gskey...done" );
             }
         }
         catch (Exception e)
