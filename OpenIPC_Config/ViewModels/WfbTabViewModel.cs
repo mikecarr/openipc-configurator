@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
@@ -18,6 +19,7 @@ public class WfbTabViewModel : ReactiveObject
 {
     private readonly Dictionary<int, string> _24frequencyMapping = new()
     {
+        { 0, "" },
         { 1, "2412 MHz [1]" },
         { 2, "2417 MHz [2]" },
         { 3, "2422 MHz [3]" },
@@ -37,6 +39,7 @@ public class WfbTabViewModel : ReactiveObject
 
     private readonly Dictionary<int, string> _58frequencyMapping = new()
     {
+        { 0, "" },
         { 36, "5180 MHz [36]" },
         { 40, "5200 MHz [40]" },
         { 44, "5220 MHz [44]" },
@@ -205,13 +208,57 @@ public class WfbTabViewModel : ReactiveObject
     public string SelectedFrequency58String
     {
         get => _selectedFrequency58String;
-        set => this.RaiseAndSetIfChanged(ref _selectedFrequency58String, value);
+        set
+        {
+            if (_selectedFrequency58String != value)
+            {
+                _selectedFrequency58String = value;
+                this.RaisePropertyChanged(nameof(SelectedFrequency58String));
+                
+                // Reset the 2.4GHz frequency to index 0
+                if(!string.IsNullOrEmpty(_selectedFrequency58String))
+                    SelectedFrequency24String = Frequencies24GHz.FirstOrDefault();
+
+                // Extract the channel number using a regular expression
+                var match = Regex.Match(value, @"\[(\d+)\]");
+                if (match.Success && int.TryParse(match.Groups[1].Value, out int channel))
+                {
+                    SelectedChannel = channel;
+                }
+                else
+                {
+                    SelectedChannel = -1; // Default value if parsing fails
+                }
+            }
+        }
     }
 
     public string SelectedFrequency24String
     {
-        get => _selectedFrequency58String;
-        set => this.RaiseAndSetIfChanged(ref _selectedFrequency24String, value);
+        get => _selectedFrequency24String;
+        set
+        {
+            if (_selectedFrequency24String != value)
+            {
+                _selectedFrequency24String = value;
+                this.RaisePropertyChanged(nameof(SelectedFrequency24String));
+
+                // Reset the 5.8GHz frequency to index 0
+                if(!string.IsNullOrEmpty(_selectedFrequency24String))
+                    SelectedFrequency58String = Frequencies58GHz.FirstOrDefault();
+                
+                // Extract the channel number using a regular expression
+                var match = Regex.Match(value, @"\[(\d+)\]");
+                if (match.Success && int.TryParse(match.Groups[1].Value, out int channel))
+                {
+                    SelectedChannel = channel;
+                }
+                else
+                {
+                    SelectedChannel = -1; // Default value if parsing fails
+                }
+            }
+        }
     }
 
     public string? WfbConfContent
@@ -489,7 +536,7 @@ public class WfbTabViewModel : ReactiveObject
         // Logic to update WfbConfContent with the new values
         var lines = wfbConfContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
         var regex = new Regex(
-            @"(frequency|channel|driver_txpower_override|frequency24|txpower|mcsindex|stbc|ldpc|feck|fecN)=.*");
+            @"(frequency|channel|driver_txpower_override|frequency24|txpower|mcs_index|stbc|ldpc|fec_k|fec_n)=.*");
         var updatedContent = regex.Replace(wfbConfContent, match =>
         {
             switch (match.Groups[1].Value)
@@ -506,16 +553,16 @@ public class WfbTabViewModel : ReactiveObject
                     return $"driver_txpower_override={newPower58}";
                 case "txpower":
                     return $"txpower={newPower24}";
-                case "mcsindex":
-                    return $"mcsindex={newMcsIndex}";
+                case "mcs_index":
+                    return $"mcs_index={newMcsIndex}";
                 case "stbc":
                     return $"stbc={newStbc}";
                 case "ldpc":
                     return $"ldpc={newLdpc}";
-                case "feck":
-                    return $"feck={newFecK}";
-                case "fecN":
-                    return $"fecN={newFecN}";
+                case "fec_k":
+                    return $"fec_k={newFecK}";
+                case "fec_n":
+                    return $"fec_n={newFecN}";
                 default:
                     return match.Value;
             }
