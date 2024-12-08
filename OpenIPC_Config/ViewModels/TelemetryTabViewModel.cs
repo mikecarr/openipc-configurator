@@ -364,7 +364,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
         // Logic to update WfbConfContent with the new values
         var lines = TelemetryContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
         var regex = new Regex(
-            @"(frequency|channels|driver_txpower_override|frequency24|txpower|mcsindex|stbc|ldpc|feck|fecN|router)=.*");
+            @"(serial|baud|router|mcs_index|aggregate|channels)=.*");
         var updatedContent = regex.Replace(TelemetryContent, match =>
         {
             switch (match.Groups[1].Value)
@@ -376,7 +376,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
                 case Telemetry.Router:
                     return $"router={newRouter}";
                 case Telemetry.McsIndex:
-                    return $"mcsindex={newMcsIndex}";
+                    return $"mcs_index={newMcsIndex}";
                 case Telemetry.Aggregate:
                     return $"aggregate={newAggregate}";
                 case Telemetry.RcChannel:
