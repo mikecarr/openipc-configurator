@@ -18,12 +18,7 @@ namespace OpenIPC_Config.ViewModels;
 
 public partial class CameraSettingsTabViewModel : ViewModelBase
 {
-    private readonly ISshClientService _sshClientService;
     private DeviceConfig _deviceConfig;
-
-    private readonly IEventAggregator _eventAggregator;
-
-    
     [ObservableProperty] private ObservableCollection<string> _bitrate;
 
     [ObservableProperty] private bool _canConnect;
@@ -98,18 +93,26 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
     private readonly Dictionary<string, string> _yamlConfig = new();
 
 
-    public CameraSettingsTabViewModel()
+    public CameraSettingsTabViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventAggregator eventAggregator)
+        : base(logger, sshClientService, eventAggregator)
     {
+        
+        // _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        // SshClientService = sshClientService ?? throw new ArgumentNullException(nameof(sshClientService));
+        // EventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
+        
         InitializeCollections();
 
-        _eventAggregator = App.EventAggregator;
-        _eventAggregator?.GetEvent<MajesticContentUpdatedEvent>().Subscribe(OnMajesticContentUpdated);
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
+        
+        EventAggregator?.GetEvent<MajesticContentUpdatedEvent>().Subscribe(OnMajesticContentUpdated);
+        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
 
 
         RestartMajesticCommand = new RelayCommand(() => RestartMajestic());
 
-        _sshClientService = new SshClientService(_eventAggregator);
+        
     }
 
     public ICommand RestartMajesticCommand { get; private set; }
@@ -630,7 +633,7 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
     {
         Log.Debug("Preparing to Save Majestic file.");
         var majesticYamlContent =
-            await _sshClientService.DownloadFileAsync(DeviceConfig.Instance, Models.OpenIPC.MajesticFileLoc);
+            await SshClientService.DownloadFileAsync(DeviceConfig.Instance, Models.OpenIPC.MajesticFileLoc);
 
         try
         {
@@ -651,9 +654,9 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
                 updatedFileContent = writer.ToString();
             }
 
-            await _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.MajesticFileLoc,
+            await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.MajesticFileLoc,
                 updatedFileContent);
-            await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MajesticRestartCommand);
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MajesticRestartCommand);
             await Task.Delay(5000);
 
 

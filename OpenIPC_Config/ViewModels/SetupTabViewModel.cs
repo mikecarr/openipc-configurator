@@ -24,13 +24,12 @@ namespace OpenIPC_Config.ViewModels;
 
 public partial class SetupTabViewModel : ViewModelBase
 {
-    private readonly ISshClientService _sshClientService;
+    
     [ObservableProperty] private bool _canConnect;
     [ObservableProperty] private int _downloadProgress;
 
     [ObservableProperty] private string _chkSumStatusColor;
 
-    private readonly IEventAggregator _eventAggregator;
     
     [ObservableProperty] public ObservableCollection<string> _firmwareVersions;
     
@@ -64,8 +63,12 @@ public partial class SetupTabViewModel : ViewModelBase
     public ICommand ShowProgressBarCommand;
     
 
-    public SetupTabViewModel()
+    public SetupTabViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventAggregator eventAggregator)
+        : base(logger, sshClientService, eventAggregator)
     {
+        
         InitializeCollections();
 
         KeyChecksum = string.Empty;
@@ -75,13 +78,12 @@ public partial class SetupTabViewModel : ViewModelBase
         ScanIpLabel = "192.168.1.";
 
         ShowProgressBarCommand = new RelayCommand(() => IsProgressBarVisible = true);
+        
+        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
+        EventAggregator?.GetEvent<DeviceContentUpdateEvent>().Subscribe(OnDeviceContentUpdate);
+        EventAggregator?.GetEvent<DeviceTypeChangeEvent>().Subscribe(OnDeviceTypeChange);
 
-        _eventAggregator = App.EventAggregator;
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-        _eventAggregator?.GetEvent<DeviceContentUpdateEvent>().Subscribe(OnDeviceContentUpdate);
-        _eventAggregator?.GetEvent<DeviceTypeChangeEvent>().Subscribe(OnDeviceTypeChange);
-
-        _sshClientService = new SshClientService(_eventAggregator);
+        
     }
 
     public ICommand GenerateKeysCommand => _generateKeysCommand ??= new RelayCommand(GenerateKeys);
@@ -194,29 +196,29 @@ public partial class SetupTabViewModel : ViewModelBase
     private async void ScriptFilesBackup()
     {
         Log.Debug("Backup script executed");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/usr/bin/channels.sh", "channels.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/816.sh", "816.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1080.sh", "1080.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1080b.sh", "1080b.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1264.sh", "1264.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/3K.sh", "3K.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/usr/bin/channels.sh", "channels.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/816.sh", "816.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1080.sh", "1080.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1080b.sh", "1080b.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1264.sh", "1264.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/3K.sh", "3K.sh");
 
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/4K.sh", "4K.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1184p100.sh", "1184p100.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1304p80.sh", "1304p80.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1440p60.sh", "1440p60.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1920p30.sh", "1920p30.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/4K.sh", "4K.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1184p100.sh", "1184p100.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1304p80.sh", "1304p80.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1440p60.sh", "1440p60.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1920p30.sh", "1920p30.sh");
 
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1080p60.sh", "1080p60.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/720p120.sh", "720p120.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/720p90.sh", "720p90.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/720p60.sh", "720p60.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1080p120.sh", "1080p120.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1080p60.sh", "1080p60.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/720p120.sh", "720p120.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/720p90.sh", "720p90.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/720p60.sh", "720p60.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1080p120.sh", "1080p120.sh");
         
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1248p90.sh", "1248p90.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1304p80.sh", "1304p80.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1416p70.sh", "1416p70.sh");
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/kill.sh", "kill.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1248p90.sh", "1248p90.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1304p80.sh", "1304p80.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1416p70.sh", "1416p70.sh");
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/kill.sh", "kill.sh");
         Log.Debug("Backup script executed...done");
     }
 
@@ -275,25 +277,25 @@ public partial class SetupTabViewModel : ViewModelBase
 
         ProgressText = "Starting upload...";
         DownloadProgress = 50;
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteSensorsFolder,
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteSensorsFolder,
             Models.OpenIPC.FileType.Sensors, selectedSensor);
 
         ProgressText = "Updating Majestic file...";
         DownloadProgress = 75;
         // update majestic file
         // what is .video0.sensorConfig used for?
-        //_sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"yaml-cli -s .video0.sensorConfig {OpenIPC_Config.RemoteSensorsFolder}/{selectedSensor}");
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+        //SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"yaml-cli -s .video0.sensorConfig {OpenIPC_Config.RemoteSensorsFolder}/{selectedSensor}");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
             $"yaml-cli -s .isp.sensorConfig {Models.OpenIPC.RemoteSensorsFolder}/{selectedSensor}");
 
         // echo y | pscp -scp -pw %3 sensors/%4 root@%2:/etc/sensors/ 
         //     plink -ssh root@%2 -pw %3 yaml-cli -s .isp.sensorConfig /etc/sensors/%4
         //echo y | pscp -scp -pw %3 %4 root@%2:/etc/sensors/
 
-        //_sshClientService.UploadDirectoryAsync(DeviceConfig.Instance, OpenIPC_Config.LocalSensorsFolder,
+        //SshClientService.UploadDirectoryAsync(DeviceConfig.Instance, OpenIPC_Config.LocalSensorsFolder,
         // OpenIPC_Config.RemoteSensorsFolder);
         ProgressText = "Restarting Majestic...";
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,DeviceCommands.MajesticRestartCommand);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,DeviceCommands.MajesticRestartCommand);
         
         ProgressText = "Done updating sensor...";
         DownloadProgress = 100;
@@ -447,19 +449,19 @@ public partial class SetupTabViewModel : ViewModelBase
             ProgressText = "Download complete, starting upload...";
 
             // Step 2: Upload file
-            await _sshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath,
+            await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath,
                 $"{Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tgz");
             DownloadProgress = 60;
             ProgressText = "Upload complete, decompressing...";
 
             // Step 3: Decompress using gzip
             var remoteFilePath = Path.Combine(Models.OpenIPC.RemoteTempFolder, $"{SelectedFwVersion}.tgz");
-            await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
             DownloadProgress = 70;
             ProgressText = "Decompression complete, extracting files...";
 
             // Step 4: Extract files using tar
-            await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
                 $"tar -xvf {Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tar -C /tmp");
             DownloadProgress = 85;
             ProgressText = "Extraction complete, upgrading system...";
@@ -482,7 +484,7 @@ public partial class SetupTabViewModel : ViewModelBase
             rootfsPath = $"{Models.OpenIPC.RemoteTempFolder}/rootfs.squashfs.{sensorType}";
 
             //sysupgrade --kernel=/tmp/uImage.%4 --rootfs=/tmp/rootfs.squashfs.%4 -n
-            // await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+            // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
             //     $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
             await PerformSystemUpgradeAsync(kernelPath, rootfsPath);
             
@@ -500,7 +502,7 @@ public partial class SetupTabViewModel : ViewModelBase
         DownloadProgress = 0;
 
         Log.Information($"Running command: sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
-        await _sshClientService.ExecuteCommandWithProgressAsync(DeviceConfig.Instance,
+        await SshClientService.ExecuteCommandWithProgressAsync(DeviceConfig.Instance,
             $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n",
             output =>
             {
@@ -525,7 +527,7 @@ public partial class SetupTabViewModel : ViewModelBase
         //     plink -ssh root@%2 -pw %3 sysupgrade -k -r -n --force_ver
         //     )
         Log.Debug("This command will only succeed if the device has access to the internet");
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.FirmwareUpdateCommand);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.FirmwareUpdateCommand);
         Log.Debug("FirmwareUpdate executed..done");
     }
 
@@ -547,7 +549,7 @@ public partial class SetupTabViewModel : ViewModelBase
             }
         }
 
-        await _sshClientService.DownloadFileLocalAsync(DeviceConfig.Instance,
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance,
             Models.OpenIPC.RemoteEtcFolder + "/drone.key",
             "drone.key");
         if (!File.Exists("drone.key")) Log.Debug("RecvDroneKeyCommand failed");
@@ -561,7 +563,7 @@ public partial class SetupTabViewModel : ViewModelBase
         // if "%1" == "keysulcam" (
         //     echo y | pscp -scp -pw %3 drone.key root@%2:/etc
         //     )
-        await _sshClientService.UploadFileAsync(DeviceConfig.Instance, Models.OpenIPC.DroneKeyPath,
+        await SshClientService.UploadFileAsync(DeviceConfig.Instance, Models.OpenIPC.DroneKeyPath,
             Models.OpenIPC.RemoteDroneKeyPath);
 
         Log.Debug("SendDroneKey executed...done");
@@ -579,7 +581,7 @@ public partial class SetupTabViewModel : ViewModelBase
         var result = await box.ShowAsync();
         if (result == ButtonResult.Ok)
         {
-            await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.ResetCameraCommand);
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.ResetCameraCommand);
         }
         else
         {
@@ -601,7 +603,7 @@ public partial class SetupTabViewModel : ViewModelBase
         // echo y | pscp -scp -pw %3 root@%2:/etc/sensors/%4 ./backup/
         //     )
         Log.Debug("SensorFilesBackup executed");
-        await _sshClientService.DownloadDirectoryAsync(DeviceConfig.Instance, "/etc/sensors",
+        await SshClientService.DownloadDirectoryAsync(DeviceConfig.Instance, "/etc/sensors",
             $"{Models.OpenIPC.LocalBackUpFolder}");
         Log.Debug("SensorFilesBackup executed...done");
     }
@@ -615,9 +617,9 @@ public partial class SetupTabViewModel : ViewModelBase
         try
         {
             UpdateUIMessage("Generating keys" );
-            await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.BackUpGsKeysIfExist);
-            await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GenerateKeys);
-            await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.CopyGenerateKeys);
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.BackUpGsKeysIfExist);
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GenerateKeys);
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.CopyGenerateKeys);
             UpdateUIMessage("Generating keys...done" );
         }
         catch (Exception e)

@@ -20,11 +20,7 @@ namespace OpenIPC_Config.ViewModels;
 
 public partial class TelemetryTabViewModel : ViewModelBase
 {
-    private readonly ISshClientService _sshClientService;
-
-
     [ObservableProperty] private bool _canConnect;
-    private readonly IEventAggregator _eventAggregator;
     [ObservableProperty] private bool _isOnboardRecOff;
     [ObservableProperty] private bool _isOnboardRecOn;
     [ObservableProperty] private string _selectedAggregate;
@@ -36,17 +32,16 @@ public partial class TelemetryTabViewModel : ViewModelBase
     [ObservableProperty] private string _telemetryContent;
 
 
-    public TelemetryTabViewModel()
+    public TelemetryTabViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventAggregator eventAggregator)
+        : base(logger, sshClientService, eventAggregator)
     {
         InitializeCollections();
 
-        _eventAggregator = App.EventAggregator;
+        EventAggregator?.GetEvent<TelemetryContentUpdatedEvent>().Subscribe(OnTelemetryContentUpdated);
+        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
 
-        _eventAggregator?.GetEvent<TelemetryContentUpdatedEvent>().Subscribe(OnTelemetryContentUpdated);
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-
-
-        _sshClientService = new SshClientService(_eventAggregator);
 
         EnableUART0Command = new RelayCommand(() => EnableUART0());
         DisableUART0Command = new RelayCommand(() => DisableUART0());
@@ -99,29 +94,29 @@ public partial class TelemetryTabViewModel : ViewModelBase
     {
         Log.Debug("DisableUART0Command executed");
 
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+        SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
             DeviceCommands.UART0OffCommand); //await SaveDisableUART0Command();
     }
 
     private async void EnableUART0()
     {
         Log.Debug("EnableUART0Command executed");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.UART0OnCommand);
+        SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.UART0OnCommand);
     }
 
     private async void OnBoardRec()
     {
         if (IsOnboardRecOn)
-            _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "yaml-cli .records.enabled true");
+            SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "yaml-cli .records.enabled true");
         else if (IsOnboardRecOff)
-            _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "yaml-cli .records.enabled false");
+            SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "yaml-cli .records.enabled false");
     }
 
     private async void AddMavlink()
     {
         Log.Debug("AddMavlinkCommand executed");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, TelemetryCommands.Extra);
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, TelemetryCommands.Extra);
+        SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
     }
 
     private async void UploadMSPOSD()
@@ -144,29 +139,29 @@ public partial class TelemetryTabViewModel : ViewModelBase
         }
 
         // killall -q msposd
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "killall -q msposd");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "killall -q msposd");
         // upload msposd
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteBinariesFolder, "msposd_star6e");
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "mv /usr/bin/msposd_star6e /usr/bin/msposd");
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteBinariesFolder, "msposd_star6e");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "mv /usr/bin/msposd_star6e /usr/bin/msposd");
         // chmod +x /usr/bin/msposd
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x /usr/bin/msposd");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x /usr/bin/msposd");
 
         // upload betaflight fonts
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
             Models.OpenIPC.FileType.BetaFlightFonts, "font.png");
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
             Models.OpenIPC.FileType.BetaFlightFonts, "font_hd.png");
 
         // upload vtxmenu.ini /etc
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteEtcFolder, "vtxmenu.ini");
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteEtcFolder, "vtxmenu.ini");
 
 
         // ensure file is unix formatted
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "dos2unix /etc/vtxmenu.ini");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "dos2unix /etc/vtxmenu.ini");
 
         // reboot
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
 
         //Thread.Sleep(3000);
         
@@ -183,11 +178,11 @@ public partial class TelemetryTabViewModel : ViewModelBase
         // )
         // 
         Log.Debug("MSPOSDExtra executed"); 
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MSPOSDExtraCommand);
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MSPOSDExtraCommand);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
         
         //TODO: do we need to restart the camera?
-        //await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        //await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
         
         var MsgBox = MessageBoxManager
             .GetMessageBoxStandard("Done!", "Please wait fir datalink to restart!", ButtonEnum.Ok);
@@ -199,11 +194,11 @@ public partial class TelemetryTabViewModel : ViewModelBase
     {
         Log.Debug("UploadINavCommand executed");
         // upload betaflight fonts
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
         
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
             Models.OpenIPC.FileType.iNavFonts, "font.png");
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
             Models.OpenIPC.FileType.iNavFonts, "font_hd.png");
     }
 
@@ -231,11 +226,11 @@ public partial class TelemetryTabViewModel : ViewModelBase
         TelemetryContent = updatedTelemetryContent;
 
         Log.Debug($"Uploading new : {Models.OpenIPC.TelemetryConfFileLoc}");
-        _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.TelemetryConfFileLoc,
+        SshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.TelemetryConfFileLoc,
             TelemetryContent);
 
         Log.Debug("Restarting Telemetry");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.TelemetryRestartCommand);
+        SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.TelemetryRestartCommand);
     }
 
 

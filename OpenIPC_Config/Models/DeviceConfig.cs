@@ -23,6 +23,10 @@ public class DeviceConfig : INotifyPropertyChanged
     public IEventAggregator EventAggregator { get; set; }
     public static DeviceConfig Instance => _instance ??= new DeviceConfig();
 
+    public static void SetInstance(DeviceConfig instance)
+    {
+        _instance = instance;
+    }
     public string Username
     {
         get => _username;

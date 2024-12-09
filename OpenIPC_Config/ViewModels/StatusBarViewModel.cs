@@ -1,3 +1,4 @@
+using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Services;
@@ -8,7 +9,6 @@ namespace OpenIPC_Config.ViewModels;
 
 public partial class StatusBarViewModel : ViewModelBase
 {
-    private readonly IEventAggregator _eventAggregator;
     
     [ObservableProperty] private string _hostNameText;
 
@@ -18,10 +18,13 @@ public partial class StatusBarViewModel : ViewModelBase
 
     [ObservableProperty] private string _appVersionText;
     
-    public StatusBarViewModel()
+    public StatusBarViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventAggregator eventAggregator)
+        : base(logger, sshClientService, eventAggregator)
     {
-        _eventAggregator = App.EventAggregator;
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(UpdateStatus);
+        
+        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(UpdateStatus);
 
         _appVersionText = GetFormattedAppVersion();
     }
