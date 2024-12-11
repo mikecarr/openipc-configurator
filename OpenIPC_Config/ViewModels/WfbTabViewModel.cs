@@ -16,7 +16,7 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
-public partial class WfbTabViewModel : ViewModelBase, IDisposable
+public partial class WfbTabViewModel : ViewModelBase
 {
     private readonly Dictionary<int, string> _24FrequencyMapping = FrequencyMappings.Frequency24GHz;
     private readonly Dictionary<int, string> _58FrequencyMapping = FrequencyMappings.Frequency58GHz;
@@ -24,8 +24,8 @@ public partial class WfbTabViewModel : ViewModelBase, IDisposable
 
     public WfbTabViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
-        : base(logger, sshClientService, eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
         
         InitializeCollections();
@@ -104,23 +104,23 @@ public partial class WfbTabViewModel : ViewModelBase, IDisposable
 
     private void SubscribeToEvents()
     {
-        EventAggregator.GetEvent<WfbConfContentUpdatedEvent>().Subscribe(OnWfbConfContentUpdated);
-        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
+        EventSubscriptionService.Subscribe<WfbConfContentUpdatedEvent, WfbConfContentUpdatedMessage>(OnWfbConfContentUpdated);
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
     }
 
     #endregion
 
     #region Methods
 
-    public void Dispose()
-    {
-        if (_isDisposed) return;
-
-        EventAggregator.GetEvent<WfbConfContentUpdatedEvent>().Unsubscribe(OnWfbConfContentUpdated);
-        EventAggregator.GetEvent<AppMessageEvent>().Unsubscribe(OnAppMessage);
-
-        _isDisposed = true;
-    }
+    // public void Dispose()
+    // {
+    //     if (_isDisposed) return;
+    //
+    //     EventAggregator.GetEvent<WfbConfContentUpdatedEvent>().Unsubscribe(OnWfbConfContentUpdated);
+    //     EventAggregator.GetEvent<AppMessageEvent>().Unsubscribe(OnAppMessage);
+    //
+    //     _isDisposed = true;
+    // }
 
     private void OnWfbConfContentUpdated(WfbConfContentUpdatedMessage message)
     {
@@ -227,10 +227,11 @@ public partial class WfbTabViewModel : ViewModelBase, IDisposable
     private async void RestartWfb()
     {
         UpdateUIMessage("Restarting WFB...");
-        EventAggregator.GetEvent<TabMessageEvent>().Publish("Restart Pushed");
-        EventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-            { Message = "Getting new content", DeviceConfig = DeviceConfig.Instance });
-
+        
+        EventSubscriptionService.Publish<TabMessageEvent, string>("Restart Pushed");
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(
+            new AppMessage { Message = "Getting new content", DeviceConfig = DeviceConfig.Instance });
+        
         var newFrequency58 = SelectedFrequency58String;
         var newFrequency24 = SelectedFrequency24String;
 
@@ -264,18 +265,19 @@ public partial class WfbTabViewModel : ViewModelBase, IDisposable
         if (string.IsNullOrEmpty(updatedWfbConfContent))
             await MessageBoxManager.GetMessageBoxStandard("Error", "WfbConfContent is empty").ShowAsync();
 
-        EventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-        {
-            Message = $"Uploading new {OpenIPC.WfbConfFileLoc}", DeviceConfig = DeviceConfig.Instance,
-            UpdateLogView = true
-        });
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(
+            new AppMessage { Message = $"Uploading new {OpenIPC.WfbConfFileLoc}", DeviceConfig = DeviceConfig.Instance,
+                UpdateLogView = true });
+
 
         Logger.Information($"Uploading new : {OpenIPC.WfbConfFileLoc}");
         await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.WfbConfFileLoc, WfbConfContent);
 
-        EventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-            { Message = "Restarting Wfb", DeviceConfig = DeviceConfig.Instance, UpdateLogView = true });
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(
+            new AppMessage { Message = "Restarting Wfb", DeviceConfig = DeviceConfig.Instance, UpdateLogView = true });
+        
         Logger.Information("Restarting Wfb");
+        
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.WfbRestartCommand);
     }
 

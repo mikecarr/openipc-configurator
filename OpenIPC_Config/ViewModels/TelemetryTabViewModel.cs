@@ -34,13 +34,14 @@ public partial class TelemetryTabViewModel : ViewModelBase
 
     public TelemetryTabViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
-        : base(logger, sshClientService, eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
         InitializeCollections();
 
-        EventAggregator?.GetEvent<TelemetryContentUpdatedEvent>().Subscribe(OnTelemetryContentUpdated);
-        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
+        EventSubscriptionService.Subscribe<TelemetryContentUpdatedEvent, TelemetryContentUpdatedMessage>(OnTelemetryContentUpdated);
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
+        
 
 
         EnableUART0Command = new RelayCommand(() => EnableUART0());

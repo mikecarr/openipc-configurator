@@ -28,7 +28,7 @@ public static class SettingsManager
     ///     If the settings file does not exist, returns a <see cref="DeviceConfig" />
     ///     with default values.
     /// </returns>
-    public static DeviceConfig? LoadSettings(IEventAggregator eventAggregator)
+    public static DeviceConfig? LoadSettings()
     {
         DeviceConfig deviceConfig;
         

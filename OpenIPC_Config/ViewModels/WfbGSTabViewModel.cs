@@ -79,19 +79,16 @@ public partial class WfbGSTabViewModel : ViewModelBase
 
     public WfbGSTabViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
-        : base(logger, sshClientService, eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
         _wfbGsConfigParser = new WfbGsConfigParser();
         _wifiConfigParser = new WifiConfigParser();
 
-
         InitializeCollections();
         
-        EventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>().Subscribe(OnRadxaContentUpdateChange);
-
-        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-
+        EventSubscriptionService.Subscribe<RadxaContentUpdateChangeEvent, RadxaContentUpdatedMessage>(OnRadxaContentUpdateChange);
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
         
     }
 

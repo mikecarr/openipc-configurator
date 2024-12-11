@@ -58,7 +58,10 @@ public class App : Application
     {
         // Register IEventAggregator as a singleton
         services.AddSingleton<IEventAggregator, EventAggregator>();
+        services.AddSingleton<IEventSubscriptionService, EventSubscriptionService>();
         services.AddSingleton<ISshClientService, SshClientService>();
+        
+        services.AddSingleton<IYamlConfigService, YamlConfigService>();
         services.AddSingleton<ILogger>(sp => Log.Logger);
 
 
@@ -69,7 +72,7 @@ public class App : Application
         services.AddTransient<ConnectControlsViewModel>();
         services.AddTransient<LogViewerViewModel>();
         services.AddTransient<SetupTabViewModel>();
-        services.AddTransient<StatusBarView>();
+        services.AddTransient<StatusBarViewModel>();
         services.AddTransient<TelemetryTabViewModel>();
         services.AddTransient<VRXTabViewModel>();
         services.AddTransient<WfbGSTabViewModel>();
@@ -78,9 +81,16 @@ public class App : Application
         // Register Views
         services.AddTransient<MainWindow>();
         services.AddTransient<MainView>();
-        services.AddTransient<WfbTabView>();
         services.AddTransient<CameraSettingsView>();
+        services.AddTransient<ConnectControlsView>();
+        services.AddTransient<LogViewer>();
+        services.AddTransient<SetupTabView>();
+        services.AddTransient<StatusBarView>();
         services.AddTransient<TelemetryTabView>();
+        services.AddTransient<VRXTabView>();
+        services.AddTransient<WfbGSTabView>();
+        services.AddTransient<WfbTabView>();
+
     }
 
     private void CreateAppSettings()

@@ -9,6 +9,7 @@ namespace OpenIPC_Config.ViewModels;
 
 public class LogViewerViewModel : ViewModelBase
 {
+    private readonly IEventSubscriptionService _eventSubscriptionService;
 
     private string _messageText;
     
@@ -18,14 +19,21 @@ public class LogViewerViewModel : ViewModelBase
 
     public LogViewerViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
-        : base(logger, sshClientService, eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
         
         
         LogMessages = new ObservableCollection<string>();
-        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(AppMessageReceived);
-        EventAggregator.GetEvent<LogMessageEvent>().Subscribe(LogMessageReceived);
+        
+        _eventSubscriptionService = eventSubscriptionService ??
+                                    throw new ArgumentNullException(nameof(eventSubscriptionService));
+        
+        _eventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(
+            AppMessageReceived);
+        _eventSubscriptionService.Subscribe<LogMessageEvent, string>(
+            LogMessageReceived);
+        
     }
 
     public ObservableCollection<string> LogMessages { get; set; }

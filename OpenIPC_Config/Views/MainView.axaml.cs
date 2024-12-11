@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
+using OpenIPC_Config.Services;
 using OpenIPC_Config.ViewModels;
 using Prism.Events;
 using Serilog;
@@ -22,8 +23,9 @@ public partial class MainView : UserControl
             DataContext = App.ServiceProvider.GetRequiredService<MainViewModel>();
 
             // Subscribe to TabSelectionChangeEvent
-            var eventAggregator = App.ServiceProvider.GetRequiredService<IEventAggregator>();
-            eventAggregator.GetEvent<TabSelectionChangeEvent>().Subscribe(OnTabSelectionChanged);
+            var _eventSubscriptionService = App.ServiceProvider.GetRequiredService<IEventSubscriptionService>();
+            
+            _eventSubscriptionService.Subscribe<TabSelectionChangeEvent, string>(OnTabSelectionChanged);
         }
         else
         {

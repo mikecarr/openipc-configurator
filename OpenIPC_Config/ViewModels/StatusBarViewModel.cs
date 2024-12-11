@@ -20,12 +20,12 @@ public partial class StatusBarViewModel : ViewModelBase
     
     public StatusBarViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
-        : base(logger, sshClientService, eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
         
-        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(UpdateStatus);
-
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(UpdateStatus);
+        
         _appVersionText = GetFormattedAppVersion();
     }
 

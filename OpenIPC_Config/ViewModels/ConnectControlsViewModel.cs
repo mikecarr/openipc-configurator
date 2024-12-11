@@ -26,6 +26,8 @@ namespace OpenIPC_Config.ViewModels;
 public partial class ConnectControlsViewModel : ViewModelBase
 {
     private readonly CancellationTokenSource? _cancellationTokenSourc;
+    
+    private readonly IEventSubscriptionService _eventSubscriptionService;
 
     private readonly DispatcherTimer _dispatcherTimer;
 
@@ -53,8 +55,8 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
     public ConnectControlsViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
-        : base(logger, sshClientService, eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
         
         SetDefaults();
@@ -62,6 +64,10 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
         ConnectCommand = new RelayCommand(() => Connect());
 
+        _eventSubscriptionService = eventSubscriptionService ??
+                                    throw new ArgumentNullException(nameof(eventSubscriptionService));
+
+        
         UpdateUIMessage("Ready");
     }
 
@@ -144,13 +150,13 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
     private void LoadSettings()
     {
-        var settings = SettingsManager.LoadSettings(EventAggregator);
+        var settings = SettingsManager.LoadSettings();
         _deviceConfig = DeviceConfig.Instance;
         IpAddress = settings.IpAddress;
         Password = settings.Password;
         SelectedDeviceType = settings.DeviceType;
         
-        EventAggregator.GetEvent<DeviceTypeChangeEvent>().Publish(SelectedDeviceType);
+        EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(SelectedDeviceType);
         
     }
 
@@ -167,7 +173,8 @@ public partial class ConnectControlsViewModel : ViewModelBase
         // For example, use an event aggregator, messenger, or direct call
         Log.Debug($"Device type selected: {deviceType}");
         //Console.WriteLine($"Device type selected: {deviceType}");
-        EventAggregator.GetEvent<DeviceTypeChangeEvent>().Publish(deviceType);
+        
+        EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(deviceType);
     }
 
     private void CheckIfCanConnect()
@@ -250,10 +257,10 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
         // Save the config to app settings
         SaveConfig();
-
-        EventAggregator?.GetEvent<AppMessageEvent>()
-            .Publish(new AppMessage { DeviceConfig = _deviceConfig });
-
+        
+        // Publish the event
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { DeviceConfig = _deviceConfig});
+            
 
         appMessage.DeviceConfig = _deviceConfig;
 
@@ -291,11 +298,9 @@ public partial class ConnectControlsViewModel : ViewModelBase
                 var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
                 radxaContentUpdatedMessage.WifiBroadcastContent = wifibroadcastContent;
 
-                EventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>()
-                    .Publish(new RadxaContentUpdatedMessage
-                    {
-                        WifiBroadcastContent = wifibroadcastContent
-                    });
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
+                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { WifiBroadcastContent = wifibroadcastContent });
+                
             }
             else
             {
@@ -322,11 +327,10 @@ public partial class ConnectControlsViewModel : ViewModelBase
                 var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
                 radxaContentUpdatedMessage.WfbConfContent = wfbModProbeContent;
 
-                EventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>()
-                    .Publish(new RadxaContentUpdatedMessage
-                    {
-                        WfbConfContent = wfbModProbeContent
-                    });
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
+                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { WfbConfContent = wfbModProbeContent });
+
+                
             }
         }
         catch (Exception e)
@@ -348,11 +352,9 @@ public partial class ConnectControlsViewModel : ViewModelBase
                 var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
                 radxaContentUpdatedMessage.ScreenModeContent = screenModeContent;
 
-                EventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>()
-                    .Publish(new RadxaContentUpdatedMessage
-                    {
-                        ScreenModeContent = screenModeContent
-                    });
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
+                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { ScreenModeContent = screenModeContent });
+                
             }
         }
         catch (Exception e)
@@ -380,11 +382,9 @@ public partial class ConnectControlsViewModel : ViewModelBase
                     Log.Information("GS key MD5 checksum matched default key");
                 }
 
-                EventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>()
-                    .Publish(new RadxaContentUpdatedMessage
-                    {
-                        DroneKeyContent = droneKey
-                    });
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
+                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { DroneKeyContent = droneKey });
+                
 
                 UpdateUIMessage("Downloading gskey...done" );
             }
@@ -395,11 +395,9 @@ public partial class ConnectControlsViewModel : ViewModelBase
             throw;
         }
 
-        EventAggregator?.GetEvent<AppMessageEvent>().Publish(new AppMessage
-        {
-            CanConnect = DeviceConfig.Instance.CanConnect,
-            DeviceConfig = _deviceConfig
-        });
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
+        
+
     }
 
     private async void processCameraFiles()
@@ -407,17 +405,20 @@ public partial class ConnectControlsViewModel : ViewModelBase
         // download file wfb.conf
         var wfbConfContent = await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WfbConfFileLoc);
 
+        
+
         if (wfbConfContent != null)
-            EventAggregator?.GetEvent<WfbConfContentUpdatedEvent>()
-                .Publish(new WfbConfContentUpdatedMessage(wfbConfContent));
+            EventSubscriptionService.Publish<WfbConfContentUpdatedEvent, 
+                WfbConfContentUpdatedMessage>(new WfbConfContentUpdatedMessage(wfbConfContent));
 
         try
         {
             var majesticContent =
                 await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.MajesticFileLoc);
             // Publish a message to WfbSettingsTabViewModel
-            EventAggregator?.GetEvent<MajesticContentUpdatedEvent>()
-                .Publish(new MajesticContentUpdatedMessage(majesticContent));
+            EventSubscriptionService.Publish<MajesticContentUpdatedEvent, 
+                MajesticContentUpdatedMessage>(new MajesticContentUpdatedMessage(majesticContent));
+            
         }
         catch (Exception e)
         {
@@ -430,8 +431,10 @@ public partial class ConnectControlsViewModel : ViewModelBase
             var telemetryContent =
                 await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.TelemetryConfFileLoc);
             // Publish a message to WfbSettingsTabViewModel
-            EventAggregator?.GetEvent<TelemetryContentUpdatedEvent>()
-                .Publish(new TelemetryContentUpdatedMessage(telemetryContent));
+            
+            EventSubscriptionService.Publish<TelemetryContentUpdatedEvent, 
+                TelemetryContentUpdatedMessage>(new TelemetryContentUpdatedMessage(telemetryContent));
+
         }
         catch (Exception e)
         {
@@ -458,8 +461,9 @@ public partial class ConnectControlsViewModel : ViewModelBase
                 _deviceConfig.KeyChksum = droneKey;
                 deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
 
-                EventAggregator?.GetEvent<DeviceContentUpdateEvent>()
-                    .Publish(deviceContentUpdatedMessage);
+                EventSubscriptionService.Publish<DeviceContentUpdateEvent, 
+                    DeviceContentUpdatedMessage>(deviceContentUpdatedMessage);
+                
             }
         }
         catch (Exception e)
@@ -468,11 +472,10 @@ public partial class ConnectControlsViewModel : ViewModelBase
             throw;
         }
 
-        EventAggregator?.GetEvent<AppMessageEvent>().Publish(new AppMessage
-        {
-            CanConnect = DeviceConfig.Instance.CanConnect,
-            DeviceConfig = _deviceConfig
-        });
+        EventSubscriptionService.Publish<AppMessageEvent, 
+            AppMessage>(new AppMessage() { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
+
+        
     }
 
     /// <summary>

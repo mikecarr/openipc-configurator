@@ -97,8 +97,6 @@
                    ToolTip.Tip="{x:Static assets:Resources.FpvRoiRectToolTip}" />
             
 
-            
-
             <ComboBox Grid.Row="0" Grid.Column="3" 
                       ItemsSource="{Binding FpvEnabled}"
                       SelectedItem="{Binding SelectedFpvEnabled, Mode=TwoWay}" />

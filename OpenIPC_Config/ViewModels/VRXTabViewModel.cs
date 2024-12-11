@@ -41,13 +41,12 @@ public partial class VRXTabViewModel : ViewModelBase
 
     public VRXTabViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
-        : base(logger, sshClientService, eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
-        EventAggregator.GetEvent<DeviceTypeChangeEvent>().Subscribe(onDeviceTypeChangeEvent);
-        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-        EventAggregator.GetEvent<RadxaContentUpdateChangeEvent>().Subscribe(OnRadxaContentUpdateChange);
-        
+        EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(onDeviceTypeChangeEvent);
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
+        EventSubscriptionService.Subscribe<RadxaContentUpdateChangeEvent, RadxaContentUpdatedMessage>(OnRadxaContentUpdateChange);
         
         InitializeCollections();
     }

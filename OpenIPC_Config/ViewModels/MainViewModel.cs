@@ -33,26 +33,29 @@ public partial class MainViewModel : ViewModelBase
 
     public MainViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
-        : base(logger, sshClientService, eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
+        
+        // Subscribe to device type change events
+        EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(
+            OnDeviceTypeChangeEvent);
         
         IsVRXEnabled = false;
 
         LoadSettings();
 
-        // Subscribe to device type change events
-        EventAggregator.GetEvent<DeviceTypeChangeEvent>().Subscribe(OnDeviceTypeChangeEvent);
     }
 
     private void LoadSettings()
     {
         // Load settings via the SettingsManager
-        var settings = SettingsManager.LoadSettings(EventAggregator);
+        var settings = SettingsManager.LoadSettings();
         _deviceConfig = DeviceConfig.Instance;
 
         // Publish the initial device type
-        EventAggregator.GetEvent<DeviceTypeChangeEvent>().Publish(settings.DeviceType);
+        EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(settings.DeviceType);
+        
     }
 
     private void OnDeviceTypeChangeEvent(DeviceType deviceTypeEvent)
@@ -66,6 +69,6 @@ public partial class MainViewModel : ViewModelBase
         SelectedTab = IsVRXEnabled ? "WFB-GS" : "WFB";
 
         // Notify the view of tab changes
-        EventAggregator.GetEvent<TabSelectionChangeEvent>().Publish(SelectedTab);
+        EventSubscriptionService.Publish<TabSelectionChangeEvent, string>(SelectedTab);
     }
 }

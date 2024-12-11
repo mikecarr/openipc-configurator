@@ -65,8 +65,8 @@ public partial class SetupTabViewModel : ViewModelBase
 
     public SetupTabViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
-        : base(logger, sshClientService, eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
         
         InitializeCollections();
@@ -79,10 +79,11 @@ public partial class SetupTabViewModel : ViewModelBase
 
         ShowProgressBarCommand = new RelayCommand(() => IsProgressBarVisible = true);
         
-        EventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-        EventAggregator?.GetEvent<DeviceContentUpdateEvent>().Subscribe(OnDeviceContentUpdate);
-        EventAggregator?.GetEvent<DeviceTypeChangeEvent>().Subscribe(OnDeviceTypeChange);
-
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
+        EventSubscriptionService.Subscribe<DeviceContentUpdateEvent, DeviceContentUpdatedMessage>(OnDeviceContentUpdate);
+        EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(OnDeviceTypeChange);
+        
+        
         
     }
 

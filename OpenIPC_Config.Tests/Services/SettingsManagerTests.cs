@@ -48,7 +48,7 @@ public class SettingsManagerTests
         File.WriteAllText(_testSettingsFilePath, JsonConvert.SerializeObject(expectedConfig));
 
         // Act
-        var result = SettingsManager.LoadSettings(_mockEventAggregator.Object);
+        var result = SettingsManager.LoadSettings();
 
         // Assert
         Assert.IsNotNull(result);
@@ -62,7 +62,7 @@ public class SettingsManagerTests
     public void LoadSettings_FileDoesNotExist_ReturnsDefaultDeviceConfig()
     {
         // Act
-        var result = SettingsManager.LoadSettings(_mockEventAggregator.Object);
+        var result = SettingsManager.LoadSettings();
 
         // Assert
         Assert.IsNotNull(result);
@@ -108,7 +108,7 @@ public class SettingsManagerTests
         Log.Logger = mockLogger.Object;
         
         // Act
-        var result = SettingsManager.LoadSettings(_mockEventAggregator.Object);
+        var result = SettingsManager.LoadSettings();
 
         // Assert
         // mockLogger.Verify(

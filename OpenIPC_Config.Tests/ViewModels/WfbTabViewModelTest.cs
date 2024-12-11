@@ -37,12 +37,14 @@ public class WfbTabViewModelTest : ViewModelTestBase
         ";
     
     
+    private Mock<WfbConfContentUpdatedEvent> _wfbConfContentUpdatedEventMock;
     private Mock<ILogger> _loggerMock;
     private Mock<IEventAggregator> _eventAggregatorMock;
     //private Mock<ISshClientService> _sshClientServiceMock;
-    private Mock<WfbConfContentUpdatedEvent> _wfbConfContentUpdatedEventMock;
     private Mock<AppMessageEvent> _appMessageEventMock;
 
+    
+    
     [Test]
     public void SelectedPower24GHz_PropertyChange_RaisesNotification()
     {
@@ -50,7 +52,7 @@ public class WfbTabViewModelTest : ViewModelTestBase
         var viewModel = new WfbTabViewModel(
             LoggerMock.Object,
             SshClientServiceMock.Object,
-            EventAggregatorMock.Object
+            EventSubscriptionServiceMock.Object
         );
         
         var propertyChangedRaised = false;
@@ -82,7 +84,7 @@ public class WfbTabViewModelTest : ViewModelTestBase
         var viewModel = new WfbTabViewModel(
             LoggerMock.Object,
             SshClientServiceMock.Object,
-            EventAggregatorMock.Object
+            EventSubscriptionServiceMock.Object
         );
 
         
@@ -111,7 +113,7 @@ public class WfbTabViewModelTest : ViewModelTestBase
         var viewModel = new WfbTabViewModel(
             LoggerMock.Object,
             SshClientServiceMock.Object,
-            EventAggregatorMock.Object
+            EventSubscriptionServiceMock.Object
         );
 
         // Act
@@ -123,30 +125,6 @@ public class WfbTabViewModelTest : ViewModelTestBase
         Assert.Equal(161, viewModel.SelectedChannel);
         Assert.Equal(1, viewModel.SelectedMcsIndex);
     }
-
-
-    [Fact]
-    public void EventAggregator_SubscribesToEvents()
-    {
-        // Arrange
-        var viewModel = new WfbTabViewModel(
-            LoggerMock.Object,
-            SshClientServiceMock.Object,
-            EventAggregatorMock.Object
-        );
-
-        // Assert
-        WfbConfContentUpdatedEventMock.Verify(
-            e => e.Subscribe(It.IsAny<Action<WfbConfContentUpdatedMessage>>(), It.IsAny<ThreadOption>(), It.IsAny<bool>(), It.IsAny<Predicate<WfbConfContentUpdatedMessage>>()), 
-            Times.Once);
-
-        AppMessageEventMock.Verify(
-            e => e.Subscribe(It.IsAny<Action<AppMessage>>(), It.IsAny<ThreadOption>(), It.IsAny<bool>(), It.IsAny<Predicate<AppMessage>>()), 
-            Times.Once);
-    }
-
-
-
 
     [Fact]
     public async Task RestartWfbCommand_UpdatesWfbConfContentCorrectly()
@@ -161,7 +139,7 @@ public class WfbTabViewModelTest : ViewModelTestBase
         var viewModel = new WfbTabViewModel(
             LoggerMock.Object,
             SshClientServiceMock.Object,
-            EventAggregatorMock.Object
+            EventSubscriptionServiceMock.Object
         );
 
         viewModel.WfbConfContent = DefaultWfbConfContent;

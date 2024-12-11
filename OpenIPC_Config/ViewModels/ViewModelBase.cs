@@ -12,21 +12,32 @@ public abstract class ViewModelBase : ObservableObject
 {
     protected readonly ISshClientService SshClientService;
     protected readonly ILogger Logger;
-    protected readonly IEventAggregator EventAggregator;
+    protected readonly IEventSubscriptionService EventSubscriptionService;
     
     protected ViewModelBase(
         ILogger logger,
         ISshClientService sshClientService,
-        IEventAggregator eventAggregator)
+        IEventSubscriptionService eventSubscriptionService)
     {
         Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         SshClientService = sshClientService ?? throw new ArgumentNullException(nameof(sshClientService));
-        EventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
+        EventSubscriptionService = eventSubscriptionService ?? throw new ArgumentNullException(nameof(eventSubscriptionService));
     }
     
-    public async void UpdateUIMessage(string message)
+    /// <summary>
+    /// Publishes a UI message via the event aggregator.
+    /// </summary>
+    /// <param name="message">The message to display.</param>
+    public virtual void UpdateUIMessage(string message)
     {
-        EventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            Logger.Warning("UpdateUIMessage called with an empty message.");
+            return;
+        }
+
+        Logger.Debug("Publishing UI message: {Message}", message);
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage
         {
             Message = message,
             UpdateLogView = false
