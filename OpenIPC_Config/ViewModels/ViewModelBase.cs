@@ -22,6 +22,7 @@ public abstract class ViewModelBase : ObservableObject
         Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         SshClientService = sshClientService ?? throw new ArgumentNullException(nameof(sshClientService));
         EventSubscriptionService = eventSubscriptionService ?? throw new ArgumentNullException(nameof(eventSubscriptionService));
+
     }
     
     /// <summary>

@@ -60,6 +60,7 @@ public class App : Application
         services.AddSingleton<IEventAggregator, EventAggregator>();
         services.AddSingleton<IEventSubscriptionService, EventSubscriptionService>();
         services.AddSingleton<ISshClientService, SshClientService>();
+        services.AddSingleton<IMessageBoxService, MessageBoxService>();
         
         services.AddSingleton<IYamlConfigService, YamlConfigService>();
         services.AddSingleton<ILogger>(sp => Log.Logger);

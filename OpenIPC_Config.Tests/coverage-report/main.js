@@ -222,45 +222,49 @@ var assemblies = [
     "name": "OpenIPC_Config",
     "classes": [
       { "name": "CompiledAvaloniaXaml.!AvaloniaResources", "rp": "OpenIPC_Config__AvaloniaResources.html", "cl": 0, "ucl": 42, "cal": 42, "tl": 70, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.App", "rp": "OpenIPC_Config_App.html", "cl": 0, "ucl": 137, "cal": 137, "tl": 224, "cb": 0, "tb": 20, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.App", "rp": "OpenIPC_Config_App.html", "cl": 0, "ucl": 176, "cal": 176, "tl": 235, "cb": 0, "tb": 34, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Assets.Resources", "rp": "OpenIPC_Config_Resources.html", "cl": 0, "ucl": 51, "cal": 51, "tl": 227, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.Events.AppMessage", "rp": "OpenIPC_Config_AppMessage.html", "cl": 0, "ucl": 11, "cal": 11, "tl": 34, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Events.AppMessage", "rp": "OpenIPC_Config_AppMessage.html", "cl": 4, "ucl": 7, "cal": 11, "tl": 34, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Events.DeviceContentUpdatedMessage", "rp": "OpenIPC_Config_DeviceContentUpdatedMessage.html", "cl": 0, "ucl": 12, "cal": 12, "tl": 34, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.Events.MajesticContentUpdatedMessage", "rp": "OpenIPC_Config_MajesticContentUpdatedMessage.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Events.MajesticContentUpdatedMessage", "rp": "OpenIPC_Config_MajesticContentUpdatedMessage.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Events.RadxaContentUpdatedMessage", "rp": "OpenIPC_Config_RadxaContentUpdatedMessage.html", "cl": 0, "ucl": 8, "cal": 8, "tl": 23, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.Events.TelemetryContentUpdatedMessage", "rp": "OpenIPC_Config_TelemetryContentUpdatedMessage.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Events.TelemetryContentUpdatedMessage", "rp": "OpenIPC_Config_TelemetryContentUpdatedMessage.html", "cl": 5, "ucl": 0, "cal": 5, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Events.WfbConfContentUpdatedMessage", "rp": "OpenIPC_Config_WfbConfContentUpdatedMessage.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Logging.EventAggregatorSink", "rp": "OpenIPC_Config_EventAggregatorSink.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 28, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Models.DeviceCommands", "rp": "OpenIPC_Config_DeviceCommands.html", "cl": 0, "ucl": 5, "cal": 5, "tl": 58, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.Models.DeviceConfig", "rp": "OpenIPC_Config_DeviceConfig.html", "cl": 42, "ucl": 4, "cal": 46, "tl": 104, "cb": 3, "tb": 8, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Models.DeviceConfig", "rp": "OpenIPC_Config_DeviceConfig.html", "cl": 43, "ucl": 3, "cal": 46, "tl": 104, "cb": 5, "tb": 8, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Models.FrequencyMappings", "rp": "OpenIPC_Config_FrequencyMappings.html", "cl": 50, "ucl": 0, "cal": 50, "tl": 58, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.Models.OpenIPC", "rp": "OpenIPC_Config_OpenIPC.html", "cl": 28, "ucl": 47, "cal": 75, "tl": 154, "cb": 4, "tb": 14, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Models.OpenIPC", "rp": "OpenIPC_Config_OpenIPC.html", "cl": 34, "ucl": 41, "cal": 75, "tl": 154, "cb": 5, "tb": 14, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Models.WfbConfig", "rp": "OpenIPC_Config_WfbConfig.html", "cl": 0, "ucl": 19, "cal": 19, "tl": 24, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Services.EnumToBoolConverter", "rp": "OpenIPC_Config_EnumToBoolConverter.html", "cl": 0, "ucl": 13, "cal": 13, "tl": 27, "cb": 0, "tb": 12, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Services.EventSubscriptionService", "rp": "OpenIPC_Config_EventSubscriptionService.html", "cl": 13, "ucl": 0, "cal": 13, "tl": 36, "cb": 4, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Services.FileSystem", "rp": "OpenIPC_Config_FileSystem.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 59, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Services.MessageBoxService", "rp": "OpenIPC_Config_MessageBoxService.html", "cl": 0, "ucl": 4, "cal": 4, "tl": 14, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Services.NetworkCommands", "rp": "OpenIPC_Config_NetworkCommands.html", "cl": 0, "ucl": 15, "cal": 15, "tl": 39, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Services.SettingsManager", "rp": "OpenIPC_Config_SettingsManager.html", "cl": 30, "ucl": 10, "cal": 40, "tl": 89, "cb": 3, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.Services.SshClientService", "rp": "OpenIPC_Config_SshClientService.html", "cl": 0, "ucl": 392, "cal": 392, "tl": 510, "cb": 0, "tb": 33, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Services.SshClientService", "rp": "OpenIPC_Config_SshClientService.html", "cl": 4, "ucl": 388, "cal": 392, "tl": 510, "cb": 0, "tb": 33, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Services.Utilities", "rp": "OpenIPC_Config_Utilities.html", "cl": 0, "ucl": 28, "cal": 28, "tl": 58, "cb": 0, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.Services.VersionHelper", "rp": "OpenIPC_Config_VersionHelper.html", "cl": 0, "ucl": 21, "cal": 21, "tl": 46, "cb": 0, "tb": 8, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Services.VersionHelper", "rp": "OpenIPC_Config_VersionHelper.html", "cl": 25, "ucl": 11, "cal": 36, "tl": 59, "cb": 6, "tb": 16, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Services.WfbConfigParser", "rp": "OpenIPC_Config_WfbConfigParser.html", "cl": 89, "ucl": 3, "cal": 92, "tl": 139, "cb": 47, "tb": 62, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Services.WfbGsConfigParser", "rp": "OpenIPC_Config_WfbGsConfigParser.html", "cl": 0, "ucl": 57, "cal": 57, "tl": 97, "cb": 0, "tb": 18, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Services.WifiConfigParser", "rp": "OpenIPC_Config_WifiConfigParser.html", "cl": 83, "ucl": 9, "cal": 92, "tl": 152, "cb": 40, "tb": 44, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Services.YamlConfigService", "rp": "OpenIPC_Config_YamlConfigService.html", "cl": 52, "ucl": 29, "cal": 81, "tl": 121, "cb": 14, "tb": 24, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.ViewLocator", "rp": "OpenIPC_Config_ViewLocator.html", "cl": 0, "ucl": 11, "cal": 11, "tl": 27, "cb": 0, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.CameraSettingsTabViewModel", "rp": "OpenIPC_Config_CameraSettingsTabViewModel.html", "cl": 0, "ucl": 405, "cal": 405, "tl": 700, "cb": 0, "tb": 200, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.ConnectControlsViewModel", "rp": "OpenIPC_Config_ConnectControlsViewModel.html", "cl": 0, "ucl": 322, "cal": 322, "tl": 527, "cb": 0, "tb": 74, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.LogViewerViewModel", "rp": "OpenIPC_Config_LogViewerViewModel.html", "cl": 0, "ucl": 48, "cal": 48, "tl": 93, "cb": 0, "tb": 12, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.MainViewModel", "rp": "OpenIPC_Config_MainViewModel.html", "cl": 0, "ucl": 26, "cal": 26, "tl": 71, "cb": 0, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.SetupTabViewModel", "rp": "OpenIPC_Config_SetupTabViewModel.html", "cl": 0, "ucl": 365, "cal": 365, "tl": 650, "cb": 0, "tb": 96, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.CameraSettingsTabViewModel", "rp": "OpenIPC_Config_CameraSettingsTabViewModel.html", "cl": 97, "ucl": 374, "cal": 471, "tl": 307, "cb": 36, "tb": 254, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.ConnectControlsViewModel", "rp": "OpenIPC_Config_ConnectControlsViewModel.html", "cl": 0, "ucl": 422, "cal": 422, "tl": 530, "cb": 0, "tb": 124, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.LogViewerViewModel", "rp": "OpenIPC_Config_LogViewerViewModel.html", "cl": 0, "ucl": 75, "cal": 75, "tl": 101, "cb": 0, "tb": 24, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.MainViewModel", "rp": "OpenIPC_Config_MainViewModel.html", "cl": 0, "ucl": 35, "cal": 35, "tl": 74, "cb": 0, "tb": 6, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.SetupTabViewModel", "rp": "OpenIPC_Config_SetupTabViewModel.html", "cl": 0, "ucl": 470, "cal": 470, "tl": 651, "cb": 0, "tb": 180, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.ViewModels.StatusBarViewModel", "rp": "OpenIPC_Config_StatusBarViewModel.html", "cl": 0, "ucl": 16, "cal": 16, "tl": 52, "cb": 0, "tb": 8, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.TelemetryTabViewModel", "rp": "OpenIPC_Config_TelemetryTabViewModel.html", "cl": 0, "ucl": 228, "cal": 228, "tl": 386, "cb": 0, "tb": 66, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.ViewModelBase", "rp": "OpenIPC_Config_ViewModelBase.html", "cl": 9, "ucl": 7, "cal": 16, "tl": 35, "cb": 3, "tb": 6, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.VRXTabViewModel", "rp": "OpenIPC_Config_VRXTabViewModel.html", "cl": 0, "ucl": 93, "cal": 93, "tl": 212, "cb": 0, "tb": 16, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.WfbGSTabViewModel", "rp": "OpenIPC_Config_WfbGSTabViewModel.html", "cl": 0, "ucl": 134, "cal": 134, "tl": 233, "cb": 0, "tb": 26, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.ViewModels.WfbTabViewModel", "rp": "OpenIPC_Config_WfbTabViewModel.html", "cl": 23, "ucl": 169, "cal": 192, "tl": 357, "cb": 0, "tb": 74, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.Views.CameraSettingsView", "rp": "OpenIPC_Config_CameraSettingsView.html", "cl": 0, "ucl": 108, "cal": 108, "tl": 166, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.TelemetryTabViewModel", "rp": "OpenIPC_Config_TelemetryTabViewModel.html", "cl": 153, "ucl": 150, "cal": 303, "tl": 386, "cb": 36, "tb": 126, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.ViewModelBase", "rp": "OpenIPC_Config_ViewModelBase.html", "cl": 19, "ucl": 8, "cal": 27, "tl": 47, "cb": 4, "tb": 8, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.VRXTabViewModel", "rp": "OpenIPC_Config_VRXTabViewModel.html", "cl": 0, "ucl": 124, "cal": 124, "tl": 211, "cb": 0, "tb": 30, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.WfbGSTabViewModel", "rp": "OpenIPC_Config_WfbGSTabViewModel.html", "cl": 0, "ucl": 166, "cal": 166, "tl": 230, "cb": 0, "tb": 44, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.ViewModels.WfbTabViewModel", "rp": "OpenIPC_Config_WfbTabViewModel.html", "cl": 23, "ucl": 184, "cal": 207, "tl": 359, "cb": 0, "tb": 84, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Views.CameraSettingsView", "rp": "OpenIPC_Config_CameraSettingsView.html", "cl": 0, "ucl": 117, "cal": 117, "tl": 164, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Views.ConnectControlsView", "rp": "OpenIPC_Config_ConnectControlsView.html", "cl": 0, "ucl": 39, "cal": 39, "tl": 96, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Views.LogViewer", "rp": "OpenIPC_Config_LogViewer.html", "cl": 0, "ucl": 21, "cal": 21, "tl": 67, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "OpenIPC_Config.Views.MainView", "rp": "OpenIPC_Config_MainView.html", "cl": 0, "ucl": 54, "cal": 54, "tl": 138, "cb": 0, "tb": 6, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "OpenIPC_Config.Views.MainView", "rp": "OpenIPC_Config_MainView.html", "cl": 0, "ucl": 64, "cal": 64, "tl": 140, "cb": 0, "tb": 10, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Views.MainWindow", "rp": "OpenIPC_Config_MainWindow.html", "cl": 0, "ucl": 8, "cal": 8, "tl": 21, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Views.NetworkIPScannerView", "rp": "OpenIPC_Config_NetworkIPScannerView.html", "cl": 0, "ucl": 35, "cal": 35, "tl": 80, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "OpenIPC_Config.Views.SetupCameraButtonsView", "rp": "OpenIPC_Config_SetupCameraButtonsView.html", "cl": 0, "ucl": 48, "cal": 48, "tl": 118, "cb": 0, "tb": 2, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
@@ -303,6 +307,12 @@ var riskHotspots = [
       { "value": 42, "exceeded": true },
     ]},
   {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.SetupTabViewModel", "reportPath": "OpenIPC_Config_SetupTabViewModel.html", "methodName": "DownloadStart()", "methodShortName": "DownloadStart()", "fileIndex": 0, "line": 380,
+    "metrics": [
+      { "value": 930, "exceeded": true },
+      { "value": 30, "exceeded": true },
+    ]},
+  {
     "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.SetupTabViewModel", "reportPath": "OpenIPC_Config_SetupTabViewModel.html", "methodName": "DownloadStart()", "methodShortName": "DownloadStart()", "fileIndex": 0, "line": 379,
     "metrics": [
       { "value": 930, "exceeded": true },
@@ -321,6 +331,30 @@ var riskHotspots = [
       { "value": 20, "exceeded": true },
     ]},
   {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.ConnectControlsViewModel", "reportPath": "OpenIPC_Config_ConnectControlsViewModel.html", "methodName": "Connect()", "methodShortName": "Connect()", "fileIndex": 0, "line": 224,
+    "metrics": [
+      { "value": 342, "exceeded": true },
+      { "value": 18, "exceeded": true },
+    ]},
+  {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.CameraSettingsTabViewModel", "reportPath": "OpenIPC_Config_CameraSettingsTabViewModel.html", "methodName": "UpdateViewModelPropertiesFromYaml()", "methodShortName": "UpdateViewModelPropertiesFromYaml()", "fileIndex": 0, "line": 178,
+    "metrics": [
+      { "value": 299, "exceeded": true },
+      { "value": 48, "exceeded": true },
+    ]},
+  {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.TelemetryTabViewModel", "reportPath": "OpenIPC_Config_TelemetryTabViewModel.html", "methodName": "ParseTelemetryContent()", "methodShortName": "ParseTelemetryContent()", "fileIndex": 0, "line": 252,
+    "metrics": [
+      { "value": 263, "exceeded": true },
+      { "value": 42, "exceeded": true },
+    ]},
+  {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.App", "reportPath": "OpenIPC_Config_App.html", "methodName": "CreateAppSettings()", "methodShortName": "CreateAppSettings()", "fileIndex": 1, "line": 98,
+    "metrics": [
+      { "value": 210, "exceeded": true },
+      { "value": 14, "exceeded": false },
+    ]},
+  {
     "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.App", "reportPath": "OpenIPC_Config_App.html", "methodName": "CreateAppSettings()", "methodShortName": "CreateAppSettings()", "fileIndex": 1, "line": 87,
     "metrics": [
       { "value": 210, "exceeded": true },
@@ -334,6 +368,12 @@ var riskHotspots = [
     ]},
   {
     "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.ConnectControlsViewModel", "reportPath": "OpenIPC_Config_ConnectControlsViewModel.html", "methodName": "processCameraFiles()", "methodShortName": "processCameraFiles()", "fileIndex": 0, "line": 406,
+    "metrics": [
+      { "value": 210, "exceeded": true },
+      { "value": 14, "exceeded": false },
+    ]},
+  {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.WfbGSTabViewModel", "reportPath": "OpenIPC_Config_WfbGSTabViewModel.html", "methodName": "OnRadxaContentUpdateChange(OpenIPC_Config.Events.RadxaContentUpdatedMessage)", "methodShortName": "OnRadxaContentUpdateChange(...)", "fileIndex": 0, "line": 199,
     "metrics": [
       { "value": 210, "exceeded": true },
       { "value": 14, "exceeded": false },
@@ -357,10 +397,22 @@ var riskHotspots = [
       { "value": 12, "exceeded": false },
     ]},
   {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.VRXTabViewModel", "reportPath": "OpenIPC_Config_VRXTabViewModel.html", "methodName": "OnRadxaContentUpdateChange(OpenIPC_Config.Events.RadxaContentUpdatedMessage)", "methodShortName": "OnRadxaContentUpdateChange(...)", "fileIndex": 0, "line": 82,
+    "metrics": [
+      { "value": 156, "exceeded": true },
+      { "value": 12, "exceeded": false },
+    ]},
+  {
     "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.VRXTabViewModel", "reportPath": "OpenIPC_Config_VRXTabViewModel.html", "methodName": "OnRadxaContentUpdateChange(OpenIPC_Config.Events.RadxaContentUpdatedMessage)", "methodShortName": "OnRadxaContentUpdateChange(...)", "fileIndex": 0, "line": 83,
     "metrics": [
       { "value": 156, "exceeded": true },
       { "value": 12, "exceeded": false },
+    ]},
+  {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.ConnectControlsViewModel", "reportPath": "OpenIPC_Config_ConnectControlsViewModel.html", "methodName": "processRadxaFiles()", "methodShortName": "processRadxaFiles()", "fileIndex": 0, "line": 287,
+    "metrics": [
+      { "value": 110, "exceeded": true },
+      { "value": 10, "exceeded": false },
     ]},
   {
     "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.Services.EnumToBoolConverter", "reportPath": "OpenIPC_Config_EnumToBoolConverter.html", "methodName": "ConvertBack(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)", "methodShortName": "ConvertBack(...)", "fileIndex": 0, "line": 16,
@@ -375,13 +427,31 @@ var riskHotspots = [
       { "value": 8, "exceeded": false },
     ]},
   {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.LogViewerViewModel", "reportPath": "OpenIPC_Config_LogViewerViewModel.html", "methodName": "LogMessageReceived(System.String)", "methodShortName": "LogMessageReceived(...)", "fileIndex": 0, "line": 48,
+    "metrics": [
+      { "value": 72, "exceeded": true },
+      { "value": 8, "exceeded": false },
+    ]},
+  {
     "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.LogViewerViewModel", "reportPath": "OpenIPC_Config_LogViewerViewModel.html", "methodName": "LogMessageReceived(System.String)", "methodShortName": "LogMessageReceived(...)", "fileIndex": 0, "line": 40,
     "metrics": [
       { "value": 72, "exceeded": true },
       { "value": 8, "exceeded": false },
     ]},
   {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.SetupTabViewModel", "reportPath": "OpenIPC_Config_SetupTabViewModel.html", "methodName": "OnDeviceContentUpdate()", "methodShortName": "OnDeviceContentUpdate()", "fileIndex": 0, "line": 141,
+    "metrics": [
+      { "value": 72, "exceeded": true },
+      { "value": 8, "exceeded": false },
+    ]},
+  {
     "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.SetupTabViewModel", "reportPath": "OpenIPC_Config_SetupTabViewModel.html", "methodName": "OnDeviceContentUpdate()", "methodShortName": "OnDeviceContentUpdate()", "fileIndex": 0, "line": 140,
+    "metrics": [
+      { "value": 72, "exceeded": true },
+      { "value": 8, "exceeded": false },
+    ]},
+  {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.WfbTabViewModel", "reportPath": "OpenIPC_Config_WfbTabViewModel.html", "methodName": "HandleFrequencyChange(System.String,System.Collections.Generic.Dictionary`2<System.Int32,System.String>)", "methodShortName": "HandleFrequencyChange(...)", "fileIndex": 0, "line": 285,
     "metrics": [
       { "value": 72, "exceeded": true },
       { "value": 8, "exceeded": false },
@@ -405,12 +475,6 @@ var riskHotspots = [
       { "value": 7, "exceeded": false },
     ]},
   {
-    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.Models.OpenIPC", "reportPath": "OpenIPC_Config_OpenIPC.html", "methodName": "GetBinariesPath()", "methodShortName": "GetBinariesPath()", "fileIndex": 0, "line": 70,
-    "metrics": [
-      { "value": 42, "exceeded": true },
-      { "value": 6, "exceeded": false },
-    ]},
-  {
     "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.Services.SshClientService", "reportPath": "OpenIPC_Config_SshClientService.html", "methodName": "DownloadDirectoryRecursively(Renci.SshNet.ScpClient,System.String,System.String)", "methodShortName": "DownloadDirectoryRecursively(...)", "fileIndex": 0, "line": 412,
     "metrics": [
       { "value": 42, "exceeded": true },
@@ -429,7 +493,19 @@ var riskHotspots = [
       { "value": 6, "exceeded": false },
     ]},
   {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.ConnectControlsViewModel", "reportPath": "OpenIPC_Config_ConnectControlsViewModel.html", "methodName": "get_Orientation()", "methodShortName": "get_Orientation()", "fileIndex": 0, "line": 79,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
     "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.ConnectControlsViewModel", "reportPath": "OpenIPC_Config_ConnectControlsViewModel.html", "methodName": "get_Orientation()", "methodShortName": "get_Orientation()", "fileIndex": 0, "line": 73,
+    "metrics": [
+      { "value": 42, "exceeded": true },
+      { "value": 6, "exceeded": false },
+    ]},
+  {
+    "assembly": "OpenIPC_Config", "class": "OpenIPC_Config.ViewModels.SetupTabViewModel", "reportPath": "OpenIPC_Config_SetupTabViewModel.html", "methodName": "RecvDroneKey()", "methodShortName": "RecvDroneKey()", "fileIndex": 0, "line": 536,
     "metrics": [
       { "value": 42, "exceeded": true },
       { "value": 6, "exceeded": false },
