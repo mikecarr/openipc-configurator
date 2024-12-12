@@ -8,8 +8,10 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using OpenIPC_Config.Logging;
+using OpenIPC_Config.Services;
 using OpenIPC_Config.ViewModels;
 using OpenIPC_Config.Views;
 using Prism.Events;
@@ -19,16 +21,78 @@ namespace OpenIPC_Config;
 
 public class App : Application
 {
-    public static IEventAggregator EventAggregator { get; private set; }
+    public static IServiceProvider ServiceProvider { get; private set; }
 
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-
-        EventAggregator = new EventAggregator();
-        Log.Debug("************** EventAggregator initialized");
     }
 
+    public override void OnFrameworkInitializationCompleted()
+    {
+        // Configure and build the DI container
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection);
+        ServiceProvider = serviceCollection.BuildServiceProvider();
+
+        CreateAppSettings();
+
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            // Remove Avalonia's default data validation plugin to avoid conflicts
+            BindingPlugins.DataValidators.RemoveAt(0);
+
+            // Resolve MainWindow and its DataContext from DI container
+            desktop.MainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+        }
+        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
+        {
+            // Resolve MainView and its DataContext from DI container
+            singleViewPlatform.MainView = ServiceProvider.GetRequiredService<MainView>();
+        }
+
+        base.OnFrameworkInitializationCompleted();
+    }
+
+    private void ConfigureServices(IServiceCollection services)
+    {
+        // Register IEventAggregator as a singleton
+        services.AddSingleton<IEventAggregator, EventAggregator>();
+        services.AddSingleton<IEventSubscriptionService, EventSubscriptionService>();
+        services.AddSingleton<ISshClientService, SshClientService>();
+        services.AddSingleton<IMessageBoxService, MessageBoxService>();
+        
+        services.AddSingleton<IYamlConfigService, YamlConfigService>();
+        services.AddSingleton<ILogger>(sp => Log.Logger);
+
+
+        // Register ViewModels
+        services.AddTransient<MainViewModel>();
+
+        services.AddTransient<CameraSettingsTabViewModel>();
+        services.AddTransient<ConnectControlsViewModel>();
+        services.AddTransient<LogViewerViewModel>();
+        services.AddTransient<SetupTabViewModel>();
+        services.AddTransient<StatusBarViewModel>();
+        services.AddTransient<TelemetryTabViewModel>();
+        services.AddTransient<VRXTabViewModel>();
+        services.AddTransient<WfbGSTabViewModel>();
+        services.AddTransient<WfbTabViewModel>();        
+
+        // Register Views
+        services.AddTransient<MainWindow>();
+        services.AddTransient<MainView>();
+        services.AddTransient<CameraSettingsView>();
+        services.AddTransient<ConnectControlsView>();
+        services.AddTransient<LogViewer>();
+        services.AddTransient<SetupTabView>();
+        services.AddTransient<StatusBarView>();
+        services.AddTransient<TelemetryTabView>();
+        services.AddTransient<VRXTabView>();
+        services.AddTransient<WfbGSTabView>();
+        services.AddTransient<WfbTabView>();
+
+    }
 
     private void CreateAppSettings()
     {
@@ -102,7 +166,7 @@ public class App : Application
 
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
-            .WriteTo.Sink(new EventAggregatorSink(EventAggregator))
+            .WriteTo.Sink(new EventAggregatorSink(ServiceProvider.GetRequiredService<IEventAggregator>()))
             .CreateLogger();
 
         Log.Information($"Using appsettings.json from {configPath}");
@@ -149,30 +213,5 @@ public class App : Application
             )
         );
         return defaultSettings;
-    }
-
-    public override void OnFrameworkInitializationCompleted()
-    {
-        CreateAppSettings();
-
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            // Line below is needed to remove Avalonia data validation.
-            // Without this line you will get duplicate validations from both Avalonia and CT
-            BindingPlugins.DataValidators.RemoveAt(0);
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainViewModel()
-            };
-        }
-        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
-        {
-            singleViewPlatform.MainView = new MainView
-            {
-                DataContext = new MainViewModel()
-            };
-        }
-
-        base.OnFrameworkInitializationCompleted();
     }
 }

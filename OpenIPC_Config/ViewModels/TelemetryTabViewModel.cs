@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -20,11 +21,8 @@ namespace OpenIPC_Config.ViewModels;
 
 public partial class TelemetryTabViewModel : ViewModelBase
 {
-    private readonly ISshClientService _sshClientService;
-
-
+    #region Observable Properties
     [ObservableProperty] private bool _canConnect;
-    private readonly IEventAggregator _eventAggregator;
     [ObservableProperty] private bool _isOnboardRecOff;
     [ObservableProperty] private bool _isOnboardRecOn;
     [ObservableProperty] private string _selectedAggregate;
@@ -34,94 +32,118 @@ public partial class TelemetryTabViewModel : ViewModelBase
     [ObservableProperty] private string _selectedRouter;
     [ObservableProperty] private string _selectedSerialPort;
     [ObservableProperty] private string _telemetryContent;
+    #endregion
 
+    #region Collections
+    public ObservableCollection<string> SerialPorts { get; private set; }
+    public ObservableCollection<string> BaudRates { get; private set; }
+    public ObservableCollection<string> McsIndex { get; private set; }
+    public ObservableCollection<string> Aggregate { get; private set; }
+    public ObservableCollection<string> RC_Channel { get; private set; }
+    public ObservableCollection<string> Router { get; private set; }
+    #endregion
 
-    public TelemetryTabViewModel()
-    {
-        InitializeCollections();
-
-        _eventAggregator = App.EventAggregator;
-
-        _eventAggregator?.GetEvent<TelemetryContentUpdatedEvent>().Subscribe(OnTelemetryContentUpdated);
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-
-
-        _sshClientService = new SshClientService(_eventAggregator);
-
-        EnableUART0Command = new RelayCommand(() => EnableUART0());
-        DisableUART0Command = new RelayCommand(() => DisableUART0());
-        OnBoardRecCommand = new RelayCommand(() => OnBoardRec());
-        AddMavlinkCommand = new RelayCommand(() => AddMavlink());
-        UploadMSPOSDCommand = new RelayCommand(() => UploadMSPOSD());
-        UploadINavCommand = new RelayCommand(() => UploadINav());
-        MSPOSDExtraCommand = new RelayCommand(() => AddMSPOSDExtra());
-        SaveAndRestartTelemetryCommand = new RelayCommand(() => SaveAndRestartTelemetry());
-    }
-    //private bool CanConnect { get; set; }
-
-    // ObservableCollections
-    public ObservableCollection<string> SerialPorts { get; set; }
-    public ObservableCollection<string> BaudRates { get; set; }
-    public ObservableCollection<string> McsIndex { get; set; }
-    public ObservableCollection<string> Aggregate { get; set; }
-    public ObservableCollection<string> RC_Channel { get; set; }
-    public ObservableCollection<string> Router { get; set; }
-
+    #region Commands
     public ICommand EnableUART0Command { get; private set; }
     public ICommand DisableUART0Command { get; private set; }
     public ICommand AddMavlinkCommand { get; private set; }
     public ICommand UploadMSPOSDCommand { get; private set; }
     public ICommand UploadINavCommand { get; private set; }
-    
     public ICommand MSPOSDExtraCommand { get; private set; }
     public ICommand OnBoardRecCommand { get; private set; }
-
     public ICommand SaveAndRestartTelemetryCommand { get; private set; }
+    #endregion
+    
+    private readonly IMessageBoxService _messageBoxService;
 
-    private void OnAppMessage(AppMessage appMessage)
+    #region Constructor
+    public TelemetryTabViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventSubscriptionService eventSubscriptionService,
+        IMessageBoxService messageBoxService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
-        if (appMessage.CanConnect) CanConnect = appMessage.CanConnect;
-        //Log.Information($"CanConnect {CanConnect.ToString()}");
+        _messageBoxService = messageBoxService;
+        
+        InitializeCollections();
+        InitializeCommands();
+        SubscribeToEvents();
     }
+    #endregion
 
+    #region Initialization
     private void InitializeCollections()
     {
-        SerialPorts = new ObservableCollectionExtended<string> { "/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2" };
-        BaudRates = new ObservableCollectionExtended<string> { "4800", "9600", "19200", "38400", "57600", "115200" };
-        McsIndex = new ObservableCollectionExtended<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-        Aggregate = new ObservableCollectionExtended<string> { "0", "1", "2", "4", "6", "8", "10", "12", "14", "15" };
-        RC_Channel = new ObservableCollectionExtended<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
-        Router = new ObservableCollectionExtended<string> { "0", "1", "2" };
+        SerialPorts = new ObservableCollection<string> { "/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2" };
+        BaudRates = new ObservableCollection<string> { "4800", "9600", "19200", "38400", "57600", "115200" };
+        McsIndex = new ObservableCollection<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+        Aggregate = new ObservableCollection<string> { "0", "1", "2", "4", "6", "8", "10", "12", "14", "15" };
+        RC_Channel = new ObservableCollection<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8" };
+        Router = new ObservableCollection<string> { "0", "1", "2" };
     }
 
+    private void InitializeCommands()
+    {
+        EnableUART0Command = new RelayCommand(EnableUART0);
+        DisableUART0Command = new RelayCommand(DisableUART0);
+        OnBoardRecCommand = new RelayCommand(OnBoardRec);
+        AddMavlinkCommand = new RelayCommand(AddMavlink);
+        UploadMSPOSDCommand = new RelayCommand(UploadMSPOSD);
+        UploadINavCommand = new RelayCommand(UploadINav);
+        MSPOSDExtraCommand = new RelayCommand(AddMSPOSDExtra);
+        SaveAndRestartTelemetryCommand = new RelayCommand(SaveAndRestartTelemetry);
+    }
+
+    private void SubscribeToEvents()
+    {
+        EventSubscriptionService.Subscribe<TelemetryContentUpdatedEvent, TelemetryContentUpdatedMessage>(OnTelemetryContentUpdated);
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
+    }
+    #endregion
+
+    #region Event Handlers
+    private void OnAppMessage(AppMessage appMessage)
+    {
+        CanConnect = appMessage.CanConnect;
+    }
+
+    public virtual void HandleTelemetryContentUpdated(TelemetryContentUpdatedMessage message)
+    {
+        TelemetryContent = message.Content;
+        ParseTelemetryContent();
+    }
+    
+    private async void OnTelemetryContentUpdated(TelemetryContentUpdatedMessage message)
+    {
+        HandleTelemetryContentUpdated(message);
+    }
+    #endregion
+
+    #region Commands
+    private async void EnableUART0()
+    {
+        UpdateUIMessage("Enabling UART0...");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.UART0OnCommand);
+    }
 
     private async void DisableUART0()
     {
-        Log.Debug("DisableUART0Command executed");
-
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
-            DeviceCommands.UART0OffCommand); //await SaveDisableUART0Command();
-    }
-
-    private async void EnableUART0()
-    {
-        Log.Debug("EnableUART0Command executed");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.UART0OnCommand);
+        UpdateUIMessage("Disabling UART0...");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.UART0OffCommand);
     }
 
     private async void OnBoardRec()
     {
-        if (IsOnboardRecOn)
-            _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "yaml-cli .records.enabled true");
-        else if (IsOnboardRecOff)
-            _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "yaml-cli .records.enabled false");
+        UpdateUIMessage("Enabling Onboard Recording...");
+        var command = IsOnboardRecOn ? "yaml-cli .records.enabled true" : "yaml-cli .records.enabled false";
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, command);
     }
 
     private async void AddMavlink()
     {
-        Log.Debug("AddMavlinkCommand executed");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, TelemetryCommands.Extra);
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        UpdateUIMessage("Adding MAVLink...");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, TelemetryCommands.Extra);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
     }
 
     private async void UploadMSPOSD()
@@ -137,42 +159,57 @@ public partial class TelemetryTabViewModel : ViewModelBase
 
         if (files == null || !files.Any())
         {
-            var box = MessageBoxManager
-                .GetMessageBoxStandard("File not found!", "File " + msposdFile + " not found!");
-            await box.ShowAsync();
+            _messageBoxService.ShowMessageBox("File not found!", "File " + msposdFile + " not found!"); 
+            // var box = MessageBoxManager
+            //     .GetMessageBoxStandard("File not found!", "File " + msposdFile + " not found!");
+            // await box.ShowAsync();
             return;
         }
 
         // killall -q msposd
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "killall -q msposd");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "killall -q msposd");
         // upload msposd
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteBinariesFolder, "msposd_star6e");
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "mv /usr/bin/msposd_star6e /usr/bin/msposd");
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteBinariesFolder, "msposd_star6e");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "mv /usr/bin/msposd_star6e /usr/bin/msposd");
         // chmod +x /usr/bin/msposd
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x /usr/bin/msposd");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x /usr/bin/msposd");
 
         // upload betaflight fonts
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
             Models.OpenIPC.FileType.BetaFlightFonts, "font.png");
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
             Models.OpenIPC.FileType.BetaFlightFonts, "font_hd.png");
 
         // upload vtxmenu.ini /etc
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteEtcFolder, "vtxmenu.ini");
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteEtcFolder, "vtxmenu.ini");
 
 
         // ensure file is unix formatted
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "dos2unix /etc/vtxmenu.ini");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "dos2unix /etc/vtxmenu.ini");
 
         // reboot
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
 
         //Thread.Sleep(3000);
+
+        _messageBoxService.ShowMessageBox("Done!", "MSPOSD setup, wait for device to restart!");
+
+        // var MsgBox = MessageBoxManager
+        //     .GetMessageBoxStandard("Done!", "MSPOSD setup, wait for device to restart!", ButtonEnum.Ok);
+        // await MsgBox.ShowAsync();
+    }
+
+    private async void UploadINav()
+    {
+        Log.Debug("UploadINavCommand executed");
+        // upload betaflight fonts
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
         
-        var MsgBox = MessageBoxManager
-            .GetMessageBoxStandard("Done!", "MSPOSD setup, wait for device to restart!", ButtonEnum.Ok);
-        await MsgBox.ShowAsync();
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+            Models.OpenIPC.FileType.iNavFonts, "font.png");
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+            Models.OpenIPC.FileType.iNavFonts, "font_hd.png");
     }
 
     private async void AddMSPOSDExtra()
@@ -183,63 +220,34 @@ public partial class TelemetryTabViewModel : ViewModelBase
         // )
         // 
         Log.Debug("MSPOSDExtra executed"); 
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MSPOSDExtraCommand);
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MSPOSDExtraCommand);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
         
         //TODO: do we need to restart the camera?
-        //await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        //await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
         
-        var MsgBox = MessageBoxManager
-            .GetMessageBoxStandard("Done!", "Please wait fir datalink to restart!", ButtonEnum.Ok);
-        await MsgBox.ShowAsync();
-        
-    }
-    
-    private async void UploadINav()
-    {
-        Log.Debug("UploadINavCommand executed");
-        // upload betaflight fonts
-        await _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
-        
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-            Models.OpenIPC.FileType.iNavFonts, "font.png");
-        await _sshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-            Models.OpenIPC.FileType.iNavFonts, "font_hd.png");
+        _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!"); 
+        // var MsgBox = MessageBoxManager
+        //     .GetMessageBoxStandard("Done!", "Please wait fir datalink to restart!", ButtonEnum.Ok);
+        // await MsgBox.ShowAsync();
     }
 
     private async void SaveAndRestartTelemetry()
     {
-        Log.Information("SaveAndRestartTelemetryCommand executed");
-        //await SaveSaveAndRestartTelemetryCommand();
+        Log.Debug("Saving and restarting telemetry...");
+        TelemetryContent = UpdateTelemetryContent(SelectedSerialPort, SelectedBaudRate, SelectedRouter, SelectedMcsIndex, SelectedAggregate, SelectedRcChannel);
+        await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.TelemetryConfFileLoc, TelemetryContent);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.TelemetryRestartCommand);
+    }
+    #endregion
 
-        var newSerial = SelectedSerialPort;
-        var newBaudRate = SelectedBaudRate;
-        var newRouter = SelectedRouter;
-        var newMcsIndex = SelectedMcsIndex;
-        var newAggregate = SelectedAggregate;
-        var newRcChannel = SelectedRcChannel;
-
-        var updatedTelemetryContent = UpdateTelemetryContent(
-            newSerial,
-            newBaudRate,
-            newRouter,
-            newMcsIndex,
-            newAggregate,
-            newRcChannel
-        );
-
-        TelemetryContent = updatedTelemetryContent;
-
-        Log.Debug($"Uploading new : {Models.OpenIPC.TelemetryConfFileLoc}");
-        _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.TelemetryConfFileLoc,
-            TelemetryContent);
-
-        Log.Debug("Restarting Telemetry");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.TelemetryRestartCommand);
+    #region Helper Methods
+    private async Task UploadFonts(Models.OpenIPC.FileType fileType)
+    {
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder, fileType, "font.png");
+        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder, fileType, "font_hd.png");
     }
 
-
-    // Method to parse the telemetryContent
     private void ParseTelemetryContent()
     {
         Log.Debug("Parsing TelemetryContent.");
@@ -342,24 +350,10 @@ public partial class TelemetryTabViewModel : ViewModelBase
                 // Handle parsed data, e.g., store in a dictionary or bind to properties
                 Log.Debug($"Telemetry - Key: {key}, Value: {value}");
             }
-        }
+        }    
     }
 
-    private async void OnTelemetryContentUpdated(TelemetryContentUpdatedMessage message)
-    {
-        TelemetryContent = message.Content;
-        //CanConnect = true;
-        ParseTelemetryContent();
-    }
-
-    private string UpdateTelemetryContent(
-        string newSerial,
-        string newBaudRate,
-        string newRouter,
-        string newMcsIndex,
-        string newAggregate,
-        string newRcChannel
-    )
+    private string UpdateTelemetryContent(string serial, string baudRate, string router, string mcsIndex, string aggregate, string rcChannel)
     {
         // Logic to update WfbConfContent with the new values
         var lines = TelemetryContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
@@ -370,17 +364,17 @@ public partial class TelemetryTabViewModel : ViewModelBase
             switch (match.Groups[1].Value)
             {
                 case Telemetry.Serial:
-                    return $"serial={newSerial}";
+                    return $"serial={serial}";
                 case Telemetry.Baud:
-                    return $"baud={newBaudRate}";
+                    return $"baud={baudRate}";
                 case Telemetry.Router:
-                    return $"router={newRouter}";
+                    return $"router={router}";
                 case Telemetry.McsIndex:
-                    return $"mcs_index={newMcsIndex}";
+                    return $"mcs_index={mcsIndex}";
                 case Telemetry.Aggregate:
-                    return $"aggregate={newAggregate}";
+                    return $"aggregate={aggregate}";
                 case Telemetry.RcChannel:
-                    return $"channels={newRcChannel}";
+                    return $"channels={rcChannel}";
 
                 default:
                     return match.Value;
@@ -388,4 +382,5 @@ public partial class TelemetryTabViewModel : ViewModelBase
         });
         return updatedContent;
     }
+    #endregion
 }

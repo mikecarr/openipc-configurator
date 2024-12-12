@@ -13,11 +13,11 @@ namespace OpenIPC_Config.Services;
 
 public class SshClientService : ISshClientService
 {
-    private IEventAggregator _eventAggregator;
+    private IEventSubscriptionService _eventSubscriptionService;
 
-    public SshClientService(IEventAggregator eventAggregator)
+    public SshClientService(IEventSubscriptionService eventSubscriptionService)
     {
-        _eventAggregator = eventAggregator;
+        _eventSubscriptionService = eventSubscriptionService;
     }
 
     public async Task<SshCommand> ExecuteCommandWithResponse(DeviceConfig deviceConfig, string command,

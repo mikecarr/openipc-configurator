@@ -5,7 +5,7 @@ using Serilog;
 
 namespace OpenIPC_Config.Services;
 
-public class WfbGsConfigParser
+public class WfbGsConfigParser : IWfbGsConfigParser
 {
     // Store the original configuration content
     private string _originalConfigContent;

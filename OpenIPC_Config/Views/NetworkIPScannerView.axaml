@@ -4,10 +4,7 @@
              xmlns:assets="clr-namespace:OpenIPC_Config.Assets"
              x:Class="OpenIPC_Config.Views.NetworkIPScannerView"
              x:DataType="vm:SetupTabViewModel">
-
-    <UserControl.DataContext>
-        <vm:SetupTabViewModel />
-    </UserControl.DataContext>
+    
 
     <!-- Scan IP -->
     <Panel Margin="5">

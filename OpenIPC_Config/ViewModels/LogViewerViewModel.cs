@@ -1,13 +1,15 @@
 using System;
 using System.Collections.ObjectModel;
 using OpenIPC_Config.Events;
+using OpenIPC_Config.Services;
 using Prism.Events;
+using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
 public class LogViewerViewModel : ViewModelBase
 {
-    private readonly IEventAggregator _eventAggregator;
+    private readonly IEventSubscriptionService _eventSubscriptionService;
 
     private string _messageText;
     
@@ -15,12 +17,23 @@ public class LogViewerViewModel : ViewModelBase
     private int _duplicateCount = 0;
     private DateTime _lastFlushTime = DateTime.Now;
 
-    public LogViewerViewModel()
+    public LogViewerViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
-        _eventAggregator = App.EventAggregator;
+        
+        
         LogMessages = new ObservableCollection<string>();
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(AppMessageReceived);
-        _eventAggregator.GetEvent<LogMessageEvent>().Subscribe(LogMessageReceived);
+        
+        _eventSubscriptionService = eventSubscriptionService ??
+                                    throw new ArgumentNullException(nameof(eventSubscriptionService));
+        
+        _eventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(
+            AppMessageReceived);
+        _eventSubscriptionService.Subscribe<LogMessageEvent, string>(
+            LogMessageReceived);
+        
     }
 
     public ObservableCollection<string> LogMessages { get; set; }

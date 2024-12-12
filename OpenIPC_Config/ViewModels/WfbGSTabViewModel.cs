@@ -61,11 +61,8 @@ public partial class WfbGSTabViewModel : ViewModelBase
         { 177, "5885 MHz [177]" }
     };
 
-    private readonly ISshClientService _sshClientService;
 
     [ObservableProperty] private bool _canConnect;
-
-    private readonly IEventAggregator _eventAggregator;
 
     [ObservableProperty] private ObservableCollection<string> _frequencies;
     [ObservableProperty] private string _gsMavlink;
@@ -80,19 +77,19 @@ public partial class WfbGSTabViewModel : ViewModelBase
 
     [ObservableProperty] private string _wifiRegion;
 
-    public WfbGSTabViewModel()
+    public WfbGSTabViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
         _wfbGsConfigParser = new WfbGsConfigParser();
         _wifiConfigParser = new WifiConfigParser();
 
-
         InitializeCollections();
-        _eventAggregator = App.EventAggregator;
-        _eventAggregator?.GetEvent<RadxaContentUpdateChangeEvent>().Subscribe(OnRadxaContentUpdateChange);
-
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-
-        _sshClientService = new SshClientService(_eventAggregator);
+        
+        EventSubscriptionService.Subscribe<RadxaContentUpdateChangeEvent, RadxaContentUpdatedMessage>(OnRadxaContentUpdateChange);
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
+        
     }
 
 
@@ -147,7 +144,7 @@ public partial class WfbGSTabViewModel : ViewModelBase
             }
 
             // Upload the updated configuration file
-            _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastModProbeFileLoc,
+            SshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastModProbeFileLoc,
                 updatedConfigString);
             Log.Information("Configuration file updated and uploaded successfully.");
         }
@@ -181,7 +178,7 @@ public partial class WfbGSTabViewModel : ViewModelBase
             }
 
             // Upload the updated configuration file
-            _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastFileLoc,
+            SshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastFileLoc,
                 updatedConfigContent);
             Log.Information("Configuration file updated and uploaded successfully.");
         }

@@ -23,6 +23,10 @@ clean_builds() {
     mkdir -p "$output_dir"
 }
 
+run_tests() {
+    echo "Running tests..."
+    dotnet test --logger "trx;LogFileName=TestResults.xml"
+}
 # Function to create macOS .app bundle
 create_macos_app_bundle() {
     app_name="OpenIPC_Config"
@@ -154,6 +158,7 @@ done
 
 # Clean previous builds
 clean_builds
+run_tests
 
 # Execute builds based on the selected options
 if [ "$build_all" = true ] || [ "$build_macos" = true ]; then

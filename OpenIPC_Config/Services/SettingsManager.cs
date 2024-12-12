@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Newtonsoft.Json;
 using OpenIPC_Config.Models;
@@ -9,7 +10,14 @@ namespace OpenIPC_Config.Services;
 public static class SettingsManager
 {
     private static readonly string AppSettingsName = "openipc_settings.json";
-    private static readonly string AppSettingFilename = $"{Models.OpenIPC.AppDataConfigDirectory}/{AppSettingsName}";
+    private static string _appSettingFilename = $"{Models.OpenIPC.AppDataConfigDirectory}/openipc_settings.json";
+
+    public static string AppSettingFilename
+    {
+        get => _appSettingFilename;
+        set => _appSettingFilename = value; // Allow setting a custom filename for testing
+    }
+
 
 
     /// <summary>
@@ -20,30 +28,42 @@ public static class SettingsManager
     ///     If the settings file does not exist, returns a <see cref="DeviceConfig" />
     ///     with default values.
     /// </returns>
-    public static DeviceConfig? LoadSettings(IEventAggregator eventAggregator)
+    public static DeviceConfig? LoadSettings()
     {
         DeviceConfig deviceConfig;
-
+        
         if (File.Exists(AppSettingFilename))
         {
-            var json = File.ReadAllText(AppSettingFilename);
-
-            deviceConfig = JsonConvert.DeserializeObject<DeviceConfig>(json);
-            if (deviceConfig != null)
+            try
             {
-                // DeviceStateUpdatedMessage deviceStateUpdatedMessage = new DeviceStateUpdatedMessage(true, deviceConfig);
-                // eventAggregator?.GetEvent<DeviceStateUpdatedEvent>()
-                //     .Publish(deviceStateUpdatedMessage);
-            }
-            else
-            {
-                Log.Error("LoadSettings: deviceConfig is null");
-            }
+                var json = File.ReadAllText(AppSettingFilename);
+                deviceConfig = JsonConvert.DeserializeObject<DeviceConfig>(json);
 
-            return deviceConfig;
+                if (deviceConfig != null)
+                {
+                    // Optionally publish an event if needed
+                    // eventAggregator?.GetEvent<DeviceStateUpdatedEvent>()?.Publish(
+                    //     new DeviceStateUpdatedMessage(true, deviceConfig));
+                    return deviceConfig;
+                }
+
+                Log.Error("LoadSettings: deviceConfig is null. The file content might be corrupted.");
+            }
+            catch (JsonException ex)
+            {
+                Log.Error($"LoadSettings: Failed to parse JSON. Exception: {ex.Message}");
+            }
+            catch (IOException ex)
+            {
+                Log.Error($"LoadSettings: File IO error. Exception: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"LoadSettings: Unexpected error. Exception: {ex.Message}");
+            }
         }
 
-        // Default values if no settings file exists
+        // Default values if no settings file exists or an error occurs
         return new DeviceConfig
         {
             IpAddress = "",
@@ -52,6 +72,7 @@ public static class SettingsManager
             DeviceType = DeviceType.Camera
         };
     }
+
 
     /// <summary>
     ///     Saves the device configuration settings to a JSON file.

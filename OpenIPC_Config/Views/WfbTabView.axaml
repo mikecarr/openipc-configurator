@@ -56,15 +56,15 @@
                   SelectedItem="{Binding SelectedPower24GHz, Mode=TwoWay}" />
 
         <ComboBox Grid.Column="1" Grid.Row="4" ToolTip.Tip="Select MCS INDEX"
-                  ItemsSource="{Binding MCSIndex}"
+                  ItemsSource="{Binding McsIndex}"
                   SelectedItem="{Binding SelectedMcsIndex, Mode=TwoWay}" />
 
         <ComboBox Grid.Column="1" Grid.Row="5" ToolTip.Tip="Select STBC"
-                  ItemsSource="{Binding STBC}"
+                  ItemsSource="{Binding Stbc}"
                   SelectedItem="{Binding SelectedStbc, Mode=TwoWay}" />
 
         <ComboBox Grid.Column="1" Grid.Row="6" ToolTip.Tip="Select LDPC"
-                  ItemsSource="{Binding LDPC}"
+                  ItemsSource="{Binding Ldpc}"
                   SelectedItem="{Binding SelectedLdpc, Mode=TwoWay}" />
 
         <ComboBox Grid.Column="1" Grid.Row="7" ToolTip.Tip="Select FEC K"

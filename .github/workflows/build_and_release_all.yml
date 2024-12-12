@@ -46,6 +46,9 @@ jobs:
       - name: Build project
         run: dotnet build OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj --configuration Release
 
+      - name: Run Tests
+        run: dotnet test --no-build --configuration Release --logger "trx;LogFileName=test-results.trx"
+
       - name: Publish Project
         run: |
           if [[ "${{ runner.os }}" == "Windows" ]]; then

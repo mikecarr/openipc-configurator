@@ -25,7 +25,6 @@ public partial class VRXTabViewModel : ViewModelBase
     [ObservableProperty] private bool _canConnect;
 
     [ObservableProperty] private string _droneKeyChecksum;
-    private readonly IEventAggregator _eventAggregator;
 
     [ObservableProperty] private ObservableCollection<string> _fps;
 
@@ -39,16 +38,15 @@ public partial class VRXTabViewModel : ViewModelBase
 
     [ObservableProperty] private bool _isSimpleMavLinkOSD;
     [ObservableProperty] private bool _isExtendedMavLinkOSD;
-    
-    private readonly ISshClientService _sshClientService;
 
-    public VRXTabViewModel()
+    public VRXTabViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
-        _eventAggregator = App.EventAggregator;
-        _eventAggregator.GetEvent<DeviceTypeChangeEvent>().Subscribe(onDeviceTypeChangeEvent);
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
-        _eventAggregator.GetEvent<RadxaContentUpdateChangeEvent>().Subscribe(OnRadxaContentUpdateChange);
-        _sshClientService = new SshClientService(_eventAggregator);
+        EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(onDeviceTypeChangeEvent);
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
+        EventSubscriptionService.Subscribe<RadxaContentUpdateChangeEvent, RadxaContentUpdatedMessage>(OnRadxaContentUpdateChange);
         
         InitializeCollections();
     }
@@ -129,7 +127,7 @@ public partial class VRXTabViewModel : ViewModelBase
         var screenMode = $"{resolution}@{fps}\n";
         
         UpdateUIMessage("Uploading screen mode");
-        await _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.ScreenModeFileLoc, screenMode);
+        await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.ScreenModeFileLoc, screenMode);
         
         // update the files here
         // VRX
@@ -149,10 +147,10 @@ public partial class VRXTabViewModel : ViewModelBase
             {
                 //basic
                 UpdateUIMessage("Setting Simple Mavlink OSD");
-                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavBasic1);
-                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavBasic2);
+                SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavBasic1);
+                SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavBasic2);
                 UpdateUIMessage("Rebooting device");
-                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+                SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
             }
             catch (Exception e)
             {
@@ -167,10 +165,10 @@ public partial class VRXTabViewModel : ViewModelBase
             try
             {
                 UpdateUIMessage("Setting Extended Mavlink OSD");
-                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavExtended1);
-                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavExtended2);
+                SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavExtended1);
+                SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsMavExtended2);
                 UpdateUIMessage("Rebooting device");
-                _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+                SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
             }
             catch (Exception e)
             {
@@ -199,9 +197,9 @@ public partial class VRXTabViewModel : ViewModelBase
     private async Task EnableVrxMSPDisplayport()
     {
         Log.Information("EnableVrxMSPDisplayport clicked");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GSMSPDisplayportCommand);
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GSMSPDisplayport2Command);
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+        SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GSMSPDisplayportCommand);
+        SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GSMSPDisplayport2Command);
+        SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
         Log.Information("EnableVrxMSPDisplaypor..done");
         //mspgs
         //plink -ssh root@%2 -pw %3 sed -i '/pixelpilot --osd --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4/c\pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 "&"' /config/scripts/stream.sh

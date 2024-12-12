@@ -4,292 +4,234 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DynamicData.Binding;
 using MsBox.Avalonia;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
 using Prism.Events;
-using ReactiveUI;
 using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
-public class WfbTabViewModel : ReactiveObject
+public partial class WfbTabViewModel : ViewModelBase
 {
-    private readonly Dictionary<int, string> _24frequencyMapping = new()
+    private readonly Dictionary<int, string> _24FrequencyMapping = FrequencyMappings.Frequency24GHz;
+    private readonly Dictionary<int, string> _58FrequencyMapping = FrequencyMappings.Frequency58GHz;
+    private bool _isDisposed;
+
+    public WfbTabViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
     {
-        { 0, "" },
-        { 1, "2412 MHz [1]" },
-        { 2, "2417 MHz [2]" },
-        { 3, "2422 MHz [3]" },
-        { 4, "2427 MHz [4]" },
-        { 5, "2432 MHz [5]" },
-        { 6, "2437 MHz [6]" },
-        { 7, "2442 MHz [7]" },
-        { 8, "2447 MHz [8]" },
-        { 9, "2452 MHz [9]" },
-        { 10, "2457 MHz [10]" },
-        { 11, "2462 MHz [11]" },
-        { 12, "2467 MHz [12]" },
-        { 13, "2472 MHz [13]" },
-        { 14, "2484 MHz [14]" }
-    };
-
-
-    private readonly Dictionary<int, string> _58frequencyMapping = new()
-    {
-        { 0, "" },
-        { 36, "5180 MHz [36]" },
-        { 40, "5200 MHz [40]" },
-        { 44, "5220 MHz [44]" },
-        { 48, "5240 MHz [48]" },
-        { 52, "5260 MHz [52]" },
-        { 56, "5280 MHz [56]" },
-        { 60, "5300 MHz [60]" },
-        { 64, "5320 MHz [64]" },
-        { 100, "5500 MHz [100]" },
-        { 104, "5520 MHz [104]" },
-        { 108, "5540 MHz [108]" },
-        { 112, "5560 MHz [112]" },
-        { 116, "5580 MHz [116]" },
-        { 120, "5600 MHz [120]" },
-        { 124, "5620 MHz [124]" },
-        { 128, "5640 MHz [128]" },
-        { 132, "5660 MHz [132]" },
-        { 136, "5680 MHz [136]" },
-        { 140, "5700 MHz [140]" },
-        { 144, "5720 MHz [144]" },
-        { 149, "5745 MHz [149]" },
-        { 153, "5765 MHz [153]" },
-        { 157, "5785 MHz [157]" },
-        { 161, "5805 MHz [161]" },
-        { 165, "5825 MHz [165]" },
-        { 169, "5845 MHz [169]" },
-        { 173, "5865 MHz [173]" },
-        { 177, "5885 MHz [177]" }
-    };
-
-    private readonly IEventAggregator _eventAggregator;
-
-    private readonly ISshClientService? _sshClientService;
-
-    private bool _canConnect;
-
-    private int _selectedChannel;
-
-    private int _selectedFecK;
-
-    private int _selectedFecN;
-
-    private string _selectedFrequency24String;
-
-    private string _selectedFrequency58String;
-
-    private int _selectedLdpc;
-
-    private int _selectedMcsIndex;
-
-    private int _selectedPower;
-
-    private int _selectedPower24GHz;
-
-    private int _selectedStbc;
-
-    private string _wfbConfContent;
-
-    public WfbTabViewModel()
-    {
+        
         InitializeCollections();
 
-        _sshClientService = new SshClientService(_eventAggregator);
-        RestartWfbCommand = new RelayCommand(() => RestartWfb());
+        RestartWfbCommand = new RelayCommand(RestartWfb);
 
-        _eventAggregator = App.EventAggregator;
-
-        _eventAggregator.GetEvent<TabMessageEvent>().Subscribe(MessageReceived);
-        _eventAggregator.GetEvent<WfbConfContentUpdatedEvent>().Subscribe(WfbConfContentUpdated);
-        _eventAggregator.GetEvent<AppMessageEvent>().Subscribe(OnAppMessage);
+        SubscribeToEvents();
     }
 
+    public ICommand RestartWfbCommand { get; }
 
-    public ObservableCollection<string> Frequencies58GHz { get; set; }
-    public ObservableCollection<string> Frequencies24GHz { get; set; }
+    #region Observable Properties
 
-    public ObservableCollection<int> Power58GHz { get; set; }
-    public ObservableCollection<int> Power24GHz { get; set; }
-    public ObservableCollection<int> MCSIndex { get; set; }
-    public ObservableCollection<int> STBC { get; set; }
-    public ObservableCollection<int> LDPC { get; set; }
-    public ObservableCollection<int> FecK { get; set; }
-    public ObservableCollection<int> FecN { get; set; }
-    public ICommand RestartWfbCommand { get; private set; }
+    [ObservableProperty] private bool _canConnect;
 
-    public int SelectedPower24GHz
+    [ObservableProperty] private string _wfbConfContent;
+
+    [ObservableProperty] private int _selectedChannel;
+
+    [ObservableProperty] private int _selectedPower24GHz;
+
+    [ObservableProperty] private int _selectedPower;
+
+    [ObservableProperty] private int _selectedLdpc;
+
+    [ObservableProperty] private int _selectedMcsIndex;
+
+    [ObservableProperty] private int _selectedStbc;
+
+    [ObservableProperty] private int _selectedFecK;
+
+    [ObservableProperty] private int _selectedFecN;
+
+    [ObservableProperty] private string _selectedFrequency24String;
+
+    [ObservableProperty] private string _selectedFrequency58String;
+
+    #endregion
+
+    #region Collections
+
+    [ObservableProperty] private ObservableCollection<string> _frequencies58GHz;
+
+    [ObservableProperty] private ObservableCollection<string> _frequencies24GHz;
+
+    [ObservableProperty] private ObservableCollection<int> _power58GHz;
+
+    [ObservableProperty] private ObservableCollection<int> _power24GHz;
+
+    [ObservableProperty] private ObservableCollection<int> _mcsIndex;
+
+    [ObservableProperty] private ObservableCollection<int> _stbc;
+
+    [ObservableProperty] private ObservableCollection<int> _ldpc;
+
+    [ObservableProperty] private ObservableCollection<int> _fecK;
+
+    [ObservableProperty] private ObservableCollection<int> _fecN;
+
+    #endregion
+
+    #region Initialization
+
+    private void InitializeCollections()
     {
-        get => _selectedPower24GHz;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedPower24GHz, value);
-            Log.Debug($"SelectedPower (2.4) updated to {value}");
-        }
+        Frequencies58GHz = new ObservableCollectionExtended<string>(_58FrequencyMapping.Values);
+        Frequencies24GHz = new ObservableCollectionExtended<string>(_24FrequencyMapping.Values);
+        Power58GHz = new ObservableCollectionExtended<int> { 1, 5, 10, 15, 20, 25, 30 };
+        Power24GHz = new ObservableCollectionExtended<int> { 1, 20, 25, 30, 35, 40 };
+        McsIndex = new ObservableCollectionExtended<int>(Enumerable.Range(1, 31));
+        Stbc = new ObservableCollectionExtended<int> { 0, 1 };
+        Ldpc = new ObservableCollectionExtended<int> { 0, 1 };
+        FecK = new ObservableCollectionExtended<int>(Enumerable.Range(0, 13));
+        FecN = new ObservableCollectionExtended<int>(Enumerable.Range(0, 13));
     }
 
-    public int SelectedChannel
+    private void SubscribeToEvents()
     {
-        get => _selectedChannel;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedChannel, value);
-            Log.Debug($"SelectedChannel updated to {value}");
-        }
+        EventSubscriptionService.Subscribe<WfbConfContentUpdatedEvent, WfbConfContentUpdatedMessage>(OnWfbConfContentUpdated);
+        EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
     }
 
-    public int SelectedPower
+    #endregion
+
+    #region Methods
+
+    // public void Dispose()
+    // {
+    //     if (_isDisposed) return;
+    //
+    //     EventAggregator.GetEvent<WfbConfContentUpdatedEvent>().Unsubscribe(OnWfbConfContentUpdated);
+    //     EventAggregator.GetEvent<AppMessageEvent>().Unsubscribe(OnAppMessage);
+    //
+    //     _isDisposed = true;
+    // }
+
+    private void OnWfbConfContentUpdated(WfbConfContentUpdatedMessage message)
     {
-        get => _selectedPower;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedPower, value);
-            Log.Debug($"SelectedPower (5.8) updated to {value}");
-        }
-    }
-
-    public int SelectedLdpc
-    {
-        get => _selectedLdpc;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedLdpc, value);
-            Log.Debug($"SelectedLdpc updated to {value}");
-        }
-    }
-
-    public int SelectedStbc
-    {
-        get => _selectedStbc;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedStbc, value);
-            Log.Debug($"SelectedStbc updated to {value}");
-        }
-    }
-
-    public int SelectedMcsIndex
-    {
-        get => _selectedMcsIndex;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedMcsIndex, value);
-            Log.Debug($"SelectedMcsIndex updated to {value}");
-        }
-    }
-
-    public int SelectedFecK
-    {
-        get => _selectedFecK;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedFecK, value);
-            Log.Debug($"SelectedFecK updated to {value}");
-        }
-    }
-
-    public int SelectedFecN
-    {
-        get => _selectedFecN;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedFecN, value);
-            Log.Debug($"SelectedFecN updated to {value}");
-        }
-    }
-
-    public string SelectedFrequency58String
-    {
-        get => _selectedFrequency58String;
-        set
-        {
-            if (_selectedFrequency58String != value)
-            {
-                _selectedFrequency58String = value;
-                this.RaisePropertyChanged(nameof(SelectedFrequency58String));
-                
-                // Reset the 2.4GHz frequency to index 0
-                if(!string.IsNullOrEmpty(_selectedFrequency58String))
-                    SelectedFrequency24String = Frequencies24GHz.FirstOrDefault();
-
-                // Extract the channel number using a regular expression
-                var match = Regex.Match(value, @"\[(\d+)\]");
-                if (match.Success && int.TryParse(match.Groups[1].Value, out int channel))
-                {
-                    SelectedChannel = channel;
-                }
-                else
-                {
-                    SelectedChannel = -1; // Default value if parsing fails
-                }
-            }
-        }
-    }
-
-    public string SelectedFrequency24String
-    {
-        get => _selectedFrequency24String;
-        set
-        {
-            if (_selectedFrequency24String != value)
-            {
-                _selectedFrequency24String = value;
-                this.RaisePropertyChanged(nameof(SelectedFrequency24String));
-
-                // Reset the 5.8GHz frequency to index 0
-                if(!string.IsNullOrEmpty(_selectedFrequency24String))
-                    SelectedFrequency58String = Frequencies58GHz.FirstOrDefault();
-                
-                // Extract the channel number using a regular expression
-                var match = Regex.Match(value, @"\[(\d+)\]");
-                if (match.Success && int.TryParse(match.Groups[1].Value, out int channel))
-                {
-                    SelectedChannel = channel;
-                }
-                else
-                {
-                    SelectedChannel = -1; // Default value if parsing fails
-                }
-            }
-        }
-    }
-
-    public string? WfbConfContent
-    {
-        get => _wfbConfContent;
-        set => this.RaiseAndSetIfChanged(ref _wfbConfContent, value);
-        //CanConnect = true;
-        //ParseWfbConfContent();
-    }
-
-    public bool CanConnect
-    {
-        get => _canConnect;
-        set => this.RaiseAndSetIfChanged(ref _canConnect, value);
-        //Log.Debug($"CanConnect {value}");
-    }
-
-
-    private void WfbConfContentUpdated(WfbConfContentUpdatedMessage obj)
-    {
-        WfbConfContent = obj.Content;
+        WfbConfContent = message.Content;
         ParseWfbConfContent();
     }
 
-    // Method that will save settings and then restart device
+    private void OnAppMessage(AppMessage message)
+    {
+        CanConnect = message.CanConnect;
+    }
+
+    partial void OnWfbConfContentChanged(string value)
+    {
+        if (!string.IsNullOrEmpty(value)) ParseWfbConfContent();
+    }
+
+    partial void OnSelectedFrequency24StringChanged(string value)
+    {
+        if (!string.IsNullOrEmpty(value)) HandleFrequencyChange(value, _24FrequencyMapping);
+    }
+
+    partial void OnSelectedFrequency58StringChanged(string value)
+    {
+        if (!string.IsNullOrEmpty(value)) HandleFrequencyChange(value, _58FrequencyMapping);
+    }
+
+    private void ParseWfbConfContent()
+    {
+        if (string.IsNullOrEmpty(WfbConfContent))
+        {
+            Logger.Debug("WfbConfContent is empty.");
+            return;
+        }
+
+        var lines = WfbConfContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var line in lines)
+        {
+            var parts = line.Split('=');
+            if (parts.Length != 2) continue;
+
+            var key = parts[0].Trim();
+            var value = parts[1].Trim();
+
+            // Map values to properties
+            MapWfbKeyToProperty(key, value);
+        }
+    }
+
+    private void MapWfbKeyToProperty(string key, string value)
+    {
+        switch (key)
+        {
+            case Wfb.Frequency:
+                HandleFrequencyKey(value);
+                break;
+            case Wfb.Txpower:
+                SelectedPower24GHz = TryParseInt(value, SelectedPower24GHz);
+                break;
+            case Wfb.DriverTxpowerOverride:
+                SelectedPower = TryParseInt(value, SelectedPower);
+                break;
+            case Wfb.McsIndex:
+                SelectedMcsIndex = TryParseInt(value, SelectedMcsIndex);
+                break;
+            case Wfb.Ldpc:
+                SelectedLdpc = TryParseInt(value, SelectedLdpc);
+                break;
+            case Wfb.Stbc:
+                SelectedStbc = TryParseInt(value, SelectedStbc);
+                break;
+            case Wfb.FecK:
+                SelectedFecK = TryParseInt(value, SelectedFecK);
+                break;
+            case Wfb.FecN:
+                SelectedFecN = TryParseInt(value, SelectedFecN);
+                break;
+            case Wfb.Channel:
+                SelectedChannel = TryParseInt(value, SelectedChannel);
+                HandleFrequencyKey(value);
+                break;
+        }
+    }
+
+    private void HandleFrequencyKey(string value)
+    {
+        if (int.TryParse(value, out var frequency))
+        {
+            SelectedFrequency58String = _58FrequencyMapping.ContainsKey(frequency)
+                ? _58FrequencyMapping[frequency]
+                : SelectedFrequency58String;
+
+            SelectedFrequency24String = _24FrequencyMapping.ContainsKey(frequency)
+                ? _24FrequencyMapping[frequency]
+                : SelectedFrequency24String;
+        }
+    }
+
+    private int TryParseInt(string value, int fallback)
+    {
+        return int.TryParse(value, out var result) ? result : fallback;
+    }
+
     private async void RestartWfb()
     {
-        _eventAggregator.GetEvent<TabMessageEvent>().Publish("Restart Pushed");
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-            { Message = "Getting new content", DeviceConfig = DeviceConfig.Instance });
-
+        UpdateUIMessage("Restarting WFB...");
+        
+        EventSubscriptionService.Publish<TabMessageEvent, string>("Restart Pushed");
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(
+            new AppMessage { Message = "Getting new content", DeviceConfig = DeviceConfig.Instance });
+        
         var newFrequency58 = SelectedFrequency58String;
         var newFrequency24 = SelectedFrequency24String;
 
@@ -323,201 +265,44 @@ public class WfbTabViewModel : ReactiveObject
         if (string.IsNullOrEmpty(updatedWfbConfContent))
             await MessageBoxManager.GetMessageBoxStandard("Error", "WfbConfContent is empty").ShowAsync();
 
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-        {
-            Message = $"Uploading new {Models.OpenIPC.WfbConfFileLoc}", DeviceConfig = DeviceConfig.Instance,
-            UpdateLogView = true
-        });
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(
+            new AppMessage { Message = $"Uploading new {OpenIPC.WfbConfFileLoc}", DeviceConfig = DeviceConfig.Instance,
+                UpdateLogView = true });
 
-        Log.Information($"Uploading new : {Models.OpenIPC.WfbConfFileLoc}");
-        _sshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WfbConfFileLoc, WfbConfContent);
 
-        _eventAggregator.GetEvent<AppMessageEvent>().Publish(new AppMessage
-            { Message = "Restarting Wfb", DeviceConfig = DeviceConfig.Instance, UpdateLogView = true });
-        Log.Information("Restarting Wfb");
-        _sshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.WfbRestartCommand);
+        Logger.Information($"Uploading new : {OpenIPC.WfbConfFileLoc}");
+        await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.WfbConfFileLoc, WfbConfContent);
+
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(
+            new AppMessage { Message = "Restarting Wfb", DeviceConfig = DeviceConfig.Instance, UpdateLogView = true });
+        
+        Logger.Information("Restarting Wfb");
+        
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.WfbRestartCommand);
     }
 
-    private void MessageReceived(string obj)
+    private void HandleFrequencyChange(string newValue, Dictionary<int, string> frequencyMapping)
     {
-        //Log.Debug($"******* {this.GetType().Name} : MessageReceived: {obj}");
-    }
-
-    private void InitializeCollections()
-    {
-        // Convert the dictionary values to an ObservableCollection for binding
-        Frequencies58GHz = new ObservableCollection<string>(_58frequencyMapping.Values);
-        Frequencies24GHz = new ObservableCollection<string>(_24frequencyMapping.Values);
-
-        Power58GHz = new ObservableCollection<int> { 1, 5, 10, 15, 20, 25, 30 };
-        Power24GHz = new ObservableCollection<int> { 1, 20, 25, 30, 35, 40 };
-        MCSIndex = new ObservableCollection<int>
+        // Reset the other frequency collection to its first value
+        if (frequencyMapping == _24FrequencyMapping)
         {
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-            30, 31
-        };
-        STBC = new ObservableCollection<int> { 0, 1 };
-        LDPC = new ObservableCollection<int> { 0, 1 };
-        FecK = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-        FecN = new ObservableCollection<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-    }
-
-    // Method to parse the wfbConfContent
-    private void ParseWfbConfContent()
-    {
-        Log.Debug("Parsing wfbConfContent.");
-
-        if (string.IsNullOrEmpty(WfbConfContent)) return;
-
-        // Logic to parse wfbConfContent, e.g., split by lines or delimiters
-        var lines = WfbConfContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-        foreach (var line in lines)
-        {
-            // Example: Parse key-value pairs
-            var parts = line.Split('=');
-            if (parts.Length == 2)
-            {
-                var key = parts[0].Trim();
-                var value = parts[1].Trim();
-
-                switch (key)
-                {
-                    case Wfb.Frequency:
-                        if (int.TryParse(value, out var frequency))
-                        {
-                            string frequencyString;
-
-                            if (_58frequencyMapping.TryGetValue(frequency, out frequencyString))
-                                SelectedFrequency58String = frequencyString;
-                            else if (_24frequencyMapping.TryGetValue(frequency, out frequencyString))
-                                SelectedFrequency24String = frequencyString;
-                            // Handle unknown frequency value
-                        }
-
-                        break;
-                    case Wfb.DriverTxpowerOverride:
-                        if (int.TryParse(value, out var parsedPower))
-                            // Ensure the parsed power exists in the collection, or set a fallback
-                            if (Power58GHz.Contains(parsedPower))
-                            {
-                                SelectedPower = parsedPower;
-                            }
-                            else
-                            {
-                                Power58GHz.Add(parsedPower);
-                                SelectedPower = parsedPower;
-                            }
-
-                        break;
-                    case Wfb.Ldpc:
-                        if (int.TryParse(value, out var parsedLdpc))
-                            // Ensure the parsed power exists in the collection, or set a fallback
-                            if (LDPC.Contains(parsedLdpc))
-                            {
-                                SelectedLdpc = parsedLdpc;
-                            }
-                            else
-                            {
-                                LDPC.Add(parsedLdpc);
-                                SelectedLdpc = parsedLdpc;
-                            }
-
-                        break;
-                    case Wfb.Stbc:
-                        if (int.TryParse(value, out var parsedStbc))
-                            if (STBC.Contains(parsedStbc))
-                            {
-                                SelectedStbc = parsedStbc;
-                            }
-                            else
-                            {
-                                STBC.Add(parsedStbc);
-                                SelectedStbc = parsedStbc;
-                            }
-
-                        break;
-                    case Wfb.Txpower:
-                        if (int.TryParse(value, out var parsedTxpower))
-                        {
-                            if (Power24GHz.Contains(parsedTxpower))
-                            {
-                                SelectedPower24GHz = parsedTxpower;
-                            }
-                            else
-                            {
-                                Power24GHz.Add(parsedTxpower);
-                                SelectedPower24GHz = parsedTxpower;
-                            }
-                        }
-
-                        break;
-                    case Wfb.McsIndex:
-                        if (int.TryParse(value, out var parsedMcsIndex))
-                            if (MCSIndex.Contains(parsedMcsIndex))
-                            {
-                                SelectedMcsIndex = parsedMcsIndex;
-                            }
-                            else
-                            {
-                                MCSIndex.Add(parsedMcsIndex);
-                                SelectedMcsIndex = parsedMcsIndex;
-                            }
-
-                        break;
-                    case Wfb.FecK:
-                        if (int.TryParse(value, out var parsedFecK))
-
-                            if (FecK.Contains(parsedFecK))
-                            {
-                                SelectedFecK = parsedFecK;
-                            }
-                            else
-                            {
-                                FecK.Add(parsedFecK);
-                                SelectedFecK = parsedFecK;
-                            }
-
-                        break;
-                    case Wfb.FecN:
-                        if (int.TryParse(value, out var parsedFecN))
-                            if (FecN.Contains(parsedFecN))
-                            {
-                                SelectedFecN = parsedFecN;
-                            }
-                            else
-                            {
-                                FecN.Add(parsedFecN);
-                                SelectedFecN = parsedFecN;
-                            }
-
-                        break;
-                    case Wfb.Channel:
-                        if (int.TryParse(value, out var channel))
-                        {
-                            SelectedChannel = channel;
-                            if (_58frequencyMapping.TryGetValue(channel, out var frequency58String))
-                                SelectedFrequency58String = frequency58String;
-                            else if (_24frequencyMapping.TryGetValue(channel, out var frequency24String))
-                                SelectedFrequency24String = frequency24String;
-                            // Handle unknown channel value
-                        }
-
-                        break;
-                }
-
-
-                // Handle parsed data, e.g., store in a dictionary or bind to properties
-                Log.Debug($"WFB - Key: {key}, Value: {value}");
-            }
+            SelectedFrequency58String = Frequencies58GHz.FirstOrDefault();
+            SelectedPower = Power58GHz.FirstOrDefault();
         }
+        else if (frequencyMapping == _58FrequencyMapping)
+        {
+            SelectedFrequency24String = Frequencies24GHz.FirstOrDefault();
+            SelectedPower24GHz = Power24GHz.FirstOrDefault();
+        }
+
+        // Extract the channel number using a regular expression
+        var match = Regex.Match(newValue, @"\[(\d+)\]");
+        if (match.Success && int.TryParse(match.Groups[1].Value, out var channel))
+            SelectedChannel = channel;
+        else
+            SelectedChannel = -1; // Default value if parsing fails
     }
 
-    private void OnAppMessage(AppMessage appMessage)
-    {
-        if (appMessage.CanConnect) CanConnect = appMessage.CanConnect;
-        //Log.Information($"CanConnect {CanConnect.ToString()}");
-    }
 
     private string UpdateWfbConfContent(
         string wfbConfContent,
@@ -569,4 +354,6 @@ public class WfbTabViewModel : ReactiveObject
         });
         return updatedContent;
     }
+
+    #endregion
 }

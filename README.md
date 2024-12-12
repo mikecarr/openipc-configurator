@@ -109,6 +109,13 @@ When creating tags, follow semantic versioning:
 * v2.0.0: Major release (breaking changes).
 
 
+## Code Coverage
+
+```
+dotnet test --collect:"XPlat Code Coverage"  
+reportgenerator -reports:"TestResults/**/*.xml" -targetdir:coverage-report -reporttypes:Html
+```
+
 
 IOS:
 https://docs.avaloniaui.net/docs/guides/platforms/ios/build-and-run-your-application-on-your-iphone-or-ipad
