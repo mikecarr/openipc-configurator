@@ -33,7 +33,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore OpenIPC_Config.Test/OpenIPC_Config.Tests.csproj
+        run: dotnet restore OpenIPC_Config.Tests/OpenIPC_Config.Tests.csproj
         
       - name: "Restore/Build/Test"
         run: dotnet test --configuration Release --verbosity normal --logger trx --collect:"XPlat Code Coverage"
