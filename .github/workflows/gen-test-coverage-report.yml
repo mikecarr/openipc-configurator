@@ -23,7 +23,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+      
+      - name: List Downloaded Files
+        run: ls -R .     
+      
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
