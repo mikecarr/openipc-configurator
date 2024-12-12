@@ -1,9 +1,5 @@
 name: Generate Test Coverage Report
 
-permissions:
-  contents: write
-  actions: read
-
 # Runs on master branch commits, 
 # every commit in a pull request, any published release.
 on:
@@ -17,14 +13,10 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-        arch: [x64, arm64]
-        # os: [ubuntu-latest]
-        # arch: [arm64]
+    # Permissions this GitHub Action needs for other things in GitHub
+    permissions: write-all
 
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out the code
