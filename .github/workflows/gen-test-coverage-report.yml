@@ -42,7 +42,6 @@ jobs:
         run: dotnet build OpenIPC_Config/OpenIPC_Config.csproj --configuration Release
         
       - name: "Restore/Build/Test"
-        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'x64'
         run: dotnet test OpenIPC_Config.Tests/OpenIPC_Config.Tests.csproj --configuration Release --verbosity normal --logger trx --collect:"XPlat Code Coverage"
 
       - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
