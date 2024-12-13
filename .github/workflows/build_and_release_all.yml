@@ -47,6 +47,7 @@ jobs:
         run: dotnet build OpenIPC_Config.Desktop/OpenIPC_Config.Desktop.csproj --configuration Release
 
       - name: Run Tests
+        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'x64'
         run: dotnet test OpenIPC_Config.Tests/OpenIPC_Config.Tests.csproj --no-build --configuration Release --logger "trx;LogFileName=test-results.trx"
 
       - name: Publish Project
