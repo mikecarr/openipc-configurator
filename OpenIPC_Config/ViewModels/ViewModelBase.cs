@@ -37,7 +37,7 @@ public abstract class ViewModelBase : ObservableObject
             return;
         }
 
-        Logger.Debug("Publishing UI message: {Message}", message);
+        Logger.Verbose("Publishing UI message: {Message}", message);
         EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage
         {
             Message = message,

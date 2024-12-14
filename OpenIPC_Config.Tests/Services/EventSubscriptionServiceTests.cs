@@ -42,7 +42,7 @@ public class EventSubscriptionServiceTests
 
         // Assert
         Assert.AreEqual("Test Payload", receivedPayload);
-        _mockLogger.Verify(logger => logger.Debug(It.Is<string>(msg => msg.Contains("Subscribed to event TestEvent"))),
+        _mockLogger.Verify(logger => logger.Verbose(It.Is<string>(msg => msg.Contains("Subscribed to event TestEvent"))),
             Times.Once);
     }
 
@@ -59,7 +59,7 @@ public class EventSubscriptionServiceTests
         // Assert
         Assert.AreEqual("Another Test Payload", receivedPayload);
         _mockLogger.Verify(
-            logger => logger.Debug(It.Is<string>(msg =>
+            logger => logger.Verbose(It.Is<string>(msg =>
                 msg.Contains("Published event TestEvent with payload Another Test Payload"))), Times.Once);
     }
 

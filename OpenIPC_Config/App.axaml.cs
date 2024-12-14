@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.JavaScript;
 using System.Threading;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -146,7 +147,6 @@ public class App : Application
             // Create default settings
             var defaultSettings = createDefaultAppSettings();
 
-
             File.WriteAllText(configPath, defaultSettings.ToString());
 
             Thread.Sleep(2000);
@@ -158,10 +158,10 @@ public class App : Application
         var configuration = new ConfigurationBuilder()
             .AddJsonFile(configPath, false, true)
             .AddJsonFile("appsettings.json", true, true)
-            .AddJsonFile("appsettings.Development.json", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-            .AddJsonFile(
-                $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
-                true)
+            // .AddJsonFile("appsettings.Development.json", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            // .AddJsonFile(
+            //     $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
+            //     true)
             .Build();
 
         Log.Logger = new LoggerConfiguration()
@@ -169,6 +169,9 @@ public class App : Application
             .WriteTo.Sink(new EventAggregatorSink(ServiceProvider.GetRequiredService<IEventAggregator>()))
             .CreateLogger();
 
+        Log.Information(
+            "**********************************************************************************************");
+        Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
         Log.Information($"Using appsettings.json from {configPath}");
         // Log.Logger = new LoggerConfiguration()
         //     .MinimumLevel.Debug()
@@ -177,7 +180,7 @@ public class App : Application
         //     .ReadFrom.AppSettings()
         //     .CreateLogger();
 
-        Log.Information("Starting up log");
+        
     }
 
     private JObject createDefaultAppSettings()
@@ -186,7 +189,7 @@ public class App : Application
         var defaultSettings = new JObject(
             new JProperty("Serilog",
                 new JObject(
-                    new JProperty("Using", new JArray("Serilog.Sinks.Console", "Serilog.Sinks.File")),
+                    new JProperty("Using", new JArray("Serilog.Sinks.Console", "Serilog.Sinks.RollingFile")),
                     new JProperty("MinimumLevel", "Debug"),
                     new JProperty("WriteTo",
                         new JArray(
@@ -194,11 +197,12 @@ public class App : Application
                                 new JProperty("Name", "Console")
                             ),
                             new JObject(
-                                new JProperty("Name", "File"),
+                                new JProperty("Name", "RollingFile"),
                                 new JProperty("Args",
                                     new JObject(
-                                        new JProperty("path",
-                                            $"{Models.OpenIPC.AppDataConfigDirectory}/Logs/configurator.log")
+                                        new JProperty("pathFormat",
+                                            $"{Models.OpenIPC.AppDataConfigDirectory}/Logs/configurator-{{Date}}.log") 
+                                        
                                     )
                                 )
                             )
