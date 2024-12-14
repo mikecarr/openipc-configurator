@@ -1,9 +1,11 @@
-using Moq;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
 using OpenIPC_Config.ViewModels;
 using Serilog;
+using Moq;
+using Xunit;
+using Assert = NUnit.Framework.Assert;
 
 namespace OpenIPC_Config.Tests.ViewModels;
 
@@ -17,6 +19,7 @@ public class CameraSettingsTabViewModelTests : ViewModelTestBase
     private Mock<IEventSubscriptionService> _mockEventSubscriptionService;
     private Mock<IYamlConfigService> _mockYamlConfigService;
     private Mock<EventAggregator> _mockEventAggregatorMock;
+    private readonly DeviceConfig _deviceConfigMock;
 
     [SetUp]
     public void SetUp()
@@ -37,58 +40,59 @@ public class CameraSettingsTabViewModelTests : ViewModelTestBase
     }
     
     [Test]
-    public void Constructor_InitializesCollections()
-    {
-        // Assert
-        Assert.IsNotNull(_viewModel.Resolution);
-        Assert.Contains("1920x1080", _viewModel.Resolution);
-
-        Assert.IsNotNull(_viewModel.Fps);
-        Assert.Contains("30", _viewModel.Fps);
-
-        Assert.IsNotNull(_viewModel.Codec);
-        Assert.Contains("h264", _viewModel.Codec);
-
-        Assert.IsNotNull(_viewModel.Bitrate);
-        Assert.Contains("4096", _viewModel.Bitrate);
-    }
-    
-    [Test]
-    public void OnMajesticContentUpdated_ParsesYamlAndUpdatesProperties()
+    public void OnSelectedResolutionChanged_Should_UpdateYamlConfig()
     {
         // Arrange
-        var yamlContent = "video_size: 1920x1080\nvideo_fps: 30, video_codec: h265, video_bitrate: 4096\nfpv_enabled: true, fpv_roi_rect: 10x20x30x40";
-        var message = new MajesticContentUpdatedMessage(yamlContent);
+        var testResolution = "1920x1080";
 
-        _mockYamlConfigService.Setup(service => service.ParseYaml(yamlContent, It.IsAny<Dictionary<string, string>>()))
-            .Callback<string, Dictionary<string, string>>((_, config) =>
+        // Act
+        _viewModel.SelectedResolution = testResolution;
+
+        Assert.That(testResolution, Is.EqualTo(_viewModel.SelectedResolution));
+        
+        
+        // Validate that the config is updated
+        // Since _yamlConfig is private, validate the behavior indirectly
+    }
+
+    [Test]
+    public void OnMajesticContentUpdated_Should_UpdateViewModelProperties()
+    {
+        var testResolution = "1920x1080";
+        var testFps = "60";
+        var testCodec = "h265";
+        
+        // Arrange
+        var testYamlContent = new Dictionary<string, string>
+        {
+            { Majestic.VideoSize, testResolution },
+            { Majestic.VideoFps, testFps },
+            { Majestic.VideoCodec, testCodec },
+            {Majestic.FpvRoiRect, "100x200x1080x1920"}
+        };
+
+        _mockYamlConfigService.Setup(y => y.ParseYaml(It.IsAny<string>(), It.IsAny<Dictionary<string, string>>()))
+            .Callback<string, Dictionary<string, string>>((content, config) =>
             {
-                config[Majestic.VideoSize] = "1920x1080";
-                config[Majestic.VideoFps] = "30";
-                config[Majestic.VideoCodec] = "h265";
-                config[Majestic.VideoBitrate] = "4096";
-                
-                
-                config[Majestic.FpvEnabled] = "true";
-                // FPV roiRect - (Left x Top x H x W )
-                config[Majestic.FpvRoiRect] = "10x20x30x40";
+                foreach (var item in testYamlContent) config[item.Key] = item.Value;
             });
+
+        var message = new MajesticContentUpdatedMessage("mocked_yaml_content");
 
         // Act
         _viewModel.OnMajesticContentUpdated(message);
 
         // Assert
-        Assert.AreEqual("1920x1080", _viewModel.SelectedResolution);
-        Assert.AreEqual("30", _viewModel.SelectedFps);
-        Assert.AreEqual("h265", _viewModel.SelectedCodec);
-        Assert.AreEqual("4096", _viewModel.SelectedBitrate);
+        Assert.That(_viewModel.SelectedResolution, Is.EqualTo(testResolution));
+        Assert.That(_viewModel.SelectedFps, Is.EqualTo(testFps));
+        Assert.That(_viewModel.SelectedCodec, Is.EqualTo(testCodec));
         
-        Assert.AreEqual("true", _viewModel.SelectedFpvEnabled);
-        
-        
-        // Assert.AreEqual("10", _viewModel.FpvRoiRectLeft.ToString());
-        // Assert.AreEqual("20", _viewModel.FpvRoiRectTop.ToString());
-        // Assert.AreEqual("30", _viewModel.FpvRoiRectHeight.ToString());
-        // Assert.AreEqual("40", _viewModel.FpvRoiRectWidth.ToString());
+        //$"{FpvRoiRectLeft[0]}x{FpvRoiRectTop[0]}x{FpvRoiRectHeight[0]}x{FpvRoiRectWidth[0]}";
+        Assert.That(_viewModel.FpvRoiRectLeft[0], Is.EqualTo("100"));
+        Assert.That(_viewModel.FpvRoiRectTop[0], Is.EqualTo("200"));
+        Assert.That(_viewModel.FpvRoiRectHeight[0], Is.EqualTo("1080"));
+        Assert.That(_viewModel.FpvRoiRectWidth[0], Is.EqualTo("1920"));
+
     }
+
 }

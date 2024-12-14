@@ -164,7 +164,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
     private void SetDefaults()
     {
         PingStatusColor = _offlineColorBrush;
-        IpAddress = "192.168.1.10";
+        //IpAddress = "192.168.1.10";
     }
 
     private void SendDeviceTypeMessage(DeviceType deviceType)

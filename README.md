@@ -8,12 +8,7 @@ Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator
 
 [Demo on YouTube](https://www.youtube.com/watch?v=iJXXMcnOC7w)
 
-## TODO:
-* Fix UI and views
-* Cleanup code
-* Add more features
 * Android and IOS versions coming soon!
-
 
 ## Features
 

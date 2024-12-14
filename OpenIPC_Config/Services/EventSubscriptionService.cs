@@ -25,12 +25,12 @@ public class EventSubscriptionService : IEventSubscriptionService
     public void Subscribe<TEvent, TPayload>(Action<TPayload> action) where TEvent : PubSubEvent<TPayload>, new()
     {
         _eventAggregator.GetEvent<TEvent>().Subscribe(action);
-        _logger.Debug($"Subscribed to event {typeof(TEvent).Name}");
+        _logger.Verbose($"Subscribed to event {typeof(TEvent).Name}");
     }
     
     public void Publish<TEvent, TPayload>(TPayload payload) where TEvent : PubSubEvent<TPayload>, new()
     {
         _eventAggregator.GetEvent<TEvent>().Publish(payload);
-        _logger.Debug($"Published event {typeof(TEvent).Name} with payload {payload}");
+        _logger.Verbose($"Published event {typeof(TEvent).Name} with payload {payload}");
     }
 }

@@ -477,6 +477,8 @@ public partial class SetupTabViewModel : ViewModelBase
             {
                 Log.Debug("Upgrade Cancelled!");;
                 UpdateUIMessage("Upgrade Cancelled!" );
+                DownloadProgress = 100;
+                ProgressText = "Upgrade Cancelled!!";
                 return;
             }
 

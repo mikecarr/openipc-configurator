@@ -222,6 +222,11 @@ namespace OpenIPC_Config.Assets {
             get { return ResourceManager.GetString("FpvRoiRectToolTip", resourceCulture); }
         }
         
+        public static string UpdateCameraToolTip
+        {
+            get { return ResourceManager.GetString("UpdateCameraToolTip", resourceCulture); }
+        }
+        
         
     }
 }

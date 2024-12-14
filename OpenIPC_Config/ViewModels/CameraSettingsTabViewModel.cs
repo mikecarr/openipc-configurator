@@ -124,6 +124,153 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         }
     }
 
+    partial void OnSelectedResolutionChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedResolution updated to {value}");
+        UpdateYamlConfig(Majestic.VideoSize, value);
+    }
+
+    partial void OnSelectedFpsChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFps updated to {value}");
+        UpdateYamlConfig(Majestic.VideoFps, value);
+    }
+    partial void OnSelectedCodecChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedCodec updated to {value}");
+        UpdateYamlConfig(Majestic.VideoCodec, value);
+    }
+
+    partial void OnSelectedBitrateChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedBitrate updated to {value}");
+        UpdateYamlConfig(Majestic.VideoBitrate, value);
+    }
+
+    partial void OnSelectedExposureChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedExposure updated to {value}");
+        UpdateYamlConfig(Majestic.IspExposure, value);
+    }
+
+    partial void OnSelectedHueChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedHue updated to {value}");
+        UpdateYamlConfig(Majestic.ImageHue, value);
+    }
+
+    partial void OnSelectedContrastChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedContrast updated to {value}");
+        UpdateYamlConfig(Majestic.ImageContrast, value);
+    }
+
+    partial void OnSelectedSaturationChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedSaturation updated to {value}");
+        UpdateYamlConfig(Majestic.ImageSaturation, value);
+    }
+
+    partial void OnSelectedLuminanceChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedLuminance updated to {value}");
+        UpdateYamlConfig(Majestic.ImageLuminance, value);
+    }
+
+    partial void OnSelectedFlipChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFlip updated to {value}");
+        UpdateYamlConfig(Majestic.ImageFlip, value);
+    }
+
+    partial void OnSelectedMirrorChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedMirror updated to {value}");
+        UpdateYamlConfig(Majestic.ImageMirror, value);
+    }
+
+    private void OnAppMessage(AppMessage appMessage)
+    {
+        if (appMessage.CanConnect) CanConnect = appMessage.CanConnect;
+        //Log.Debug($"CanConnect {CanConnect.ToString()}");
+    }
+
+    partial void OnSelectedFpvEnabledChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SlectedFpvEnabledChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvEnabled, value);
+    }
+    
+    partial void OnSelectedFpvNoiseLevelChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvNoiseLevelChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvNoiseLevel, value);
+    }
+    
+    partial void OnSelectedFpvRoiQpChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvRoiQpChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvRoiQp, value);
+    }
+    
+    partial void OnSelectedFpvRefEnhanceChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvRefEnhanceChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvRefEnhance, value);
+    }
+    
+    partial void OnSelectedFpvRefPredChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvRefPredChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvRefPred, value);
+    }
+    
+    partial void OnSelectedFpvIntraLineChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvIntraLineChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvIntraLine, value);
+    }
+    
+    partial void OnSelectedFpvIntraQpChanged(string value)
+    {
+        // Custom logic when the property changes
+        Log.Debug($"SelectedFpvIntraQpChanged updated to {value}");
+        UpdateYamlConfig(Majestic.FpvIntraQp, value);
+    }
+    
+    
+    private void UpdateCombinedValue()
+    {
+        CombinedFpvRoiRectValue = $"{FpvRoiRectLeft[0]}x{FpvRoiRectTop[0]}x{FpvRoiRectHeight[0]}x{FpvRoiRectWidth[0]}";
+        Log.Debug($"Combined value updated to {CombinedFpvRoiRectValue}");
+        UpdateYamlConfig(Majestic.FpvRoiRect, CombinedFpvRoiRectValue);
+    }
+    
+    public void UpdateYamlConfig(string key, string newValue)
+    {
+        if (_yamlConfig.ContainsKey(key))
+            _yamlConfig[key] = newValue;
+        else
+            _yamlConfig.Add(key, newValue);
+    }
+    
     private void InitializeCollections()
     {
         Resolution = new ObservableCollection<string>
@@ -162,7 +309,6 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         
         FpvIntraLine = new ObservableCollection<string>(Enumerable.Range(0, 10).Select(i => i.ToString()));
         FpvIntraQp = new ObservableCollection<string>{ "true", "false" };
-
 
         FpvRoiRectLeft = new ObservableCollection<string> { "" };
     }
@@ -287,9 +433,13 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         
     }
 
-    private async Task SaveRestartMajesticCommand()
+    public async Task SaveRestartMajesticCommand()
     {
         Logger.Debug("Preparing to Save Majestic YAML file.");
+        
+        var h = FpvRoiRectLeft[0];
+        UpdateCombinedValue();
+        
         var updatedYamlContent = _yamlConfigService.UpdateYaml(_yamlConfig);
 
         try

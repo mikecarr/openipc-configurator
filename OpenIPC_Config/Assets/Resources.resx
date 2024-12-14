@@ -24,8 +24,8 @@
         </value>
     </resheader>
     <data name="MSPOSDToolTip" xml:space="preserve">
-        <value>Upload the latest MSPOSD of OpenIPC_Config
-Upload the fonts for Betaflight to the OpenIPC_Config camera
+        <value>Upload the latest MSPOSD of OpenIPC
+Upload the fonts for Betaflight to the OpenIPC camera
 
 To enter the menu move: 
 LEFT stick to bottom right and
@@ -34,20 +34,20 @@ RIGHT stick to bottom left
 MSPVTX is partially working, do NOT use</value>
     </data>
     <data name="IPToolTip" xml:space="preserve">
-        <value>Type the OpenIPC_Config Camera IP/NVR/Radxa Zero 3w(WFB-ng) in a correct format XXX.XXX.XXX.XXX</value>
+        <value>Type the OpenIPC Camera IP/NVR/Radxa Zero 3w(WFB-ng) in a correct format XXX.XXX.XXX.XXX</value>
     </data>
     <data name="RestartWfbToolTip" xml:space="preserve">
-        <value>Restart the WFB on the OpenIPC_Config camera</value>
+        <value>Restart the WFB on the OpenIPC camera</value>
     </data>
     <data name="RestartMajesticToolTip" xml:space="preserve">
-        <value>Restarts the Majestic on the OpenIPC_Config camera</value>
+        <value>Restarts the Majestic on the OpenIPC camera</value>
     </data>
     <data name="ScriptFilesBackupToolTip" xml:space="preserve">
         <value>Transfer all the *.sh files from
 /root/ and /usr/sbin/channels.sh
-of the OpenIPC_Config camera
+of the OpenIPC camera
 to the location of the 
-OpenIPC_Config Configurator executable</value>
+OpenIPC Configurator executable</value>
     </data>
     <data name="RecOffToolTip" xml:space="preserve">
         <value>Turn OFF the onboard REC</value>
@@ -60,7 +60,7 @@ OpenIPC_Config Configurator executable</value>
 Must select ON or OFF option first</value>
     </data>
     <data name="UploadINavFontsToolTip" xml:space="preserve">
-        <value>Upload the fonts for INAV to the OpenIPC_Config camera</value>
+        <value>Upload the fonts for INAV to the OpenIPC camera</value>
     </data>
     <data name="AddMavlinkExtraToolTip" xml:space="preserve">
         <value>1) Add OSD SOC temperature
@@ -75,25 +75,25 @@ Must also be selected to the Serial Selector</value>
 Must also be selected to the Serial Selector</value>
     </data>
     <data name="ResetCameraToolTip" xml:space="preserve">
-        <value>Reset OpenIPC_Config camera settings to factory defaults</value>
+        <value>Reset OpenIPC camera settings to factory defaults</value>
     </data>
     <data name="SensorBinBackupToolTip" xml:space="preserve">
         <value>Transfer the imx415_fpv.bin 
-from the the Sigmastar OpenIPC_Config camera
+from the the Sigmastar OpenIPC camera
 to the backup folder in the location 
-of the OpenIPC_Config Configurator.exe file</value>
+of the OpenIPC Configurator.exe file</value>
     </data>
     <data name="SensorDriverBackupToolTip" xml:space="preserve">
         <value>Transfer the sensor_imx415_mipi.ko
-from the the Sigmastar OpenIPC_Config camera
+from the the Sigmastar OpenIPC camera
 to the backup folder in the location 
-of the OpenIPC_Config Configurator executable file</value>
+of the OpenIPC Configurator executable file</value>
     </data>
     <data name="SensorDriverUpdateToolTip" xml:space="preserve">
         <value>Transfer the sensor_imx415_mipi.ko
 from the location of the 
-OpenIPC_Config Configurator.exe file
-to the Sigmastar OpenIPC_Config camera
+OpenIPC Configurator.exe file
+to the Sigmastar OpenIPC camera
         </value>
     </data>
     <data name="SensorBinUpdateToolTip" xml:space="preserve">
@@ -105,9 +105,9 @@ to the Sigmastar OpenIPC_Config camera
     <data name="ScriptFilesRestoreToolTip" xml:space="preserve">
         <value>Transfer all the *.sh files
 from the location of the 
-OpenIPC_Config Configurator executable to
+OpenIPC Configurator executable to
 /root/ and /usr/sbin/channels.sh"
-of the OpenIPC_Config camera"</value>
+of the OpenIPC camera"</value>
     </data>
     <data name="RecvDroneKeyToolTip" xml:space="preserve">
         <value>Receive drone.key from the designated IP</value>
@@ -127,10 +127,10 @@ Step 2: Enter the VRX
 Step 3: Click [Generate keys]
 Step 4: Click [Receive drone.key]
 Step 5: Reboot the VRX
-Step 6: Select the option [OpenIPC_Config Camera]
-Step 7: Enter the OpenIPC_Config camera IP
+Step 6: Select the option [OpenIPC Camera]
+Step 7: Enter the OpenIPC camera IP
 Step 8: Click [Send drone.key]
-Step 9: Reboot OpenIPC_Config camera</value>
+Step 9: Reboot OpenIPC camera</value>
     </data>
     <data name="btnVRXMSPDisplayPort" xml:space="preserve">
         <value>Enables the MSP Displayport function of OpenIPC</value>
@@ -177,5 +177,8 @@ If you set 90fps GOP: 1 , real gop is 90 and if you set value to 9 the correctio
     </data>
     <data name="FpvRoiRectToolTip" xml:space="preserve">
         <value>FPV roiRect - (Left x Top x H x W )</value>
+    </data>
+    <data name="UpdateCameraToolTip" xml:space="preserve">
+        <value>Updates Camera's firmware to selected firmware</value>
     </data>
 </root>
