@@ -258,7 +258,25 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
     
     private void UpdateCombinedValue()
     {
-        CombinedFpvRoiRectValue = $"{FpvRoiRectLeft[0]}x{FpvRoiRectTop[0]}x{FpvRoiRectHeight[0]}x{FpvRoiRectWidth[0]}";
+        var fpvRoiRectLeft = FpvRoiRectLeft[0];
+        var fpvRoiRectTop = FpvRoiRectTop[0];
+        var fpvRoiRectHeight = FpvRoiRectHeight[0];
+        var fpvRoiRectWidth = FpvRoiRectWidth[0];
+
+        if (string.IsNullOrEmpty(fpvRoiRectLeft) &&
+            string.IsNullOrEmpty(fpvRoiRectTop) &&
+            string.IsNullOrEmpty(fpvRoiRectHeight) &&
+            string.IsNullOrEmpty(fpvRoiRectWidth)
+           )
+        {
+            // set to empty so that it removes the settings
+            CombinedFpvRoiRectValue = "";
+        }
+        else
+        {
+            CombinedFpvRoiRectValue = $"{FpvRoiRectLeft[0]}x{FpvRoiRectTop[0]}x{FpvRoiRectHeight[0]}x{FpvRoiRectWidth[0]}";    
+        }
+        
         Log.Debug($"Combined value updated to {CombinedFpvRoiRectValue}");
         UpdateYamlConfig(Majestic.FpvRoiRect, CombinedFpvRoiRectValue);
     }
@@ -269,7 +287,13 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
             _yamlConfig[key] = newValue;
         else
             _yamlConfig.Add(key, newValue);
+
+        if (string.IsNullOrEmpty(newValue))
+        {
+            _yamlConfig.Remove(key);
+        }
     }
+    
     
     private void InitializeCollections()
     {
@@ -298,17 +322,22 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         Mirror = new ObservableCollection<string> { "true", "false" };
         
         FpvEnabled = new ObservableCollection<string> { "true", "false" };
-        FpvNoiseLevel = new ObservableCollection<string> { "0", "1", "2" };
+        FpvNoiseLevel = new ObservableCollection<string> { "","0", "1", "2" };
+        
         
         // Create an ObservableCollection with values from -30 to 30
         FpvRoiQp = new ObservableCollection<string>(Enumerable.Range(-30, 61).Select(i => i.ToString()));
+        FpvRoiQp.Insert(0,"");
         
         FpvRefEnhance = new ObservableCollection<string>(Enumerable.Range(0, 10).Select(i => i.ToString()));
+        FpvRefEnhance.Insert(0,"");
         
-        FpvRefPred = new ObservableCollection<string> { "true", "false" };
+        FpvRefPred = new ObservableCollection<string> { "", "true", "false" };
         
         FpvIntraLine = new ObservableCollection<string>(Enumerable.Range(0, 10).Select(i => i.ToString()));
-        FpvIntraQp = new ObservableCollection<string>{ "true", "false" };
+        FpvIntraLine.Insert(0,"");
+        
+        FpvIntraQp = new ObservableCollection<string>{ "","true", "false" };
 
         FpvRoiRectLeft = new ObservableCollection<string> { "" };
     }
