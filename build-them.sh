@@ -39,7 +39,7 @@ create_macos_app_bundle() {
     # Copy the icon file
     echo "Copying icon file..."
     
-    cp "OpenIPC/OpenIPC_Config/Assets/Icons/OpenIPC.icns" "$app_bundle/Contents/Resources/$app_name.icns"
+    cp "OpenIPC_Config/Assets/Icons/OpenIPC.icns" "$app_bundle/Contents/Resources/$app_name.icns"
 
     # Move the executable file
     echo "Moving executable to .app bundle..."
