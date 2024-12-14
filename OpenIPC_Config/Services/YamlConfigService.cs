@@ -67,8 +67,14 @@ public class YamlConfigService : IYamlConfigService
                 using var writer = new StringWriter();
                 yamlStream.Save(writer, false);
 
+                // Get the serialized YAML content as a string
+                string yamlContent = writer.ToString();
+                
+                // Ensure Unix-style line endings
+                yamlContent = yamlContent.Replace("\r\n", "\n");
+                
                 _logger.Information("YAML content updated successfully.");
-                return writer.ToString();
+                return yamlContent;
             }
             catch (Exception ex)
             {
