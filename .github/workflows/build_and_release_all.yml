@@ -226,6 +226,22 @@ jobs:
       - name: List Downloaded Files
         run: ls -R .
 
+      - name: Generate latest.json
+        run: |
+          cat << EOF > latest.json
+          {
+          "version": "${{ env.VERSION }}",
+          "release_notes": "This is a dynamically generated release note. Update as needed.",
+          "download_url": "https://github.com/${{ github.repository }}/releases/"
+          }
+          EOF
+
+          
+      - name: Add latest.json to Release
+        run: |
+          echo "Adding latest.json to release"
+          cp latest.json ./latest.json
+
       - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
@@ -235,3 +251,4 @@ jobs:
           files: |
             ./OpenIPC-Config-*/OpenIPC-Config-*.zip
             ./OpenIPC-Config-*/OpenIPC-Config-*.dmg
+            ./latest.json
