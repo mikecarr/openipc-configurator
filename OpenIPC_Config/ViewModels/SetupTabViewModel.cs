@@ -176,6 +176,8 @@ public partial class SetupTabViewModel : ViewModelBase
             "ssc338q_fpv_emax-wyvern-link-nor",
             "ssc338q_fpv_openipc-mario-aio-nor",
             "ssc338q_fpv_openipc-urllc-aio-nor",
+            "ssc338q_fpv_openipc-thinker-aio-nor",
+            "ssc338q_fpv_emax-wyvern-link-nor",
             "ssc338q_fpv_runcam-wifilink-nor",
             "openipc.ssc338q-nor-fpv",
             "openipc.ssc338q-nor-rubyfpv",
@@ -391,6 +393,8 @@ public partial class SetupTabViewModel : ViewModelBase
         if (SelectedFwVersion == "ssc338q_fpv_emax-wyvern-link-nor" ||
             SelectedFwVersion == "ssc338q_fpv_openipc-mario-aio-nor" ||
             SelectedFwVersion == "ssc338q_fpv_openipc-urllc-aio-nor" ||
+            SelectedFwVersion == "ssc338q_fpv_openipc-thinker-aio-nor" ||
+            SelectedFwVersion == "ssc338q_fpv_emax-wyvern-link-nor" ||
             SelectedFwVersion == "ssc338q_fpv_runcam-wifilink-nor")
         {
             url = $"https://github.com/OpenIPC/builder/releases/download/latest/{SelectedFwVersion}.tgz";
@@ -585,7 +589,8 @@ public partial class SetupTabViewModel : ViewModelBase
         var result = await box.ShowAsync();
         if (result == ButtonResult.Ok)
         {
-            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.ResetCameraCommand);
+            SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.ResetCameraCommand);
+            await Task.Delay(1000); // Non-blocking pause
         }
         else
         {
