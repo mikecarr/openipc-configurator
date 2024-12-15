@@ -1,15 +1,20 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using Newtonsoft.Json.Linq;
 using OpenIPC_Config.Logging;
 using OpenIPC_Config.Services;
@@ -37,6 +42,10 @@ public class App : Application
         ServiceProvider = serviceCollection.BuildServiceProvider();
 
         CreateAppSettings();
+        
+        // check for updates
+        CheckForUpdatesAsync();
+
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -53,6 +62,70 @@ public class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    public virtual async Task ShowUpdateDialogAsync(string releaseNotes, string downloadUrl)
+    {
+        var msgBox = MessageBoxManager.GetMessageBoxStandard("Update Available",
+            $"New version available:\n\n{releaseNotes}\n\nDo you want to download the update?", ButtonEnum.YesNo);
+
+        var result = await msgBox.ShowAsync();
+
+        if (result == ButtonResult.Yes)
+        {
+            OpenBrowser(downloadUrl);
+        }
+    }
+
+    private void OpenBrowser(string url)
+    {
+        if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+        {
+            url = "https://" + url;
+        }
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = url,
+            UseShellExecute = true
+        });
+    }
+    
+    private async Task CheckForUpdatesAsync()
+    {
+        // Set up the necessary dependencies
+        var httpClient = new HttpClient();
+
+        var configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            Assembly.GetExecutingAssembly().GetName().Name, "appsettings.json");
+        
+        // Create an IConfiguration instance
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
+            .Build();
+
+        // Pass the dependencies to the constructor
+        var updateChecker = new UpdateChecker(httpClient, configuration);
+
+        try
+        {
+            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            var result = await updateChecker.CheckForUpdateAsync(currentVersion);
+
+            if (result.HasUpdate)
+            {
+                await ShowUpdateDialogAsync(result.ReleaseNotes, result.DownloadUrl);
+                Log.Information($"Update Available! Version: {result.ReleaseNotes}");
+            }
+            else
+            {
+                Log.Information("No updates found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"An error occurred while checking for updates: {ex.Message}");
+        }
     }
 
     private void ConfigureServices(IServiceCollection services)
@@ -94,6 +167,7 @@ public class App : Application
         services.AddTransient<WfbTabView>();
 
     }
+    
 
     private void CreateAppSettings()
     {
@@ -173,13 +247,6 @@ public class App : Application
             "**********************************************************************************************");
         Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
         Log.Information($"Using appsettings.json from {configPath}");
-        // Log.Logger = new LoggerConfiguration()
-        //     .MinimumLevel.Debug()
-        //     .WriteTo.Sink(new EventAggregatorSink(EventAggregator))
-        //     //.ReadFrom.Configuration(configuration)
-        //     .ReadFrom.AppSettings()
-        //     .CreateLogger();
-
         
     }
 
@@ -187,6 +254,12 @@ public class App : Application
     {
         // Create default settings
         var defaultSettings = new JObject(
+            new JProperty("UpdateChecker",
+                new JObject(
+                    new JProperty("LatestJsonUrl", "https://github.com/OpenIPC/openipc-configurator/releases/latest/download/latest.json")
+                )
+                    
+            ),
             new JProperty("Serilog",
                 new JObject(
                     new JProperty("Using", new JArray("Serilog.Sinks.Console", "Serilog.Sinks.RollingFile")),
