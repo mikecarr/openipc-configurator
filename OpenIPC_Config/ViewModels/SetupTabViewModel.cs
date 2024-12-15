@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Rendering;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -628,26 +629,43 @@ public partial class SetupTabViewModel : ViewModelBase
         catch (Exception e)
         {
             Log.Error(e.ToString());
-            throw;
+            
         }
 
-        throw new NotImplementedException();
-    }
-
-    private void SendGSKey()
-    {
-        //TDOO: SendGSKey
-        throw new NotImplementedException();
-        UpdateUIMessage("Sending keys..." );
-        UpdateUIMessage("Sending keys...done");
         
     }
 
-    private void RecvGSKey()
+    private async void SendGSKey()
     {
-        //TDOO: RecvGSKey
-        throw new NotImplementedException();
+        try
+        {
+            UpdateUIMessage("Sending keys...");
+            await SshClientService.UploadFileAsync(DeviceConfig.Instance, Models.OpenIPC.GsKeyPath,
+                Models.OpenIPC.RemoteGsKeyPath);
+
+            UpdateUIMessage("Restarting OpenIPC Service on GS");
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsWfbStopCommand);
+            await Task.Delay(500); // Non-blocking pause
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsWfbStartCommand);
+            
+            UpdateUIMessage("Sending keys...done");
+        }
+        catch (Exception e)
+        {
+            Log.Error(e.ToString());
+            throw;
+        }
+            
+
+    }
+
+    private async void RecvGSKey()
+    {
         UpdateUIMessage("Receiving keys..." );
+        
+        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteGsKeyPath,
+            $"{Models.OpenIPC.LocalTempFolder}/gs.key");
+        
         UpdateUIMessage("Receiving keys...done" );
     }
 }

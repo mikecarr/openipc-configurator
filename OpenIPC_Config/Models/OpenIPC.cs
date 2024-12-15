@@ -26,13 +26,6 @@ public class OpenIPC
     public const string ScreenModeFileLoc = "/config/scripts/screen-mode";
 
 
-    
-    // public const string LocalBinariesFolder = "binaries";
-    // public const string LocalSensorsFolder = "binaries/sensors";
-    // public const string LocalFontsFolder = "binaries/fonts";
-    // public const string LocalBetaFlightFontsFolder = "binaries/fonts/bf";
-    // public const string LocalINavFontsFolder = "binaries/fonts/inav";
-
     public const string KeyMD5Sum = "24767056dc165963fe6db7794aee12cd";
 //    public const string LocalFwFolder = "binaries/fw";
 
@@ -46,6 +39,7 @@ public class OpenIPC
     public const string RemoteTempFolder = "/tmp";
 
     public const string DroneKeyPath = "binaries/drone.key";
+    public const string GsKeyPath = "binaries/gs.key";
 
 
     public static string LocalFirmwareFolder;
