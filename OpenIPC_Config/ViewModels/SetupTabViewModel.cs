@@ -663,8 +663,9 @@ public partial class SetupTabViewModel : ViewModelBase
     {
         UpdateUIMessage("Receiving keys..." );
         
-        await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteGsKeyPath,
+        SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteGsKeyPath,
             $"{Models.OpenIPC.LocalTempFolder}/gs.key");
+        await Task.Delay(1000); // Non-blocking pause
         
         UpdateUIMessage("Receiving keys...done" );
     }
