@@ -371,6 +371,27 @@ public partial class SetupTabViewModel : ViewModelBase
         return null;
     }
 
+    private async Task UploadFirmwareAsync(string firmwarePath, string remotePath)
+    {
+        DownloadProgress = 60;
+        ProgressText = "Uploading firmware...";
+        await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath, remotePath);
+    }
+
+    private async Task DecompressFirmwareAsync(string remoteFilePath)
+    {
+        DownloadProgress = 70;
+        ProgressText = "Decompressing firmware...";
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
+    }
+
+    private async Task ExtractFirmwareAsync(string tarFilePath, string destinationPath)
+    {
+        DownloadProgress = 85;
+        ProgressText = "Extracting firmware...";
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"tar -xvf {tarFilePath} -C {destinationPath}");
+    }
+    
     /// <summary>
     ///     Downloads the latest firmware version of the selected type from the official OpenIPC_Config repositories.
     /// </summary>
@@ -455,21 +476,30 @@ public partial class SetupTabViewModel : ViewModelBase
             ProgressText = "Download complete, starting upload...";
 
             // Step 2: Upload file
-            await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath,
-                $"{Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tgz");
-            DownloadProgress = 60;
+            string remotePath = $"{Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tgz";
+            await UploadFirmwareAsync(firmwarePath, remotePath);
+            
+            // await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath,
+            //     $"{Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tgz");
+            // DownloadProgress = 60;
             ProgressText = "Upload complete, decompressing...";
 
             // Step 3: Decompress using gzip
-            var remoteFilePath = Path.Combine(Models.OpenIPC.RemoteTempFolder, $"{SelectedFwVersion}.tgz");
-            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
-            DownloadProgress = 70;
+            await DecompressFirmwareAsync(remotePath);
+            
+            // var remoteFilePath = Path.Combine(Models.OpenIPC.RemoteTempFolder, $"{SelectedFwVersion}.tgz");
+            // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
+            // DownloadProgress = 70;
             ProgressText = "Decompression complete, extracting files...";
 
-            // Step 4: Extract files using tar
-            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
-                $"tar -xvf {Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tar -C /tmp");
-            DownloadProgress = 85;
+            // Step 4: Extract firmware
+            string tarFilePath = remotePath.Replace(".tgz", ".tar");
+            await ExtractFirmwareAsync(tarFilePath, "/tmp");
+
+            
+            // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+            //     $"tar -xvf {Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tar -C /tmp");
+            // DownloadProgress = 85;
             ProgressText = "Extraction complete, upgrading system...";
 
             // Step 5: Execute sysupgrade
