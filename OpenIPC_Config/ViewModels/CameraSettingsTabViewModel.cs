@@ -122,6 +122,8 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
             // controls buttons
             CanConnect = appMessage.CanConnect;
         }
+        
+        
     }
 
     partial void OnSelectedResolutionChanged(string value)
@@ -198,12 +200,6 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         // Custom logic when the property changes
         Log.Debug($"SelectedMirror updated to {value}");
         UpdateYamlConfig(Majestic.ImageMirror, value);
-    }
-
-    private void OnAppMessage(AppMessage appMessage)
-    {
-        if (appMessage.CanConnect) CanConnect = appMessage.CanConnect;
-        //Log.Debug($"CanConnect {CanConnect.ToString()}");
     }
 
     partial void OnSelectedFpvEnabledChanged(string value)
@@ -475,8 +471,8 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         {
             await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.MajesticFileLoc,
                 updatedYamlContent);
-            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MajesticRestartCommand);
-            Logger.Information("Majestic configuration updated and service restarted successfully.");
+            SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MajesticRestartCommand);
+            Logger.Information("Majestic configuration updated and service is restarting.");
         }
         catch (Exception ex)
         {
