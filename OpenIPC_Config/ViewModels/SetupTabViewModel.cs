@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Rendering;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -175,6 +176,8 @@ public partial class SetupTabViewModel : ViewModelBase
             "ssc338q_fpv_emax-wyvern-link-nor",
             "ssc338q_fpv_openipc-mario-aio-nor",
             "ssc338q_fpv_openipc-urllc-aio-nor",
+            "ssc338q_fpv_openipc-thinker-aio-nor",
+            "ssc338q_fpv_emax-wyvern-link-nor",
             "ssc338q_fpv_runcam-wifilink-nor",
             "openipc.ssc338q-nor-fpv",
             "openipc.ssc338q-nor-rubyfpv",
@@ -368,6 +371,27 @@ public partial class SetupTabViewModel : ViewModelBase
         return null;
     }
 
+    private async Task UploadFirmwareAsync(string firmwarePath, string remotePath)
+    {
+        DownloadProgress = 60;
+        ProgressText = "Uploading firmware...";
+        await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath, remotePath);
+    }
+
+    private async Task DecompressFirmwareAsync(string remoteFilePath)
+    {
+        DownloadProgress = 70;
+        ProgressText = "Decompressing firmware...";
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
+    }
+
+    private async Task ExtractFirmwareAsync(string tarFilePath, string destinationPath)
+    {
+        DownloadProgress = 85;
+        ProgressText = "Extracting firmware...";
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"tar -xvf {tarFilePath} -C {destinationPath}");
+    }
+    
     /// <summary>
     ///     Downloads the latest firmware version of the selected type from the official OpenIPC_Config repositories.
     /// </summary>
@@ -390,6 +414,8 @@ public partial class SetupTabViewModel : ViewModelBase
         if (SelectedFwVersion == "ssc338q_fpv_emax-wyvern-link-nor" ||
             SelectedFwVersion == "ssc338q_fpv_openipc-mario-aio-nor" ||
             SelectedFwVersion == "ssc338q_fpv_openipc-urllc-aio-nor" ||
+            SelectedFwVersion == "ssc338q_fpv_openipc-thinker-aio-nor" ||
+            SelectedFwVersion == "ssc338q_fpv_emax-wyvern-link-nor" ||
             SelectedFwVersion == "ssc338q_fpv_runcam-wifilink-nor")
         {
             url = $"https://github.com/OpenIPC/builder/releases/download/latest/{SelectedFwVersion}.tgz";
@@ -453,21 +479,30 @@ public partial class SetupTabViewModel : ViewModelBase
             ProgressText = "Download complete, starting upload...";
 
             // Step 2: Upload file
-            await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath,
-                $"/tmp/{SelectedFwVersion}.tgz");
-            DownloadProgress = 60;
+            string remotePath = $"/tmp/{SelectedFwVersion}.tgz";
+            await UploadFirmwareAsync(firmwarePath, remotePath);
+            
+            // await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath,
+            //     $"{Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tgz");
+            // DownloadProgress = 60;
             ProgressText = "Upload complete, decompressing...";
 
             // Step 3: Decompress using gzip
-            var remoteFilePath = $"/tmp/{SelectedFwVersion}.tgz";
-            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
-            DownloadProgress = 70;
+            await DecompressFirmwareAsync(remotePath);
+            
+            // var remoteFilePath = $"/tmp/{SelectedFwVersion}.tgz");
+            // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
+            // DownloadProgress = 70;
             ProgressText = "Decompression complete, extracting files...";
 
-            // Step 4: Extract files using tar
-            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
-                $"tar -xvf /tmp/{SelectedFwVersion}.tar -C /tmp");
-            DownloadProgress = 85;
+            // Step 4: Extract firmware
+            string tarFilePath = remotePath.Replace(".tgz", ".tar");
+            await ExtractFirmwareAsync(tarFilePath, "/tmp");
+
+            
+            // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+            //     $"tar -xvf {Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tar -C /tmp");
+            //DownloadProgress = 85;
             ProgressText = "Extraction complete, upgrading system...";
 
             // Step 5: Execute sysupgrade
@@ -587,7 +622,8 @@ public partial class SetupTabViewModel : ViewModelBase
         var result = await box.ShowAsync();
         if (result == ButtonResult.Ok)
         {
-            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.ResetCameraCommand);
+            SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.ResetCameraCommand);
+            await Task.Delay(1000); // Non-blocking pause
         }
         else
         {
@@ -631,26 +667,44 @@ public partial class SetupTabViewModel : ViewModelBase
         catch (Exception e)
         {
             Log.Error(e.ToString());
-            throw;
+            
         }
 
-        throw new NotImplementedException();
-    }
-
-    private void SendGSKey()
-    {
-        //TDOO: SendGSKey
-        throw new NotImplementedException();
-        UpdateUIMessage("Sending keys..." );
-        UpdateUIMessage("Sending keys...done");
         
     }
 
-    private void RecvGSKey()
+    private async void SendGSKey()
     {
-        //TDOO: RecvGSKey
-        throw new NotImplementedException();
+        try
+        {
+            UpdateUIMessage("Sending keys...");
+            await SshClientService.UploadFileAsync(DeviceConfig.Instance, Models.OpenIPC.GsKeyPath,
+                Models.OpenIPC.RemoteGsKeyPath);
+
+            UpdateUIMessage("Restarting OpenIPC Service on GS");
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsWfbStopCommand);
+            await Task.Delay(500); // Non-blocking pause
+            await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsWfbStartCommand);
+            
+            UpdateUIMessage("Sending keys...done");
+        }
+        catch (Exception e)
+        {
+            Log.Error(e.ToString());
+            throw;
+        }
+            
+
+    }
+
+    private async void RecvGSKey()
+    {
         UpdateUIMessage("Receiving keys..." );
+        
+        SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteGsKeyPath,
+            $"{Models.OpenIPC.LocalTempFolder}/gs.key");
+        await Task.Delay(1000); // Non-blocking pause
+        
         UpdateUIMessage("Receiving keys...done" );
     }
 }

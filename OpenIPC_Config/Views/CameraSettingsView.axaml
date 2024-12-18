@@ -141,8 +141,8 @@
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.RestartMajesticToolTip}" />
 
-        <!-- Warning Label -->
-        <TextBlock Text="Be careful what you enter here" HorizontalAlignment="Right" FontSize="12" />
+        <!-- ~1~ Warning Label @1@ -->
+        <!-- <TextBlock Text="Be careful what you enter here" HorizontalAlignment="Right" FontSize="12" /> -->
 
     </StackPanel>
 </UserControl>

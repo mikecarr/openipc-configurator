@@ -422,7 +422,6 @@ public partial class ConnectControlsViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             Log.Error(e.Message);
         }
 

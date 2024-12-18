@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
@@ -95,7 +96,7 @@ public class App : Application
 
     }
 
-    private void CreateAppSettings()
+    private async void CreateAppSettings()
     {
         string configPath;
         string configDirectory;
@@ -149,7 +150,8 @@ public class App : Application
 
             File.WriteAllText(configPath, defaultSettings.ToString());
 
-            Thread.Sleep(2000);
+            await Task.Delay(2000); // Non-blocking pause
+            
 
             Log.Information($"Default appsettings.json created at {configPath}");
         }
