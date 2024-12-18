@@ -240,7 +240,7 @@ jobs:
       - name: Add latest.json to Release
         run: |
           echo "Adding latest.json to release"
-          cp latest.json ./latest.json
+          cp --backup=numbered latest.json ./latest.json
 
       - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v1
