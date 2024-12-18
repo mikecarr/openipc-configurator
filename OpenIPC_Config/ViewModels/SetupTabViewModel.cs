@@ -405,7 +405,10 @@ public partial class SetupTabViewModel : ViewModelBase
 
         if (SelectedFwVersion != string.Empty && sensorType != string.Empty)
         {
-            var firmwarePath = $"{Models.OpenIPC.AppDataConfigDirectory}/firmware/{SelectedFwVersion}.tgz";
+            string firmwarePath = Path.Combine(Models.OpenIPC.AppDataConfigDirectory, "firmware", $"{SelectedFwVersion}.tgz");
+            
+            
+            //var firmwarePath = $"{Models.OpenIPC.AppDataConfigDirectory}/firmware/{SelectedFwVersion}.tgz";
             var localTmpPath = $"{Models.OpenIPC.LocalTempFolder}";
             if (!Directory.Exists(localTmpPath)) Directory.CreateDirectory(localTmpPath);
 
@@ -451,19 +454,19 @@ public partial class SetupTabViewModel : ViewModelBase
 
             // Step 2: Upload file
             await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath,
-                $"{Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tgz");
+                $"/tmp/{SelectedFwVersion}.tgz");
             DownloadProgress = 60;
             ProgressText = "Upload complete, decompressing...";
 
             // Step 3: Decompress using gzip
-            var remoteFilePath = Path.Combine(Models.OpenIPC.RemoteTempFolder, $"{SelectedFwVersion}.tgz");
+            var remoteFilePath = $"/tmp/{SelectedFwVersion}.tgz";
             await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
             DownloadProgress = 70;
             ProgressText = "Decompression complete, extracting files...";
 
             // Step 4: Extract files using tar
             await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
-                $"tar -xvf {Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tar -C /tmp");
+                $"tar -xvf /tmp/{SelectedFwVersion}.tar -C /tmp");
             DownloadProgress = 85;
             ProgressText = "Extraction complete, upgrading system...";
 
@@ -483,9 +486,9 @@ public partial class SetupTabViewModel : ViewModelBase
             }
 
             
-            kernelPath = $"{Models.OpenIPC.RemoteTempFolder}/uImage.{sensorType}";
-            rootfsPath = $"{Models.OpenIPC.RemoteTempFolder}/rootfs.squashfs.{sensorType}";
-
+            kernelPath = $"/tmp/uImage.{sensorType}";
+            rootfsPath = $"/tmp/rootfs.squashfs.{sensorType}";
+            
             //sysupgrade --kernel=/tmp/uImage.%4 --rootfs=/tmp/rootfs.squashfs.%4 -n
             // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
             //     $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
