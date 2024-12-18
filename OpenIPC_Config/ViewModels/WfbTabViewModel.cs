@@ -229,8 +229,8 @@ public partial class WfbTabViewModel : ViewModelBase
         UpdateUIMessage("Restarting WFB...");
         
         EventSubscriptionService.Publish<TabMessageEvent, string>("Restart Pushed");
-        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(
-            new AppMessage { Message = "Getting new content", DeviceConfig = DeviceConfig.Instance });
+        
+        UpdateUIMessage("Getting new content");
         
         var newFrequency58 = SelectedFrequency58String;
         var newFrequency24 = SelectedFrequency24String;
@@ -265,20 +265,16 @@ public partial class WfbTabViewModel : ViewModelBase
         if (string.IsNullOrEmpty(updatedWfbConfContent))
             await MessageBoxManager.GetMessageBoxStandard("Error", "WfbConfContent is empty").ShowAsync();
 
-        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(
-            new AppMessage { Message = $"Uploading new {OpenIPC.WfbConfFileLoc}", DeviceConfig = DeviceConfig.Instance,
-                UpdateLogView = true });
+        UpdateUIMessage($"Uploading new {OpenIPC.WfbConfFileLoc}");
 
 
         Logger.Information($"Uploading new : {OpenIPC.WfbConfFileLoc}");
         await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.WfbConfFileLoc, WfbConfContent);
-
-        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(
-            new AppMessage { Message = "Restarting Wfb", DeviceConfig = DeviceConfig.Instance, UpdateLogView = true });
         
-        Logger.Information("Restarting Wfb");
+        UpdateUIMessage("Restarting Wfb");
         
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.WfbRestartCommand);
+        UpdateUIMessage("Restarting Wfb..done");
     }
 
     private void HandleFrequencyChange(string newValue, Dictionary<int, string> frequencyMapping)
