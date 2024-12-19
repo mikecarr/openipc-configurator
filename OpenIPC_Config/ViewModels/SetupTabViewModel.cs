@@ -309,7 +309,7 @@ public partial class SetupTabViewModel : ViewModelBase
     {
         Log.Debug("OfflineUpdate executed");
         IsProgressBarVisible = true;
-        await DownloadStart();
+        DownloadStart();
         Log.Debug("OfflineUpdate executed..done");
     }
 
@@ -527,37 +527,66 @@ public partial class SetupTabViewModel : ViewModelBase
             //sysupgrade --kernel=/tmp/uImage.%4 --rootfs=/tmp/rootfs.squashfs.%4 -n
             // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
             //     $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
-            await PerformSystemUpgradeAsync(kernelPath, rootfsPath);
             
-            DownloadProgress = 100;
-            UpdateUIMessage("System upgrade complete!" );
-            ProgressText = "System upgrade complete!";
+            using var cts = new CancellationTokenSource();
+
+            // Provide a way for the user to cancel (e.g., a button)
+            CancellationToken cancelToken = cts.Token;
+            
+            PerformSystemUpgradeAsync(kernelPath, rootfsPath, cancelToken);
+            
+            //DownloadProgress = 100;
+            //UpdateUIMessage("System upgrade complete!" );
+            //ProgressText = "System upgrade complete!";
         }
         
     }
     
     
-    public async Task PerformSystemUpgradeAsync(string kernelPath, string rootfsPath)
+    public async Task PerformSystemUpgradeAsync(string kernelPath, string rootfsPath, CancellationToken cancellationToken)
     {
-        ProgressText = "Starting system upgrade...";
-        DownloadProgress = 0;
+        try
+        {
+            ProgressText = "Starting system upgrade...";
+            DownloadProgress = 0;
 
-        Log.Information($"Running command: sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
-        await SshClientService.ExecuteCommandWithProgressAsync(DeviceConfig.Instance,
-            $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n",
-            output =>
-            {
-                // Update the UI incrementally
-                Dispatcher.UIThread.InvokeAsync(() =>
+            Log.Information($"Running command: sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
+
+            // Pass cancellation token to the command
+            await SshClientService.ExecuteCommandWithProgressAsync(
+                DeviceConfig.Instance,
+                $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n",
+                output =>
                 {
-                    ProgressText = output;
-                    DownloadProgress += 10; // Example progress increment
-                    Log.Information(output);
-                });
-            });
+                    // Update the UI incrementally
+                    Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        //ProgressText = output;
 
-        DownloadProgress = 100;
-        ProgressText = "System upgrade complete!";
+                        // Dynamically update progress based on command output (if possible)
+                        if (output.Contains("sysupgrade")) DownloadProgress = 80;
+                        if (output.Contains("Conditional reboot")) DownloadProgress = 98;
+
+                        Log.Information(output);
+                    });
+                },
+                cancellationToken
+            );
+
+            // Complete progress after execution
+            DownloadProgress = 100;
+            ProgressText = "System upgrade complete, please wait!";
+        }
+        catch (OperationCanceledException)
+        {
+            ProgressText = "System upgrade canceled.";
+            Log.Warning("System upgrade operation was canceled.");
+        }
+        catch (Exception ex)
+        {
+            ProgressText = $"Error during system upgrade: {ex.Message}";
+            Log.Error($"Error during system upgrade: {ex}");
+        }
     }
 
 
