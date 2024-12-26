@@ -13,6 +13,7 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" /> <!-- TabControl -->
@@ -85,4 +86,5 @@
             <views:StatusBarView />
         </Border>
     </Grid>
+        </ScrollViewer>
 </UserControl>

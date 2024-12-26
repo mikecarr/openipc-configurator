@@ -181,4 +181,7 @@ If you set 90fps GOP: 1 , real gop is 90 and if you set value to 9 the correctio
     <data name="UpdateCameraToolTip" xml:space="preserve">
         <value>Updates Camera's firmware to selected firmware</value>
     </data>
+    <data name="LocalIpToolTip" xml:space="preserve">
+        <value>IP of the device running the App</value>
+    </data>
 </root>

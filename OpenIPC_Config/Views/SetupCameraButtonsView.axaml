@@ -60,6 +60,7 @@
                       SelectedItem="{Binding SelectedSensor, Mode=TwoWay}"
                       IsEnabled="{Binding CanConnect}"
                       HorizontalAlignment="Stretch" />
+            
             <Button Grid.Row="3" Grid.Column="1"  Content="Sensor Bin Update"
                     Command="{Binding SensorFilesUpdateCommand}"
                     IsEnabled="{Binding CanConnect}"

@@ -3,7 +3,8 @@
         xmlns:views="clr-namespace:OpenIPC_Config.Views"
         x:Class="OpenIPC_Config.Views.MainWindow"
         Title="OpenIPC FPV Config Tool"
-        Width="900" Height="850" MinWidth="600" MinHeight="800">
+        >
+        <!-- Width="900" Height="850" MinWidth="600" MinHeight="800"> -->
 
     <!-- MainView is the content of the MainWindow -->
     <views:MainView  />

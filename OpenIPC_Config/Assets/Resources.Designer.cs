@@ -227,6 +227,11 @@ namespace OpenIPC_Config.Assets {
             get { return ResourceManager.GetString("UpdateCameraToolTip", resourceCulture); }
         }
         
+        public static string LocalIpToolTip
+        {
+            get { return ResourceManager.GetString("LocalIpToolTip", resourceCulture); }
+        }
+        
         
     }
 }

@@ -25,13 +25,14 @@ namespace OpenIPC_Config.ViewModels;
 
 public partial class SetupTabViewModel : ViewModelBase
 {
-    
+    public bool IsMobile => App.OSType == "Mobile";
+    public bool IsEnabledForView => CanConnect && !IsMobile;
+        
     [ObservableProperty] private bool _canConnect;
     [ObservableProperty] private int _downloadProgress;
 
     [ObservableProperty] private string _chkSumStatusColor;
 
-    
     [ObservableProperty] public ObservableCollection<string> _firmwareVersions;
     
     [ObservableProperty] private bool _isCamera;
@@ -46,6 +47,7 @@ public partial class SetupTabViewModel : ViewModelBase
     [ObservableProperty] private string _scanMessages;
     [ObservableProperty] private string _selectedFwVersion;
     [ObservableProperty] private string _selectedSensor;
+    [ObservableProperty] private string _localIp;
     
     private ICommand _firmwareUpdateCommand;
     private ICommand _generateKeysCommand;
@@ -75,6 +77,8 @@ public partial class SetupTabViewModel : ViewModelBase
         KeyChecksum = string.Empty;
 
         ChkSumStatusColor = "Green";
+
+        LocalIp = "Device IP: " + NetworkHelper.GetLocalIPAddress();
 
         ScanIpLabel = "192.168.1.";
 
@@ -166,7 +170,9 @@ public partial class SetupTabViewModel : ViewModelBase
     private void InitializeCollections()
     {
         // load sensor files from local folder
-        var directoryPath = Path.Combine(OpenIPC.GetBinariesPath(), "sensors");
+        
+        var binariesPath = OpenIPC.GetBinariesPath();
+        var directoryPath = Path.Combine(binariesPath, "sensors");
         //var directoryPath = OpenIPC.LocalSensorsFolder;
         PopulateSensorFileNames(directoryPath);
         
@@ -605,7 +611,8 @@ public partial class SetupTabViewModel : ViewModelBase
     {
         Log.Debug("RecvDroneKeyCommand executed");
 
-        if (File.Exists("drone.key"))
+        var droneKeyPath = Path.Combine(OpenIPC.AppDataConfigDirectory, "drone.key");
+        if (File.Exists(droneKeyPath))
         {
             Log.Debug("drone.key already exists locally, do you want to overwrite it?");
             var msBox = MessageBoxManager.GetMessageBoxStandard("File exists!",
@@ -621,8 +628,8 @@ public partial class SetupTabViewModel : ViewModelBase
 
         await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance,
             Models.OpenIPC.RemoteEtcFolder + "/drone.key",
-            "drone.key");
-        if (!File.Exists("drone.key")) Log.Debug("RecvDroneKeyCommand failed");
+            droneKeyPath);
+        if (!File.Exists(droneKeyPath)) Log.Debug("RecvDroneKeyCommand failed");
 
         Log.Debug("RecvDroneKeyCommand executed...done");
     }
