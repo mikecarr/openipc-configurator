@@ -24,23 +24,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Android SDK
-        uses: actions/setup-java@v3
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v3
         with:
-          distribution: 'zulu'
-          java-version: '11'
+          dotnet-version: '8.0.x'
 
-      - name: Install Android SDK
+      - name: Update .NET SDK Workloads
         run: |
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          mkdir -p $HOME/android-sdk
-          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-          unzip -o sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
-          mv $HOME/android-sdk/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-        shell: bash
+          dotnet workload update
+
+      - name: Install Android and iOS workloads
+        run: |
+          dotnet workload install android
+
+      - name: Restore dependencies
+        run: dotnet restore      
 
       - name: Build Android APK
         run: |
