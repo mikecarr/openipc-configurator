@@ -33,12 +33,27 @@ jobs:
         run: |
           dotnet workload update
 
-      - name: Install Android
+      - name: Install Android Workload
         run: |
           dotnet workload install android
 
       - name: Restore dependencies
         run: dotnet restore OpenIPC_Config.Android/OpenIPC_Config.Android.csproj     
+
+      - name: Install Android SDK
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          mkdir -p $HOME/android-sdk
+          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip -o sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
+          mv $HOME/android-sdk/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-33" \
+            "build-tools;33.0.2" \
+            "cmdline-tools;latest"
 
       - name: Build Android APK
         run: |
