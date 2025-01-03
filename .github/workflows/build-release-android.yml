@@ -33,13 +33,12 @@ jobs:
         run: |
           dotnet workload update
 
-      - name: Install Android and iOS workloads
+      - name: Install Android
         run: |
           dotnet workload install android
-          dotnet workload install ios
 
       - name: Restore dependencies
-        run: dotnet restore      
+        run: dotnet restore OpenIPC_Config.Android/OpenIPC_Config.Android.csproj     
 
       - name: Build Android APK
         run: |
