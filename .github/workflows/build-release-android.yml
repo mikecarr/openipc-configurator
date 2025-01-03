@@ -6,6 +6,9 @@ permissions:
       
 on:
   workflow_dispatch:
+  # push:
+  #   branches:
+  #     - android  # Trigger only on pushes to the android branch
   push:
     tags:
       - 'release-v*'       # Trigger for tags that start with 'v', e.g., v1.0.0, v2.1.3
@@ -21,11 +24,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Android SDK
-        uses: actions/setup-java@v3
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v3
         with:
-          distribution: 'zulu'
-          java-version: '11'
+          dotnet-version: '8.0.x'
+
+      - name: Update .NET SDK Workloads
+        run: |
+          dotnet workload update
+
+      - name: Install Android Workload
+        run: |
+          dotnet workload install android
+
+      - name: Restore dependencies
+        run: dotnet restore OpenIPC_Config.Android/OpenIPC_Config.Android.csproj     
 
       - name: Install Android SDK
         run: |
@@ -34,10 +47,13 @@ jobs:
           mkdir -p $HOME/android-sdk
           curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
           unzip -o sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
-          mv $HOME/android-sdk/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
           yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-        shell: bash
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
 
       - name: Build Android APK
         run: |
@@ -52,8 +68,17 @@ jobs:
           zip -r OpenIPC-Config-android-${{ matrix.arch }}.zip OpenIPC-Config-android-${{ matrix.arch }}
         shell: bash
 
-      - name: Upload Android Artifact
-        uses: actions/upload-artifact@v4
+      # - name: Upload Android Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: OpenIPC-Config-android-${{ matrix.arch }}
+      #     path: OpenIPC-Config-android-${{ matrix.arch }}.zip
+
+
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: OpenIPC-Config-android-${{ matrix.arch }}
-          path: OpenIPC-Config-android-${{ matrix.arch }}.zip
+          files: |
+            OpenIPC-Config-android-${{ matrix.arch }}.zip
+          draft: false  # Set to `true` if you want the release to remain in draft
+    
