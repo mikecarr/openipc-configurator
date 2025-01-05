@@ -8,6 +8,11 @@
         <Setter Property="Height" Value="800" />
     </Style>
 
+
+    <Style Selector="Label">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <!-- <Setter Property="FontWeight" Value="Medium" /> -->
+    </Style>
     
     <!-- TabItem Styles -->
     <Style Selector="TabItem">
