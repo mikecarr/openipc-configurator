@@ -184,4 +184,10 @@ If you set 90fps GOP: 1 , real gop is 90 and if you set value to 9 the correctio
     <data name="Enable40MhzToolTip" xml:space="preserve">
         <value>Uploads the modified wifibroadcast file to enable 40Mhz mode</value>
     </data>
+    <data name="UploadLatestVtxMenuToolTip" xml:space="preserve">
+        <value>Upload the latest vtxmenu for the MSPOSD of OpenIPC
+        To enter the VTX menu move: 
+        LEFT stick to bottom right and
+        RIGHT stick to bottom left</value>
+    </data>
 </root>
