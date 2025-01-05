@@ -114,6 +114,8 @@ jobs:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
+          echo "$APPLE_CERTIFICATE"
+          
           echo "$APPLE_CERTIFICATE" | base64 --decode > signing_certificate.p12
           security import signing_certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -A
           security set-key-partition-list -S apple-tool:,apple: -k temp_keychain_password build.keychain
