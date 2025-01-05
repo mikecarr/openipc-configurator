@@ -111,7 +111,7 @@ jobs:
           echo "$APPLE_CERTIFICATE" | base64 --decode > signing_certificate.p12
           security import signing_certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -A
           security set-key-partition-list -S apple-tool:,apple: -s -k "$APPLE_CERTIFICATE_PASSWORD" /Users/runner/Library/Keychains/login.keychain
-          codesign --deep --force --options runtime --sign "Developer ID Application: Your Name (TEAMID)" OpenIPC_Config.app
+          codesign --deep --force --options runtime --sign "Developer ID Application: Mike Carr (EQKLR945TW)" OpenIPC_Config.app
       - name: Remove Quarantine Flag (macOS only)
         if: matrix.os == 'macos-latest'
         run: xattr -cr OpenIPC_Config.app
