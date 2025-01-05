@@ -101,17 +101,28 @@ jobs:
           EOF
 
           chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}.Desktop"
-      
-      - name: Sign macOS .app
-        if: matrix.os == 'macos-latest'
+
+      - name: Set up a temporary keychain
+        run: |
+          security create-keychain -p temp_keychain_password build.keychain
+          security list-keychains -s build.keychain
+          security unlock-keychain -p temp_keychain_password build.keychain
+          security set-keychain-settings -lut 3600 build.keychain
+
+      - name: Import signing certificate
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
           echo "$APPLE_CERTIFICATE" | base64 --decode > signing_certificate.p12
-          security import signing_certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -A
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$APPLE_CERTIFICATE_PASSWORD" /Users/runner/Library/Keychains/login.keychain
-          codesign --deep --force --options runtime --sign "Developer ID Application: Mike Carr (EQKLR945TW)" OpenIPC_Config.app
+          security import signing_certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -A
+          security set-key-partition-list -S apple-tool:,apple: -k temp_keychain_password build.keychain
+
+      - name: Code sign the application
+        run: |
+          codesign --deep --force --options runtime \
+            --sign "Developer ID Application: Mike Carr (EQKLR945TW)" OpenIPC_Config.app
+            
       - name: Remove Quarantine Flag (macOS only)
         if: matrix.os == 'macos-latest'
         run: xattr -cr OpenIPC_Config.app
