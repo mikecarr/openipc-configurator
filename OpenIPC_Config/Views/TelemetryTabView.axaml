@@ -75,9 +75,9 @@
         <Button Grid.Row="3" Grid.Column="3" Content="Upload MSPOSD" Command="{Binding UploadMSPOSDCommand}"
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.MSPOSDToolTip}" />
-        <Button Grid.Row="4" Grid.Column="3" Content="Upload INAV Fonts" Command="{Binding UploadINavCommand}"
+        <Button Grid.Row="4" Grid.Column="3" Content="Enable 40Mhz" Command="{Binding Enable40MhzCommand}"
                 IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.MSPOSDToolTip}" />
+                ToolTip.Tip="{x:Static assets:Resources.Enable40MhzToolTip}" />
         <Button Grid.Row="5" Grid.Column="3" Content="MSPOSD Extra" Command="{Binding MSPOSDExtraCommand}"
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.UploadINavFontsToolTip}" />
