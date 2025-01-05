@@ -321,6 +321,8 @@ public partial class SetupTabViewModel : ViewModelBase
 
         var pingTasks = new List<Task>();
 
+        ScanIPResultTextBox = string.Empty;
+        
         for (var i = 0; i < 254; i++)
         {
             var host = ScanIpLabel + i;

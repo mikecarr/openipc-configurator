@@ -232,6 +232,11 @@ namespace OpenIPC_Config.Assets {
             get { return ResourceManager.GetString("Enable40MhzToolTip", resourceCulture); }
         }
         
+        public static string UploadLatestVtxMenuToolTip
+        {
+            get { return ResourceManager.GetString("UploadLatestVtxMenuToolTip", resourceCulture); }
+        }
+        
         
     }
 }

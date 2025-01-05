@@ -108,21 +108,21 @@ public class TelemetryTabViewModelTests
     }
 
     [Test]
-    public async Task UploadMSPOSDCommand_ExecutesCommandsAndUploadsFiles()
+    public async Task UploadLatestVtxMenu_ExecutesCommandsAndUploadsFiles()
     {
         // Arrange
-        var msposdFile = "msposd_star6e";
+        var vtxmenuIni = "vtxmenu.ini";
 
         _mockSshClientService
-            .Setup(service => service.UploadBinaryAsync(It.IsAny<DeviceConfig>(), "/usr/bin", msposdFile))
+            .Setup(service => service.UploadBinaryAsync(It.IsAny<DeviceConfig>(), "/etc", vtxmenuIni ))
             .Returns(Task.CompletedTask);
 
         // Act
-        await Task.Run(() => _viewModel.UploadMSPOSDCommand.Execute(null));
+        await Task.Run(() => _viewModel.UploadLatestVtxMenuCommand.Execute(null));
 
         // Assert
         _mockSshClientService.Verify(
-            service => service.UploadBinaryAsync(It.IsAny<DeviceConfig>(), "/usr/bin", msposdFile),
+            service => service.UploadBinaryAsync(It.IsAny<DeviceConfig>(), "/etc", vtxmenuIni),
             Times.Once
         );
     }

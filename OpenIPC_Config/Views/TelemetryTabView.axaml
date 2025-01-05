@@ -72,9 +72,9 @@
         <Button Grid.Row="2" Grid.Column="3" Content="Add MAVLINK" Command="{Binding AddMavlinkCommand}"
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.AddMavlinkExtraToolTip}" />
-        <Button Grid.Row="3" Grid.Column="3" Content="Upload MSPOSD" Command="{Binding UploadMSPOSDCommand}"
+        <Button Grid.Row="3" Grid.Column="3" Content="Latest VTXMenu" Command="{Binding UploadLatestVtxMenuCommand}"
                 IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.MSPOSDToolTip}" />
+                ToolTip.Tip="{x:Static assets:Resources.UploadLatestVtxMenuToolTip}" />
         <Button Grid.Row="4" Grid.Column="3" Content="Enable 40Mhz" Command="{Binding Enable40MhzCommand}"
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.Enable40MhzToolTip}" />
