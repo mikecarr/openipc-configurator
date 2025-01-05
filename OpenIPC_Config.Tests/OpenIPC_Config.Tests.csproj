@@ -43,4 +43,10 @@
       <ProjectReference Include="..\OpenIPC_Config\OpenIPC_Config.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="VERSION">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

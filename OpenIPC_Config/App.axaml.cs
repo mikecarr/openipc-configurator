@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.JavaScript;
@@ -11,6 +13,8 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using Newtonsoft.Json.Linq;
 using OpenIPC_Config.Logging;
 using OpenIPC_Config.Services;
@@ -38,6 +42,9 @@ public class App : Application
         ServiceProvider = serviceCollection.BuildServiceProvider();
 
         CreateAppSettings();
+        
+        // check for updates
+        CheckForUpdatesAsync();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -55,7 +62,7 @@ public class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }
-    
+
     private string GetConfigPath()
     {
         var appName = Assembly.GetExecutingAssembly().GetName().Name;
@@ -88,7 +95,7 @@ public class App : Application
 
         return configPath;
     }
-
+    
     private void CreateAppSettings()
     {
         var configPath = GetConfigPath();
@@ -100,8 +107,105 @@ public class App : Application
             File.WriteAllText(configPath, defaultSettings.ToString());
             Log.Information($"Default appsettings.json created at {configPath}");
         }
+        
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(configPath, false, true)
+            .AddJsonFile("appsettings.json", true, true)
+            // .AddJsonFile("appsettings.Development.json", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            // .AddJsonFile(
+            //     $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
+            //     true)
+            .Build();
+
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)
+            .WriteTo.Sink(new EventAggregatorSink(ServiceProvider.GetRequiredService<IEventAggregator>()))
+            .CreateLogger();
+
+        Log.Information(
+            "**********************************************************************************************");
+        Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
+        Log.Information($"Using appsettings.json from {configPath}");
+    }
+    
+    public virtual async Task ShowUpdateDialogAsync(string releaseNotes, string downloadUrl, string newVersion)
+    {
+        var msgBox = MessageBoxManager.GetMessageBoxStandard("Update Available",
+            $"New version available: {newVersion}\n\n{releaseNotes}\n\nDo you want to download the update?", ButtonEnum.YesNo);
+
+        var result = await msgBox.ShowAsync();
+
+        if (result == ButtonResult.Yes)
+        {
+            OpenBrowser(downloadUrl);
+        }
     }
 
+    private void OpenBrowser(string url)
+    {
+        if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+        {
+            url = "https://" + url;
+        }
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = url,
+            UseShellExecute = true
+        });
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        // Set up the necessary dependencies
+        var httpClient = new HttpClient();
+
+        var configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            Assembly.GetExecutingAssembly().GetName().Name, "appsettings.json");
+
+        // Create an IConfiguration instance
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
+            .Build();
+
+        // Pass the dependencies to the constructor
+        var updateChecker = new UpdateChecker(httpClient, configuration);
+
+        try
+        {
+            string currentVersion;
+#if DEBUG
+            // In debug mode, read the version from VERSION.txt
+            string versionFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "VERSION");
+            if (File.Exists(versionFilePath))
+            {
+                currentVersion = File.ReadAllText(versionFilePath).Trim();
+            }
+            else
+            {
+                currentVersion = "0.0.0.0"; // Default version for debugging
+            }
+#else
+            currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+#endif
+
+            var result = await updateChecker.CheckForUpdateAsync(currentVersion);
+
+            if (result.HasUpdate)
+            {
+                await ShowUpdateDialogAsync(result.ReleaseNotes, result.DownloadUrl, result.NewVersion);
+                Log.Information($"Update Available! Version: {result.NewVersion}, {result.ReleaseNotes}");
+            }
+            else
+            {
+                Log.Information("No updates found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"An error occurred while checking for updates: {ex.Message}");
+        }
+    }
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -110,6 +214,7 @@ public class App : Application
         services.AddSingleton<IEventSubscriptionService, EventSubscriptionService>();
         services.AddSingleton<ISshClientService, SshClientService>();
         services.AddSingleton<IMessageBoxService, MessageBoxService>();
+        
         services.AddSingleton<IYamlConfigService, YamlConfigService>();
         services.AddSingleton<ILogger>(sp => Log.Logger);
 
@@ -123,6 +228,20 @@ public class App : Application
         services.AddSingleton<IConfiguration>(configuration);
         services.AddTransient<DeviceConfigValidator>();
         
+        // Register IConfiguration
+        services.AddTransient<DeviceConfigValidator>();
+        
+        // Register ViewModels
+        RegisterViewModels(services);
+        
+        // Register Views
+        RegisterViews(services);
+        
+
+    }
+
+    private static void RegisterViewModels(IServiceCollection services)
+    {
         // Register ViewModels
         services.AddTransient<MainViewModel>();
 
@@ -134,8 +253,11 @@ public class App : Application
         services.AddTransient<TelemetryTabViewModel>();
         services.AddTransient<VRXTabViewModel>();
         services.AddTransient<WfbGSTabViewModel>();
-        services.AddTransient<WfbTabViewModel>();        
-
+        services.AddTransient<WfbTabViewModel>();
+    }
+    
+    private static void RegisterViews(IServiceCollection services)
+    {
         // Register Views
         services.AddTransient<MainWindow>();
         services.AddTransient<MainView>();
@@ -148,9 +270,7 @@ public class App : Application
         services.AddTransient<VRXTabView>();
         services.AddTransient<WfbGSTabView>();
         services.AddTransient<WfbTabView>();
-
     }
-
     
     private JObject createDefaultAppSettings()
     {
@@ -199,5 +319,4 @@ public class App : Application
 
         return defaultSettings;
     }
-
 }
