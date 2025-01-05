@@ -102,13 +102,9 @@ jobs:
 
           chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}.Desktop"
 
-      # - name: Set up a temporary keychain
-      #   run: |
-      #     security create-keychain -p temp_keychain_password build.keychain
-      #     security list-keychains -s build.keychain
-      #     security unlock-keychain -p temp_keychain_password build.keychain
-      #     security set-keychain-settings -lut 3600 build.keychain
-
+      - name: Debug Signature Before Signing
+        run: codesign -dvvv OpenIPC_Config.app || echo "No signature found"
+        
       - name: Import Signing Certificate
         env:
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
