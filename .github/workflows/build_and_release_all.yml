@@ -112,7 +112,11 @@ jobs:
       - name: Import Signing Certificate
         env:
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
         run: |
+          echo "$APPLE_CERTIFICATE" | base64 --decode > signing_certificate.p12
+          ls -l signing_certificate.p12
+          md5 signing_certificate.p12
           security import signing_certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -A
           security find-identity -p codesigning -v
     
