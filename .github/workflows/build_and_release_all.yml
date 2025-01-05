@@ -123,8 +123,7 @@ jobs:
       - name: Code sign the application
         if: matrix.os == 'macos-latest'
         run: |
-          codesign --deep --force --options runtime \
-            --sign "Developer ID Application: Mike Carr (EQKLR945TW)" OpenIPC_Config.app
+          codesign --deep --force --options runtime --sign "Developer ID Application: Mike Carr (EQKLR945TW)" OpenIPC_Config.app
             
 #      - name: Remove Quarantine Flag (macOS only)
 #        if: matrix.os == 'macos-latest'
