@@ -46,6 +46,8 @@ public partial class WfbTabViewModel : ViewModelBase
     [ObservableProperty] private int _selectedChannel;
 
     [ObservableProperty] private int _selectedPower24GHz;
+    
+    [ObservableProperty] private int _selectedBandwidth;
 
     [ObservableProperty] private int _selectedPower;
 
@@ -75,6 +77,8 @@ public partial class WfbTabViewModel : ViewModelBase
 
     [ObservableProperty] private ObservableCollection<int> _power24GHz;
 
+    [ObservableProperty] private ObservableCollection<int> _bandwidth;
+
     [ObservableProperty] private ObservableCollection<int> _mcsIndex;
 
     [ObservableProperty] private ObservableCollection<int> _stbc;
@@ -95,6 +99,7 @@ public partial class WfbTabViewModel : ViewModelBase
         Frequencies24GHz = new ObservableCollectionExtended<string>(_24FrequencyMapping.Values);
         Power58GHz = new ObservableCollectionExtended<int> { 1, 5, 10, 15, 20, 25, 30 };
         Power24GHz = new ObservableCollectionExtended<int> { 1, 20, 25, 30, 35, 40 };
+        Bandwidth = new ObservableCollectionExtended<int> { 20,40 };
         McsIndex = new ObservableCollectionExtended<int>(Enumerable.Range(1, 31));
         Stbc = new ObservableCollectionExtended<int> { 0, 1 };
         Ldpc = new ObservableCollectionExtended<int> { 0, 1 };
@@ -183,6 +188,9 @@ public partial class WfbTabViewModel : ViewModelBase
             case Wfb.DriverTxpowerOverride:
                 SelectedPower = TryParseInt(value, SelectedPower);
                 break;
+            case Wfb.Bandwidth:
+                SelectedBandwidth = TryParseInt(value, SelectedBandwidth);
+                break;
             case Wfb.McsIndex:
                 SelectedMcsIndex = TryParseInt(value, SelectedMcsIndex);
                 break;
@@ -237,6 +245,7 @@ public partial class WfbTabViewModel : ViewModelBase
 
         var newPower58 = SelectedPower;
         var newPower24 = SelectedPower24GHz;
+        var newBandwidth = SelectedBandwidth;
         var newMcsIndex = SelectedMcsIndex;
         var newStbc = SelectedStbc;
         var newLdpc = SelectedLdpc;
@@ -251,6 +260,7 @@ public partial class WfbTabViewModel : ViewModelBase
             newFrequency24,
             newPower58,
             newPower24,
+            newBandwidth,
             newMcsIndex,
             newStbc,
             newLdpc,
@@ -306,6 +316,7 @@ public partial class WfbTabViewModel : ViewModelBase
         string newFrequency24,
         int newPower58,
         int newPower24,
+        int newBandwidth,
         int newMcsIndex,
         int newStbc,
         int newLdpc,
@@ -317,7 +328,7 @@ public partial class WfbTabViewModel : ViewModelBase
         // Logic to update WfbConfContent with the new values
         var lines = wfbConfContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
         var regex = new Regex(
-            @"(frequency|channel|driver_txpower_override|frequency24|txpower|mcs_index|stbc|ldpc|fec_k|fec_n)=.*");
+            @"(frequency|channel|driver_txpower_override|frequency24|bandwidth|txpower|mcs_index|stbc|ldpc|fec_k|fec_n)=.*");
         var updatedContent = regex.Replace(wfbConfContent, match =>
         {
             switch (match.Groups[1].Value)
@@ -334,6 +345,8 @@ public partial class WfbTabViewModel : ViewModelBase
                     return $"driver_txpower_override={newPower58}";
                 case "txpower":
                     return $"txpower={newPower24}";
+                case "bandwidth":
+                    return $"bandwidth={newBandwidth}";
                 case "mcs_index":
                     return $"mcs_index={newMcsIndex}";
                 case "stbc":

@@ -48,7 +48,8 @@ public partial class TelemetryTabViewModel : ViewModelBase
     public ICommand DisableUART0Command { get; private set; }
     public ICommand AddMavlinkCommand { get; private set; }
     public ICommand UploadMSPOSDCommand { get; private set; }
-    public ICommand UploadINavCommand { get; private set; }
+    
+    public ICommand Enable40MhzCommand { get; private set; }
     public ICommand MSPOSDExtraCommand { get; private set; }
     public ICommand OnBoardRecCommand { get; private set; }
     public ICommand SaveAndRestartTelemetryCommand { get; private set; }
@@ -89,7 +90,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
         OnBoardRecCommand = new RelayCommand(OnBoardRec);
         AddMavlinkCommand = new RelayCommand(AddMavlink);
         UploadMSPOSDCommand = new RelayCommand(UploadMSPOSD);
-        UploadINavCommand = new RelayCommand(UploadINav);
+        Enable40MhzCommand = new RelayCommand(Enable40Mhz);
         MSPOSDExtraCommand = new RelayCommand(AddMSPOSDExtra);
         SaveAndRestartTelemetryCommand = new RelayCommand(SaveAndRestartTelemetry);
     }
@@ -200,17 +201,26 @@ public partial class TelemetryTabViewModel : ViewModelBase
         // await MsgBox.ShowAsync();
     }
 
-    private async void UploadINav()
+    private async void Enable40Mhz()
     {
-        Log.Debug("UploadINavCommand executed");
-        // upload betaflight fonts
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
-        
-        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-            Models.OpenIPC.FileType.iNavFonts, "font.png");
-        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-            Models.OpenIPC.FileType.iNavFonts, "font_hd.png");
+        UpdateUIMessage("Enabling 40MHz...");
+        await SshClientService.UploadFileAsync(DeviceConfig.Instance, Models.OpenIPC.LocalWifiBroadcastBinFileLoc, Models.OpenIPC.RemoteWifiBroadcastBinFileLoc);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"{DeviceCommands.Dos2UnixCommand} {Models.OpenIPC.RemoteWifiBroadcastBinFileLoc}");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"chmod +x {Models.OpenIPC.RemoteWifiBroadcastBinFileLoc}");
+        UpdateUIMessage("Enabling 40MHz...done");
+            
     }
+    // private async void UploadINav()
+    // {
+    //     Log.Debug("UploadINavCommand executed");
+    //     // upload betaflight fonts
+    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
+    //     
+    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+    //         Models.OpenIPC.FileType.iNavFonts, "font.png");
+    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+    //         Models.OpenIPC.FileType.iNavFonts, "font_hd.png");
+    // }
 
     private async void AddMSPOSDExtra()
     {
