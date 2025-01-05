@@ -105,9 +105,11 @@ jobs:
           chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}.Desktop"
 
       - name: Debug Signature Before Signing
+        if: matrix.os == 'macos-latest'
         run: codesign -dvvv OpenIPC_Config.app || echo "No signature found"
         
       - name: Import Signing Certificate
+        if: matrix.os == 'macos-latest'
         env:
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -119,13 +121,14 @@ jobs:
           security find-identity -p codesigning -v
     
       - name: Code sign the application
+        if: matrix.os == 'macos-latest'
         run: |
           codesign --deep --force --options runtime \
             --sign "Developer ID Application: Mike Carr (EQKLR945TW)" OpenIPC_Config.app
             
-      - name: Remove Quarantine Flag (macOS only)
-        if: matrix.os == 'macos-latest'
-        run: xattr -cr OpenIPC_Config.app
+#      - name: Remove Quarantine Flag (macOS only)
+#        if: matrix.os == 'macos-latest'
+#        run: xattr -cr OpenIPC_Config.app
 
       # Linux Icon and Packaging
       - name: Set up Icon and .desktop file
