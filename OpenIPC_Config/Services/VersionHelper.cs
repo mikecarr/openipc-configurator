@@ -31,7 +31,6 @@ public static class VersionHelper
     {
         try
         {
-#if DEBUG            
             var versionFilePath = Path.Combine(AppContext.BaseDirectory, "VERSION");
             if (_fileSystem.Exists(versionFilePath))
             {
@@ -39,11 +38,11 @@ public static class VersionHelper
             }
             return "v0.0.1";
 
-#else
-            return Assembly.GetExecutingAssembly()
-                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-                .InformationalVersion ?? "Unknown Version";
-#endif
+
+            // return Assembly.GetExecutingAssembly()
+            //     .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            //     .InformationalVersion ?? "Unknown Version";
+
 
         }
         catch (Exception ex)
