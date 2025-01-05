@@ -31,18 +31,20 @@ public static class VersionHelper
     {
         try
         {
-            if (IsDevelopment())
+#if DEBUG            
+            var versionFilePath = Path.Combine(AppContext.BaseDirectory, "VERSION");
+            if (_fileSystem.Exists(versionFilePath))
             {
-                var versionFilePath = Path.Combine(AppContext.BaseDirectory, "VERSION");
-                if (_fileSystem.Exists(versionFilePath))
-                {
-                    return _fileSystem.ReadAllText(versionFilePath).Trim();
-                }
+                return _fileSystem.ReadAllText(versionFilePath).Trim();
             }
+            return "v0.0.1";
 
+#else
             return Assembly.GetExecutingAssembly()
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
                 .InformationalVersion ?? "Unknown Version";
+#endif
+
         }
         catch (Exception ex)
         {

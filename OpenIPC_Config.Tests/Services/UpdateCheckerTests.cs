@@ -9,7 +9,7 @@ namespace OpenIPC_Config.Tests.Services;
 public class UpdateCheckerTests
 {
     private const string MockUpdateJson = @"{
-        'version': '1.2.0',
+        'version': 'release-v1.2.0',
         'release_notes': 'Bug fixes and performance improvements.',
         'download_url': 'https://example.com/download'
     }";
@@ -29,7 +29,7 @@ public class UpdateCheckerTests
             {
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(@"{
-                'version': '1.2.0',
+                'version': 'release-v1.2.0',
                 'release_notes': 'Bug fixes and performance improvements.',
                 'download_url': 'https://example.com/download'
             }")
@@ -43,12 +43,13 @@ public class UpdateCheckerTests
         var updateChecker = new UpdateChecker(mockHttpClient, mockConfiguration.Object);
 
         // Act
-        var result = await updateChecker.CheckForUpdateAsync("1.0.0");
+        var result = await updateChecker.CheckForUpdateAsync("v0.0.1");
 
         // Assert
         Assert.True(result.HasUpdate);
         Assert.AreEqual("Bug fixes and performance improvements.", result.ReleaseNotes);
         Assert.AreEqual("https://example.com/download", result.DownloadUrl);
+        Assert.AreEqual("release-v1.2.0", result.NewVersion);
     }
 
 }

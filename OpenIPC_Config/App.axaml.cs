@@ -46,7 +46,6 @@ public class App : Application
         // check for updates
         CheckForUpdatesAsync();
 
-
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // Remove Avalonia's default data validation plugin to avoid conflicts
@@ -64,10 +63,75 @@ public class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    public virtual async Task ShowUpdateDialogAsync(string releaseNotes, string downloadUrl)
+    private string GetConfigPath()
+    {
+        var appName = Assembly.GetExecutingAssembly().GetName().Name;
+        string configPath;
+
+        if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS() || OperatingSystem.IsMacOS())
+        {
+            var configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName);
+            if (!Directory.Exists(configDirectory))
+                Directory.CreateDirectory(configDirectory);
+
+            configPath = Path.Combine(configDirectory, "appsettings.json");
+        }
+        else if (OperatingSystem.IsWindows())
+        {
+            var configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName);
+            if (!Directory.Exists(configDirectory))
+                Directory.CreateDirectory(configDirectory);
+
+            configPath = Path.Combine(configDirectory, "appsettings.json");
+        }
+        else // Assume Linux
+        {
+            var configDirectory = Path.Combine($"./config/{appName}");
+            if (!Directory.Exists(configDirectory))
+                Directory.CreateDirectory(configDirectory);
+
+            configPath = Path.Combine(configDirectory, "appsettings.json");
+        }
+
+        return configPath;
+    }
+    
+    private void CreateAppSettings()
+    {
+        var configPath = GetConfigPath();
+
+        // Create default settings if not present
+        if (!File.Exists(configPath))
+        {
+            var defaultSettings = createDefaultAppSettings();
+            File.WriteAllText(configPath, defaultSettings.ToString());
+            Log.Information($"Default appsettings.json created at {configPath}");
+        }
+        
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(configPath, false, true)
+            .AddJsonFile("appsettings.json", true, true)
+            // .AddJsonFile("appsettings.Development.json", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            // .AddJsonFile(
+            //     $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
+            //     true)
+            .Build();
+
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)
+            .WriteTo.Sink(new EventAggregatorSink(ServiceProvider.GetRequiredService<IEventAggregator>()))
+            .CreateLogger();
+
+        Log.Information(
+            "**********************************************************************************************");
+        Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
+        Log.Information($"Using appsettings.json from {configPath}");
+    }
+    
+    public virtual async Task ShowUpdateDialogAsync(string releaseNotes, string downloadUrl, string newVersion)
     {
         var msgBox = MessageBoxManager.GetMessageBoxStandard("Update Available",
-            $"New version available:\n\n{releaseNotes}\n\nDo you want to download the update?", ButtonEnum.YesNo);
+            $"New version available: {newVersion}\n\n{releaseNotes}\n\nDo you want to download the update?", ButtonEnum.YesNo);
 
         var result = await msgBox.ShowAsync();
 
@@ -90,7 +154,7 @@ public class App : Application
             UseShellExecute = true
         });
     }
-    
+
     private async Task CheckForUpdatesAsync()
     {
         // Set up the necessary dependencies
@@ -98,7 +162,7 @@ public class App : Application
 
         var configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             Assembly.GetExecutingAssembly().GetName().Name, "appsettings.json");
-        
+
         // Create an IConfiguration instance
         var configuration = new ConfigurationBuilder()
             .AddJsonFile(configPath, optional: false, reloadOnChange: true)
@@ -109,13 +173,28 @@ public class App : Application
 
         try
         {
-            var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            string currentVersion;
+#if DEBUG
+            // In debug mode, read the version from VERSION.txt
+            string versionFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "VERSION");
+            if (File.Exists(versionFilePath))
+            {
+                currentVersion = File.ReadAllText(versionFilePath).Trim();
+            }
+            else
+            {
+                currentVersion = "0.0.0.0"; // Default version for debugging
+            }
+#else
+            currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+#endif
+
             var result = await updateChecker.CheckForUpdateAsync(currentVersion);
 
             if (result.HasUpdate)
             {
-                await ShowUpdateDialogAsync(result.ReleaseNotes, result.DownloadUrl);
-                Log.Information($"Update Available! Version: {result.ReleaseNotes}");
+                await ShowUpdateDialogAsync(result.ReleaseNotes, result.DownloadUrl, result.NewVersion);
+                Log.Information($"Update Available! Version: {result.NewVersion}, {result.ReleaseNotes}");
             }
             else
             {
@@ -139,7 +218,30 @@ public class App : Application
         services.AddSingleton<IYamlConfigService, YamlConfigService>();
         services.AddSingleton<ILogger>(sp => Log.Logger);
 
+        // Load the configuration
+        var configPath = GetConfigPath();
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
+            .Build();
 
+        // Register IConfiguration
+        services.AddSingleton<IConfiguration>(configuration);
+        services.AddTransient<DeviceConfigValidator>();
+        
+        // Register IConfiguration
+        services.AddTransient<DeviceConfigValidator>();
+        
+        // Register ViewModels
+        RegisterViewModels(services);
+        
+        // Register Views
+        RegisterViews(services);
+        
+
+    }
+
+    private static void RegisterViewModels(IServiceCollection services)
+    {
         // Register ViewModels
         services.AddTransient<MainViewModel>();
 
@@ -151,8 +253,11 @@ public class App : Application
         services.AddTransient<TelemetryTabViewModel>();
         services.AddTransient<VRXTabViewModel>();
         services.AddTransient<WfbGSTabViewModel>();
-        services.AddTransient<WfbTabViewModel>();        
-
+        services.AddTransient<WfbTabViewModel>();
+    }
+    
+    private static void RegisterViews(IServiceCollection services)
+    {
         // Register Views
         services.AddTransient<MainWindow>();
         services.AddTransient<MainView>();
@@ -165,91 +270,8 @@ public class App : Application
         services.AddTransient<VRXTabView>();
         services.AddTransient<WfbGSTabView>();
         services.AddTransient<WfbTabView>();
-
     }
     
-
-    private void CreateAppSettings()
-    {
-        string configPath;
-        string configDirectory;
-
-        var appName = Assembly.GetExecutingAssembly().GetName().Name;
-        Log.Information($"Application name: {appName}, running on {RuntimeInformation.OSDescription}");
-        if (OperatingSystem.IsAndroid())
-        {
-            // Android-specific path
-            configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appName);
-            configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appName, "appsettings.json");
-        }
-        else if (OperatingSystem.IsIOS())
-        {
-            configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appName);
-            configPath = Path.Combine(configDirectory, "appsettings.json");
-        }
-        else if (OperatingSystem.IsWindows())
-        {
-            configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appName);
-            configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appName,
-                "appsettings.json");
-        }
-        else if (OperatingSystem.IsMacOS())
-        {
-            configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appName);
-            configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appName,
-                "appsettings.json");
-        }
-        else // Assume Linux
-        {
-            configDirectory = Path.Combine($"./config/{appName}");
-            configPath = Path.Combine($"./config/{appName}", "appsettings.json");
-        }
-
-        if (!Directory.Exists(configDirectory))
-            Directory.CreateDirectory(configDirectory);
-
-        // Check if appsettings.json exists, otherwise create a default one
-        if (!File.Exists(configPath))
-        {
-            // Create default settings
-            var defaultSettings = createDefaultAppSettings();
-
-            File.WriteAllText(configPath, defaultSettings.ToString());
-
-            Thread.Sleep(2000);
-
-            Log.Information($"Default appsettings.json created at {configPath}");
-        }
-
-
-        var configuration = new ConfigurationBuilder()
-            .AddJsonFile(configPath, false, true)
-            .AddJsonFile("appsettings.json", true, true)
-            // .AddJsonFile("appsettings.Development.json", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-            // .AddJsonFile(
-            //     $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json",
-            //     true)
-            .Build();
-
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .WriteTo.Sink(new EventAggregatorSink(ServiceProvider.GetRequiredService<IEventAggregator>()))
-            .CreateLogger();
-
-        Log.Information(
-            "**********************************************************************************************");
-        Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
-        Log.Information($"Using appsettings.json from {configPath}");
-        
-    }
-
     private JObject createDefaultAppSettings()
     {
         // Create default settings
@@ -258,12 +280,11 @@ public class App : Application
                 new JObject(
                     new JProperty("LatestJsonUrl", "https://github.com/OpenIPC/openipc-configurator/releases/latest/download/latest.json")
                 )
-                    
             ),
             new JProperty("Serilog",
                 new JObject(
                     new JProperty("Using", new JArray("Serilog.Sinks.Console", "Serilog.Sinks.RollingFile")),
-                    new JProperty("MinimumLevel", "Debug"),
+                    new JProperty("MinimumLevel", "Verbose"),
                     new JProperty("WriteTo",
                         new JArray(
                             new JObject(
@@ -274,8 +295,7 @@ public class App : Application
                                 new JProperty("Args",
                                     new JObject(
                                         new JProperty("pathFormat",
-                                            $"{Models.OpenIPC.AppDataConfigDirectory}/Logs/configurator-{{Date}}.log") 
-                                        
+                                            $"{Models.OpenIPC.AppDataConfigDirectory}/Logs/configurator-{{Date}}.log")
                                     )
                                 )
                             )
@@ -287,8 +307,16 @@ public class App : Application
                         )
                     )
                 )
+            ),
+            new JProperty("DeviceHostnameMapping",
+                new JObject(
+                    new JProperty("Camera", new JArray("openipc-ssc338q","openipc-ssc330")),
+                    new JProperty("Radxa", new JArray("radxa", "raspberrypi")),
+                    new JProperty("NVR", new JArray("openipc-hi3536dv100"))
+                )
             )
         );
+
         return defaultSettings;
     }
 }

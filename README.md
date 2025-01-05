@@ -10,6 +10,8 @@ Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator
 
 * Android and IOS versions coming soon!
 
+**Note: At this time NVR is not supported, please use MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator) for NVR support. I plan on adding support later**
+
 ## Features
 
 * **Camera settings management**: configure camera settings such as resolution, frame rate, and exposure

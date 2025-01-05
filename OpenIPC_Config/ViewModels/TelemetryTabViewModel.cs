@@ -47,8 +47,9 @@ public partial class TelemetryTabViewModel : ViewModelBase
     public ICommand EnableUART0Command { get; private set; }
     public ICommand DisableUART0Command { get; private set; }
     public ICommand AddMavlinkCommand { get; private set; }
-    public ICommand UploadMSPOSDCommand { get; private set; }
-    public ICommand UploadINavCommand { get; private set; }
+    // public ICommand UploadMSPOSDCommand { get; private set; }
+    public ICommand UploadLatestVtxMenuCommand { get; private set; }
+    public ICommand Enable40MhzCommand { get; private set; }
     public ICommand MSPOSDExtraCommand { get; private set; }
     public ICommand OnBoardRecCommand { get; private set; }
     public ICommand SaveAndRestartTelemetryCommand { get; private set; }
@@ -88,8 +89,8 @@ public partial class TelemetryTabViewModel : ViewModelBase
         DisableUART0Command = new RelayCommand(DisableUART0);
         OnBoardRecCommand = new RelayCommand(OnBoardRec);
         AddMavlinkCommand = new RelayCommand(AddMavlink);
-        UploadMSPOSDCommand = new RelayCommand(UploadMSPOSD);
-        UploadINavCommand = new RelayCommand(UploadINav);
+        UploadLatestVtxMenuCommand = new RelayCommand(UploadLatestVtxMenu);
+        Enable40MhzCommand = new RelayCommand(Enable40Mhz);
         MSPOSDExtraCommand = new RelayCommand(AddMSPOSDExtra);
         SaveAndRestartTelemetryCommand = new RelayCommand(SaveAndRestartTelemetry);
     }
@@ -146,71 +147,95 @@ public partial class TelemetryTabViewModel : ViewModelBase
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
     }
 
-    private async void UploadMSPOSD()
+    private async void UploadLatestVtxMenu()
     {
-        Log.Debug("UploadMSPOSDCommand executed");
-
-        var msposdFile = "msposd_star6e";
-
-        // Get all files in the binaries folder
-        var binariesFolderPath = OpenIPC.GetBinariesPath();
-
-        var files = Directory.GetFiles(binariesFolderPath).Where(f => f.Contains(msposdFile));
-
-        if (files == null || !files.Any())
-        {
-            _messageBoxService.ShowMessageBox("File not found!", "File " + msposdFile + " not found!"); 
-            // var box = MessageBoxManager
-            //     .GetMessageBoxStandard("File not found!", "File " + msposdFile + " not found!");
-            // await box.ShowAsync();
-            return;
-        }
-
-        // killall -q msposd
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "killall -q msposd");
-        // upload msposd
-        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteBinariesFolder, "msposd_star6e");
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "mv /usr/bin/msposd_star6e /usr/bin/msposd");
-        // chmod +x /usr/bin/msposd
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x /usr/bin/msposd");
-
-        // upload betaflight fonts
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
-        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-            Models.OpenIPC.FileType.BetaFlightFonts, "font.png");
-        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-            Models.OpenIPC.FileType.BetaFlightFonts, "font_hd.png");
-
+        Log.Debug("UploadLatestVtxMenu executed");
+        
         // upload vtxmenu.ini /etc
         await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteEtcFolder, "vtxmenu.ini");
-
-
+        
         // ensure file is unix formatted
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "dos2unix /etc/vtxmenu.ini");
-
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"dos2unix /etc/vtxmenu.ini");
+        
         // reboot
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
-
-        //Thread.Sleep(3000);
-
-        _messageBoxService.ShowMessageBox("Done!", "MSPOSD setup, wait for device to restart!");
-
-        // var MsgBox = MessageBoxManager
-        //     .GetMessageBoxStandard("Done!", "MSPOSD setup, wait for device to restart!", ButtonEnum.Ok);
-        // await MsgBox.ShowAsync();
-    }
-
-    private async void UploadINav()
-    {
-        Log.Debug("UploadINavCommand executed");
-        // upload betaflight fonts
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
         
-        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-            Models.OpenIPC.FileType.iNavFonts, "font.png");
-        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-            Models.OpenIPC.FileType.iNavFonts, "font_hd.png");
+        Log.Debug("UploadLatestVtxMenu executed...done");
     }
+    // private async void UploadMSPOSD()
+    // {
+    //     Log.Debug("UploadMSPOSDCommand executed");
+    //
+    //     var msposdFile = "msposd_star6e";
+    //
+    //     // Get all files in the binaries folder
+    //     var binariesFolderPath = OpenIPC.GetBinariesPath();
+    //
+    //     var files = Directory.GetFiles(binariesFolderPath).Where(f => f.Contains(msposdFile));
+    //
+    //     if (files == null || !files.Any())
+    //     {
+    //         _messageBoxService.ShowMessageBox("File not found!", "File " + msposdFile + " not found!"); 
+    //         // var box = MessageBoxManager
+    //         //     .GetMessageBoxStandard("File not found!", "File " + msposdFile + " not found!");
+    //         // await box.ShowAsync();
+    //         return;
+    //     }
+    //
+    //     // killall -q msposd
+    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "killall -q msposd");
+    //     // upload msposd
+    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteBinariesFolder, "msposd_star6e");
+    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "mv /usr/bin/msposd_star6e /usr/bin/msposd");
+    //     // chmod +x /usr/bin/msposd
+    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x /usr/bin/msposd");
+    //
+    //     // upload betaflight fonts
+    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
+    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+    //         Models.OpenIPC.FileType.BetaFlightFonts, "font.png");
+    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+    //         Models.OpenIPC.FileType.BetaFlightFonts, "font_hd.png");
+    //
+    //     // upload vtxmenu.ini /etc
+    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteEtcFolder, "vtxmenu.ini");
+    //
+    //
+    //     // ensure file is unix formatted
+    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "dos2unix /etc/vtxmenu.ini");
+    //
+    //     // reboot
+    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+    //
+    //     //Thread.Sleep(3000);
+    //
+    //     _messageBoxService.ShowMessageBox("Done!", "MSPOSD setup, wait for device to restart!");
+    //
+    //     // var MsgBox = MessageBoxManager
+    //     //     .GetMessageBoxStandard("Done!", "MSPOSD setup, wait for device to restart!", ButtonEnum.Ok);
+    //     // await MsgBox.ShowAsync();
+    // }
+
+    private async void Enable40Mhz()
+    {
+        UpdateUIMessage("Enabling 40MHz...");
+        await SshClientService.UploadFileAsync(DeviceConfig.Instance, Models.OpenIPC.LocalWifiBroadcastBinFileLoc, Models.OpenIPC.RemoteWifiBroadcastBinFileLoc);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"{DeviceCommands.Dos2UnixCommand} {Models.OpenIPC.RemoteWifiBroadcastBinFileLoc}");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"chmod +x {Models.OpenIPC.RemoteWifiBroadcastBinFileLoc}");
+        UpdateUIMessage("Enabling 40MHz...done");
+            
+    }
+    // private async void UploadINav()
+    // {
+    //     Log.Debug("UploadINavCommand executed");
+    //     // upload betaflight fonts
+    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
+    //     
+    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+    //         Models.OpenIPC.FileType.iNavFonts, "font.png");
+    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
+    //         Models.OpenIPC.FileType.iNavFonts, "font_hd.png");
+    // }
 
     private async void AddMSPOSDExtra()
     {

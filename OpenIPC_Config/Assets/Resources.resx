@@ -181,4 +181,71 @@ If you set 90fps GOP: 1 , real gop is 90 and if you set value to 9 the correctio
     <data name="UpdateCameraToolTip" xml:space="preserve">
         <value>Updates Camera's firmware to selected firmware</value>
     </data>
+    <data name="Enable40MhzToolTip" xml:space="preserve">
+        <value>Uploads the modified wifibroadcast file to enable 40Mhz mode</value>
+    </data>
+    <data name="UploadLatestVtxMenuToolTip" xml:space="preserve">
+        <value>Upload the latest vtxmenu for the MSPOSD of OpenIPC
+        To enter the VTX menu move: 
+        LEFT stick to bottom right and
+        RIGHT stick to bottom left</value>
+    </data>
+    <data name="SelectBandwithToolTip" xml:space="preserve">
+        <value>Bandwidth:
+            
+Select the WiFi bandwidth for communication. Wider bandwidths (e.g., 40MHz) support higher speeds but may increase interference; narrower bandwidths (e.g., 20MHz) improve stability in congested areas.
+        </value>
+    </data>
+    <data name="SelectMCSIndexToolTip" xml:space="preserve">
+        <value>MCS Index (Modulation and Coding Scheme Index):
+            
+Specifies the data rate and modulation type for wireless communication. Higher values generally mean faster speeds but require better signal quality.</value>
+    </data>
+    <data name="SelectStbcToolTip" xml:space="preserve">
+        <value>STBC (Space-Time Block Coding):
+            
+Improves wireless communication reliability and performance by transmitting duplicate signals across multiple antennas.</value>
+    </data>
+    <data name="SelectLdpcToolTip" xml:space="preserve">
+        <value>LDPC (Low-Density Parity Check):
+            
+Enables error correction for reliable data transmission by reducing packet loss in challenging environments.</value>
+    </data>
+    <data name="SelectFecKToolTip" xml:space="preserve">
+        <value>FEC K (Forward Error Correction K):
+            
+Defines the number of data blocks to encode for error correction. A larger value increases efficiency but reduces redundancy.</value>
+    </data>
+    <data name="SelectFecNToolTip" xml:space="preserve">
+        <value>FEC N (Forward Error Correction N):
+            
+Represents the total number of blocks, including data and parity, used in error correction. A larger value enhances reliability but lowers throughput.</value>
+    </data>
+
+    <data name="Select58GHzFrequencyToolTip" xml:space="preserve">
+        <value>5.8GHz transmit frequency:
+            
+Select the 5.8GHz frequency channel for wireless communication. Higher frequencies may provide faster speeds but reduced range.            
+        </value>
+    </data>
+    <data name="Select58GHzPowerToolTip" xml:space="preserve">
+        <value>5.8GHz transmit power:
+            
+Adjust the transmission power for the 5.8GHz frequency. Higher power improves range but may increase interference and battery consumption.
+        </value>
+    </data>
+    <data name="Select24GHzFrequencyToolTip" xml:space="preserve">
+        <value>2.4GHz transmit frequency:
+            
+Select the 2.4GHz frequency channel for wireless communication. Lower frequencies offer better range and penetration through obstacles.
+        </value>
+    </data>
+    <data name="Select24GHzPowerToolTip" xml:space="preserve">
+        <value>2.4GHz transmit tower:
+            
+Adjust the transmission power for the 2.4GHz frequency. Lower power conserves energy but reduces transmission range.    
+
+        </value>
+    </data>
+    
 </root>

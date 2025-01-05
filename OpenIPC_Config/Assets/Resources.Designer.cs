@@ -227,6 +227,59 @@ namespace OpenIPC_Config.Assets {
             get { return ResourceManager.GetString("UpdateCameraToolTip", resourceCulture); }
         }
         
+        public static string Enable40MhzToolTip
+        {
+            get { return ResourceManager.GetString("Enable40MhzToolTip", resourceCulture); }
+        }
         
+        public static string UploadLatestVtxMenuToolTip
+        {
+            get { return ResourceManager.GetString("UploadLatestVtxMenuToolTip", resourceCulture); }
+        }
+
+        public static string SelectBandwithToolTip
+        {
+            get { return ResourceManager.GetString("SelectBandwithToolTip", resourceCulture); }
+        }
+        public static string SelectMCSIndexToolTip
+        {
+            get { return ResourceManager.GetString("SelectMCSIndexToolTip", resourceCulture); }
+        }
+        public static string SelectStbcToolTip
+        {
+            get { return ResourceManager.GetString("SelectStbcToolTip", resourceCulture); }
+        }
+        
+        public static string SelectLdpcToolTip
+        {
+            get { return ResourceManager.GetString("SelectLdpcToolTip", resourceCulture); }
+        }
+        
+        public static string SelectFecKToolTip
+        {
+            get { return ResourceManager.GetString("SelectFecKToolTip", resourceCulture); }
+        }
+        public static string SelectFecNToolTip
+        {
+            get { return ResourceManager.GetString("SelectFecNToolTip", resourceCulture); }
+        }
+
+        public static string Select58GHzFrequencyToolTip
+        {
+            get { return ResourceManager.GetString("Select58GHzFrequencyToolTip", resourceCulture); }
+        }
+        public static string Select58GHzPowerToolTip
+        {
+            get { return ResourceManager.GetString("Select58GHzPowerToolTip", resourceCulture); }
+        }
+        public static string Select24GHzFrequencyToolTip
+        {
+            get { return ResourceManager.GetString("Select24GHzFrequencyToolTip", resourceCulture); }
+        }
+        public static string Select24GHzPowerToolTip
+        {
+            get { return ResourceManager.GetString("Select24GHzPowerToolTip", resourceCulture); }
+        }
+
     }
 }

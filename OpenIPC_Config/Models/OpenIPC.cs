@@ -19,6 +19,7 @@ public class OpenIPC
     public const string MajesticFileLoc = "/etc/majestic.yaml";
     public const string WfbConfFileLoc = "/etc/wfb.conf";
     public const string TelemetryConfFileLoc = "/etc/telemetry.conf";
+    
 
     // Radxa files
     public const string WifiBroadcastFileLoc = "/etc/wifibroadcast.cfg";
@@ -26,15 +27,8 @@ public class OpenIPC
     public const string ScreenModeFileLoc = "/config/scripts/screen-mode";
 
 
-    
-    // public const string LocalBinariesFolder = "binaries";
-    // public const string LocalSensorsFolder = "binaries/sensors";
-    // public const string LocalFontsFolder = "binaries/fonts";
-    // public const string LocalBetaFlightFontsFolder = "binaries/fonts/bf";
-    // public const string LocalINavFontsFolder = "binaries/fonts/inav";
-
     public const string KeyMD5Sum = "24767056dc165963fe6db7794aee12cd";
-//    public const string LocalFwFolder = "binaries/fw";
+    public const string LocalWifiBroadcastBinFileLoc = "binaries/clean/wifibroadcast"; 
 
 
     public const string RemoteEtcFolder = "/etc";
@@ -44,8 +38,10 @@ public class OpenIPC
     public const string RemoteDroneKeyPath = "/etc/drone.key";
     public const string RemoteGsKeyPath = "/etc/gs.key";
     public const string RemoteTempFolder = "/tmp";
+    public const string RemoteWifiBroadcastBinFileLoc = "/usr/bin/wifibroadcast";
 
     public const string DroneKeyPath = "binaries/drone.key";
+    public const string GsKeyPath = "binaries/gs.key";
 
 
     public static string LocalFirmwareFolder;

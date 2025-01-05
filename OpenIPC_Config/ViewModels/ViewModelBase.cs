@@ -14,6 +14,7 @@ public abstract class ViewModelBase : ObservableObject
     protected readonly ILogger Logger;
     protected readonly IEventSubscriptionService EventSubscriptionService;
     
+    
     protected ViewModelBase(
         ILogger logger,
         ISshClientService sshClientService,
@@ -41,7 +42,8 @@ public abstract class ViewModelBase : ObservableObject
         EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage
         {
             Message = message,
-            UpdateLogView = false
+            UpdateLogView = false,
+            CanConnect = DeviceConfig.Instance.CanConnect
         });
     }
 }

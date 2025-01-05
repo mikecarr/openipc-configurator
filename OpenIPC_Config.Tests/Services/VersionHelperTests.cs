@@ -41,24 +41,7 @@ public class VersionHelperTests
         Assert.AreEqual(expectedVersion, version);
     }
 
-    [Test]
-    public void GetAppVersion_ReturnsAssemblyVersion_IfVersionFileDoesNotExist()
-    {
-        // Arrange
-        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
-
-        var expectedVersion = Assembly.GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion ?? "Unknown Version";
-
-        _mockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns(false);
-
-        // Act
-        var version = VersionHelper.GetAppVersion();
-
-        // Assert
-        Assert.AreEqual(expectedVersion, version);
-    }
+    
 
     [Test]
     public void GetAppVersion_ReturnsUnknownVersion_OnException()

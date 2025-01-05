@@ -2,9 +2,14 @@ namespace OpenIPC_Config.Models;
 
 public static class DeviceCommands
 {
+    public const string Dos2UnixCommand = "dos2unix";
+    
     public const string WfbStartCommand = "wifibroadcast start";
     public const string WfbStopCommand = "wifibroadcast stop";
     public const string WfbRestartCommand = "wifibroadcast stop; sleep 2; wifibroadcast start";
+    
+    public const string GsWfbStartCommand = "systemctl start openipc.service";
+    public const string GsWfbStopCommand = "systemctl stop openipc.service";
 
     public const string MajesticRestartCommand = "killall -1 majestic";
 

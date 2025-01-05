@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +20,7 @@ public class UpdateChecker
     }
 
     
-    public async Task<(bool HasUpdate, string ReleaseNotes, string DownloadUrl)> CheckForUpdateAsync(string currentVersion)
+    public async Task<(bool HasUpdate, string ReleaseNotes, string DownloadUrl, string NewVersion)> CheckForUpdateAsync(string currentVersion)
     {
         try
         {
@@ -28,7 +29,7 @@ public class UpdateChecker
 
             if (updateInfo != null && IsNewerVersion(updateInfo.Version, currentVersion))
             {
-                return (true, updateInfo.ReleaseNotes, updateInfo.DownloadUrl);
+                return (true, updateInfo.ReleaseNotes, updateInfo.DownloadUrl, updateInfo.Version);
             }
         }
         catch (Exception ex)
@@ -36,13 +37,28 @@ public class UpdateChecker
             Log.Error($"Error during update check: {ex.Message}");
         }
 
-        return (false, string.Empty, string.Empty);
+        return (false, string.Empty, string.Empty, string.Empty);
     }
 
     private bool IsNewerVersion(string newVersion, string currentVersion)
     {
-        return Version.TryParse(newVersion, out var newVer) &&
-               Version.TryParse(currentVersion, out var currVer) &&
+        // Helper function to remove the "-v" prefix and extract the version number
+        string ExtractVersionNumber(string version)
+        {
+            const string prefix = "v";
+            return version.StartsWith(prefix) ? version.Substring(prefix.Length) : version;
+        }
+        
+        // Helper function to remove the "release-v" prefix and extract the version number
+        string ExtractGHVersionNumber(string version)
+        {
+            const string prefix = "release-v";
+            return version.StartsWith(prefix) ? version.Substring(prefix.Length) : version;
+        }
+
+        // Extract and parse the version numbers
+        return Version.TryParse(ExtractGHVersionNumber(newVersion), out var newVer) &&
+               Version.TryParse(ExtractVersionNumber(currentVersion), out var currVer) &&
                newVer > currVer;
     }
 

@@ -6,6 +6,7 @@ public static class Wfb
     public const string Frequency = "frequency";
     public const string DriverTxpowerOverride = "driver_txpower_override";
     public const string Txpower = "txpower";
+    public const string Bandwidth = "bandwidth";
     public const string Stbc = "stbc";
     public const string Ldpc = "ldpc";
     public const string McsIndex = "mcs_index";

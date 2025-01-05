@@ -56,10 +56,11 @@
                              IsChecked="{Binding SelectedDeviceType, 
                              Converter={StaticResource EnumToBoolConverter}, 
                              ConverterParameter={x:Static models:DeviceType.Radxa}}" />
-                <RadioButton Margin="5" Content="NVR" 
-                             IsChecked="{Binding SelectedDeviceType, 
-                             Converter={StaticResource EnumToBoolConverter}, 
-                             ConverterParameter={x:Static models:DeviceType.NVR}}" />
+                <!-- Disabled until I can get the logic added -->
+                <!-- <RadioButton Margin="5" Content="NVR"  -->
+                <!--              IsChecked="{Binding SelectedDeviceType,  -->
+                <!--              Converter={StaticResource EnumToBoolConverter},  -->
+                <!--              ConverterParameter={x:Static models:DeviceType.NVR}}" /> -->
             </StackPanel>
         </WrapPanel>
 
