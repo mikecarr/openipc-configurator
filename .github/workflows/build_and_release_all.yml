@@ -17,12 +17,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-#        os: [macos-latest, windows-latest, ubuntu-latest]
-#        arch: [x64, arm64]
+       os: [macos-latest, windows-latest, ubuntu-latest]
+       arch: [x64, arm64]
         # os: [ubuntu-latest]
         # arch: [arm64]
-        os: [ macos-latest ]
-        arch: [arm64]
+        # os: [ macos-latest ]
+        # arch: [arm64]
 
 
     steps:
@@ -104,27 +104,27 @@ jobs:
 
           chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}.Desktop"
 
-      - name: Debug Signature Before Signing
-        if: matrix.os == 'macos-latest'
-        run: codesign -dvvv OpenIPC_Config.app || echo "No signature found"
+      # - name: Debug Signature Before Signing
+      #   if: matrix.os == 'macos-latest'
+      #   run: codesign -dvvv OpenIPC_Config.app || echo "No signature found"
         
-      - name: Import Signing Certificate
-        if: matrix.os == 'macos-latest'
-        env:
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-        run: |
-          echo "$APPLE_CERTIFICATE" | base64 --decode > signing_certificate.p12
-          ls -l signing_certificate.p12
-          md5 signing_certificate.p12
-          security import signing_certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -A
-          security find-identity -p codesigning -v
+      # - name: Import Signing Certificate
+      #   if: matrix.os == 'macos-latest'
+      #   env:
+      #     APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      #     APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      #   run: |
+      #     echo "$APPLE_CERTIFICATE" | base64 --decode > signing_certificate.p12
+      #     ls -l signing_certificate.p12
+      #     md5 signing_certificate.p12
+      #     security import signing_certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -A
+      #     security find-identity -p codesigning -v
 
-      - name: Code Sign Nested Components
-        if: matrix.os == 'macos-latest'
-        run: |
-          find OpenIPC_Config.app -type f -name "*.dll" -exec codesign --force --options runtime --sign "Developer ID Application: Mike Carr (EQKLR945TW)" {} \;
-          codesign --force --options runtime --deep --sign "Developer ID Application: Mike Carr (EQKLR945TW)" OpenIPC_Config.app
+      # - name: Code Sign Nested Components
+      #   if: matrix.os == 'macos-latest'
+      #   run: |
+      #     find OpenIPC_Config.app -type f -name "*.dll" -exec codesign --force --options runtime --sign "Developer ID Application: Mike Carr (EQKLR945TW)" {} \;
+      #     codesign --force --options runtime --deep --sign "Developer ID Application: Mike Carr (EQKLR945TW)" OpenIPC_Config.app
       
       
       #      - name: Remove Quarantine Flag (macOS only)
