@@ -76,11 +76,23 @@ public class App : Application
         return configuration;
     }
     
-    private void InitializeLogger(IConfiguration configuration)
+    private void InitializeBasicLogger()
     {
         Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .CreateLogger();
+
+        Log.Information("Basic logger initialized for early startup.");
+    }
+    
+    private void ReconfigureLogger(IConfiguration configuration)
+    {
+        var eventAggregator = ServiceProvider.GetRequiredService<IEventAggregator>();
+
+        Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
-            .WriteTo.Sink(new EventAggregatorSink(ServiceProvider?.GetService<IEventAggregator>()))
+            .WriteTo.Console() // Keep console logging
+            .WriteTo.Sink(new EventAggregatorSink(eventAggregator)) // Add EventAggregatorSink
             .CreateLogger();
 
         Log.Information(
@@ -89,27 +101,34 @@ public class App : Application
         Log.Information("Logger initialized successfully.");
     }
     
+    // private void InitializeLogger(IConfiguration configuration)
+    // {
+    //     Log.Logger = new LoggerConfiguration()
+    //         .ReadFrom.Configuration(configuration)
+    //         .WriteTo.Sink(new EventAggregatorSink(ServiceProvider?.GetService<IEventAggregator>()))
+    //         .CreateLogger();
+    //
+    //     Log.Information(
+    //         "**********************************************************************************************");
+    //     Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
+    //     Log.Information("Logger initialized successfully.");
+    // }
+    
     public override void OnFrameworkInitializationCompleted()
     {
-        // Load configuration
+        // Step 1: Initialize basic logger
+        InitializeBasicLogger();
+
+        // Step 2: Load configuration
         var configuration = LoadConfiguration();
-        
-        // Configure logger
-        InitializeLogger(configuration);
         
         // Configure DI container
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection, configuration);
         ServiceProvider = serviceCollection.BuildServiceProvider();
         
-        // CreateAppSettings();
-            
-        // Configure and build the DI container
-        // var serviceCollection = new ServiceCollection();
-        // ConfigureServices(serviceCollection);
-        // ServiceProvider = serviceCollection.BuildServiceProvider();
-        //
-        // //CreateAppSettings();
+        // Step 4: Reconfigure logger with DI services
+        ReconfigureLogger(configuration);
         
         // check for updates
         CheckForUpdatesAsync();
