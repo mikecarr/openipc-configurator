@@ -42,6 +42,8 @@ Do not touch anything until finished</TextBlock>
             <Button Grid.Row="2" Grid.Column="1" Content="SCAN"
                     Command="{Binding ScanCommand}"
                     ToolTip.Tip="{x:Static assets:Resources.ScanIpToolTip}" />
+            
+
 
             <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" BorderThickness="0"
                      Text="{Binding ScanMessages}" />
@@ -55,6 +57,14 @@ Do not touch anything until finished</TextBlock>
                          Height="125"
                          Text="{Binding ScanIPResultTextBox}" />
             </ScrollViewer>
+            
+            <TextBlock Grid.Row="7" Grid.Column="0" 
+                       FontStyle="Italic"
+                       TextAlignment="Left"
+                       VerticalAlignment="Center" 
+                       FontSize="12"
+                       Text="{Binding LocalIp}"
+                       ToolTip.Tip="{x:Static assets:Resources.LocalIpToolTip}" />
 
 
         </Grid>

@@ -28,10 +28,31 @@ namespace OpenIPC_Config;
 public class App : Application
 {
     public static IServiceProvider ServiceProvider { get; private set; }
+    
+    public static string OSType { get; private set; }
 
+    private void DetectOsType()
+    {
+        // Detect OS Type
+        if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+        {
+            OSType = "Mobile";
+        }
+        else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+        {
+            OSType = "Desktop";
+        }
+        else
+        {
+            OSType = "Unknown";
+        }
+    }
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        
+        DetectOsType();
+
     }
 
     private IConfigurationRoot LoadConfiguration()

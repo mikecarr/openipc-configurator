@@ -34,6 +34,10 @@ public partial class TelemetryTabViewModel : ViewModelBase
     [ObservableProperty] private string _telemetryContent;
     #endregion
 
+    public bool IsMobile => App.OSType == "Mobile";
+    public bool IsEnabledForView => CanConnect && !IsMobile;
+
+    
     #region Collections
     public ObservableCollection<string> SerialPorts { get; private set; }
     public ObservableCollection<string> BaudRates { get; private set; }
