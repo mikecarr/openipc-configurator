@@ -34,14 +34,61 @@ public class App : Application
         AvaloniaXamlLoader.Load(this);
     }
 
+    private IConfigurationRoot LoadConfiguration()
+    {
+        var configPath = GetConfigPath();
+
+        // Create default settings if not present
+        if (!File.Exists(configPath))
+        {
+            var defaultSettings = createDefaultAppSettings();
+            File.WriteAllText(configPath, defaultSettings.ToString());
+            Log.Information($"Default appsettings.json created at {configPath}");
+        }
+
+        // Build configuration
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
+
+        return configuration;
+    }
+    
+    private void InitializeLogger(IConfiguration configuration)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)
+            .WriteTo.Sink(new EventAggregatorSink(ServiceProvider?.GetService<IEventAggregator>()))
+            .CreateLogger();
+
+        Log.Information(
+            "**********************************************************************************************");
+        Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
+        Log.Information("Logger initialized successfully.");
+    }
+    
     public override void OnFrameworkInitializationCompleted()
     {
-        // Configure and build the DI container
+        // Load configuration
+        var configuration = LoadConfiguration();
+        
+        // Configure logger
+        InitializeLogger(configuration);
+        
+        // Configure DI container
         var serviceCollection = new ServiceCollection();
-        ConfigureServices(serviceCollection);
+        ConfigureServices(serviceCollection, configuration);
         ServiceProvider = serviceCollection.BuildServiceProvider();
-
-        CreateAppSettings();
+        
+        // CreateAppSettings();
+            
+        // Configure and build the DI container
+        // var serviceCollection = new ServiceCollection();
+        // ConfigureServices(serviceCollection);
+        // ServiceProvider = serviceCollection.BuildServiceProvider();
+        //
+        // //CreateAppSettings();
         
         // check for updates
         CheckForUpdatesAsync();
@@ -207,7 +254,7 @@ public class App : Application
         }
     }
 
-    private void ConfigureServices(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         // Register IEventAggregator as a singleton
         services.AddSingleton<IEventAggregator, EventAggregator>();
@@ -218,11 +265,8 @@ public class App : Application
         services.AddSingleton<IYamlConfigService, YamlConfigService>();
         services.AddSingleton<ILogger>(sp => Log.Logger);
 
-        // Load the configuration
-        var configPath = GetConfigPath();
-        var configuration = new ConfigurationBuilder()
-            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
-            .Build();
+        // Register configuration
+        services.AddSingleton<IConfiguration>(configuration);
 
         // Register IConfiguration
         services.AddSingleton<IConfiguration>(configuration);

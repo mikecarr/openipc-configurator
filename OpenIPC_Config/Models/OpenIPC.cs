@@ -79,6 +79,16 @@ public class OpenIPC
             basePath = AppContext.BaseDirectory;
             return Path.Combine(basePath, "binaries");
         }
+        else if (OperatingSystem.IsAndroid() )
+        {
+            basePath = AppContext.BaseDirectory;
+            return basePath;
+        }
+        else if (OperatingSystem.IsIOS())
+        {
+            basePath = AppContext.BaseDirectory;
+            return Path.Combine(basePath, "binaries");
+        }
 
         throw new PlatformNotSupportedException("Unsupported platform");
     }
