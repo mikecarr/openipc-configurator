@@ -248,4 +248,7 @@ Adjust the transmission power for the 2.4GHz frequency. Lower power conserves en
         </value>
     </data>
     
+    <data name="LocalIpToolTip" xml:space="preserve">
+        <value>IP of the device running the App</value>
+    </data>
 </root>

@@ -11,6 +11,8 @@
     </UserControl.Resources>
 
     <!-- Root Grid -->
+    <!-- ScrollViewer for Entire View -->
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
     <Grid >
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" /> <!-- Input Fields + Radio Buttons -->
@@ -78,4 +80,5 @@
                     Command="{Binding ConnectCommand}" />
         </Grid>
     </Grid>
+        </ScrollViewer>
 </UserControl>

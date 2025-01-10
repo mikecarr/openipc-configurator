@@ -28,20 +28,107 @@ namespace OpenIPC_Config;
 public class App : Application
 {
     public static IServiceProvider ServiceProvider { get; private set; }
+    
+    public static string OSType { get; private set; }
 
+    private void DetectOsType()
+    {
+        // Detect OS Type
+        if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+        {
+            OSType = "Mobile";
+        }
+        else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+        {
+            OSType = "Desktop";
+        }
+        else
+        {
+            OSType = "Unknown";
+        }
+    }
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        
+        DetectOsType();
+
     }
 
+    private IConfigurationRoot LoadConfiguration()
+    {
+        var configPath = GetConfigPath();
+
+        // Create default settings if not present
+        if (!File.Exists(configPath))
+        {
+            var defaultSettings = createDefaultAppSettings();
+            File.WriteAllText(configPath, defaultSettings.ToString());
+            Log.Information($"Default appsettings.json created at {configPath}");
+        }
+
+        // Build configuration
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .Build();
+
+        return configuration;
+    }
+    
+    private void InitializeBasicLogger()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .CreateLogger();
+
+        Log.Information("Basic logger initialized for early startup.");
+    }
+    
+    private void ReconfigureLogger(IConfiguration configuration)
+    {
+        var eventAggregator = ServiceProvider.GetRequiredService<IEventAggregator>();
+
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(configuration)
+            .WriteTo.Console() // Keep console logging
+            .WriteTo.Sink(new EventAggregatorSink(eventAggregator)) // Add EventAggregatorSink
+            .CreateLogger();
+
+        Log.Information(
+            "**********************************************************************************************");
+        Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
+        Log.Information("Logger initialized successfully.");
+    }
+    
+    // private void InitializeLogger(IConfiguration configuration)
+    // {
+    //     Log.Logger = new LoggerConfiguration()
+    //         .ReadFrom.Configuration(configuration)
+    //         .WriteTo.Sink(new EventAggregatorSink(ServiceProvider?.GetService<IEventAggregator>()))
+    //         .CreateLogger();
+    //
+    //     Log.Information(
+    //         "**********************************************************************************************");
+    //     Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
+    //     Log.Information("Logger initialized successfully.");
+    // }
+    
     public override void OnFrameworkInitializationCompleted()
     {
-        // Configure and build the DI container
-        var serviceCollection = new ServiceCollection();
-        ConfigureServices(serviceCollection);
-        ServiceProvider = serviceCollection.BuildServiceProvider();
+        // Step 1: Initialize basic logger
+        InitializeBasicLogger();
 
-        CreateAppSettings();
+        // Step 2: Load configuration
+        var configuration = LoadConfiguration();
+        
+        // Configure DI container
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection, configuration);
+        ServiceProvider = serviceCollection.BuildServiceProvider();
+        
+        // Step 4: Reconfigure logger with DI services
+        ReconfigureLogger(configuration);
         
         // check for updates
         CheckForUpdatesAsync();
@@ -207,7 +294,7 @@ public class App : Application
         }
     }
 
-    private void ConfigureServices(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         // Register IEventAggregator as a singleton
         services.AddSingleton<IEventAggregator, EventAggregator>();
@@ -218,11 +305,8 @@ public class App : Application
         services.AddSingleton<IYamlConfigService, YamlConfigService>();
         services.AddSingleton<ILogger>(sp => Log.Logger);
 
-        // Load the configuration
-        var configPath = GetConfigPath();
-        var configuration = new ConfigurationBuilder()
-            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
-            .Build();
+        // Register configuration
+        services.AddSingleton<IConfiguration>(configuration);
 
         // Register IConfiguration
         services.AddSingleton<IConfiguration>(configuration);
