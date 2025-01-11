@@ -115,11 +115,11 @@ jobs:
            MY_KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
            APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
            ACTIONS_STEP_DEBUG: true
-           
-
         run: |
           echo "Creating custom keychain"
           security create-keychain -p $MY_KEYCHAIN_PASSWORD build.keychain
+          ls -al
+          
 
           echo "Importing signing certificate"
           security import macos_signing_cert.p12 -k build.keychain -P $APPLE_CERTIFICATE_PASSWORD -T /usr/bin/codesign
