@@ -114,6 +114,7 @@ jobs:
         env:
            MY_KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
            APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+           ACTIONS_STEP_DEBUG: true
            
 
         run: |
