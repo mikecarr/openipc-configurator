@@ -44,7 +44,7 @@
                 <TextBox MinWidth="150" Height="30" PasswordChar="*" Text="{Binding Password}" />
             </StackPanel>
 
-            <!-- Radio Buttons -->
+            <!-- DeviceType Radio Buttons -->
             <StackPanel Orientation="Horizontal" Margin="5" VerticalAlignment="Center">
                 <RadioButton Margin="5" Content="None" 
                              IsChecked="{Binding SelectedDeviceType, 
@@ -66,14 +66,18 @@
             </StackPanel>
         </WrapPanel>
 
-        <!-- Connect Button -->
+        <!-- Ping Status & Connect Button -->
         <Grid Grid.Row="1" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+            
+            <!-- Ping Status -->
             <Panel Grid.Column="0" Background="{Binding PingStatusColor}" 
                    Height="30" Width="50" Margin="5" />
+            
+            <!-- Connect Button -->
             <Button Grid.Column="1" Content="Connect"
                     HorizontalAlignment="Left"
                     IsEnabled="{Binding CanConnect}" 
