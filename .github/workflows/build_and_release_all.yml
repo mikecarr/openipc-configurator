@@ -136,6 +136,8 @@ jobs:
 
       - name: Use the custom keychain for signing
         run: |
+          security find-identity
+
           echo "Using custom keychain for codesign"
           codesign --deep --force --verify --verbose --sign "Developer ID Application: Mike Carr (EQKLR945TW)" ./OpenIPC_Config.app
   
