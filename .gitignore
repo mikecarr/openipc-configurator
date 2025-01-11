@@ -461,3 +461,9 @@ $RECYCLE.BIN/
 
 # Local Build
 build
+
+
+
+.secrets
+.vars
+payload.json 

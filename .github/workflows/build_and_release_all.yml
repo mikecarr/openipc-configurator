@@ -14,15 +14,15 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     strategy:
       matrix:
-       os: [macos-latest, windows-latest, ubuntu-latest]
-       arch: [x64, arm64]
+      #  os: [macos-latest, windows-latest, ubuntu-latest]
+      #  arch: [x64, arm64]
         # os: [ubuntu-latest]
         # arch: [arm64]
-        # os: [ macos-latest ]
-        # arch: [arm64]
+        os: [ macos-latest ]
+        arch: [arm64]
 
 
     steps:
@@ -104,33 +104,49 @@ jobs:
 
           chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}.Desktop"
 
-      # - name: Debug Signature Before Signing
-      #   if: matrix.os == 'macos-latest'
-      #   run: codesign -dvvv OpenIPC_Config.app || echo "No signature found"
-        
-      # - name: Import Signing Certificate
-      #   if: matrix.os == 'macos-latest'
-      #   env:
-      #     APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-      #     APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-      #   run: |
-      #     echo "$APPLE_CERTIFICATE" | base64 --decode > signing_certificate.p12
-      #     ls -l signing_certificate.p12
-      #     md5 signing_certificate.p12
-      #     security import signing_certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -A
-      #     security find-identity -p codesigning -v
+      - name: Decode signing certificate
+        if: matrix.os == 'macos-latest'
+        run: |
+          echo "$APPLE_CERTIFICATE" | base64 --decode > macos_signing_cert.p12
+          echo "$MACOS_PROVISION_PROFILE" | base64 --decode > macos_provision_profile.mobileprovision
 
-      # - name: Code Sign Nested Components
-      #   if: matrix.os == 'macos-latest'
-      #   run: |
-      #     find OpenIPC_Config.app -type f -name "*.dll" -exec codesign --force --options runtime --sign "Developer ID Application: Mike Carr (EQKLR945TW)" {} \;
-      #     codesign --force --options runtime --deep --sign "Developer ID Application: Mike Carr (EQKLR945TW)" OpenIPC_Config.app
-      
-      
-      #      - name: Remove Quarantine Flag (macOS only)
-#        if: matrix.os == 'macos-latest'
-#        run: xattr -cr OpenIPC_Config.app
+      - name: Create and manage custom keychain
+        env:
+           MY_KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+           
 
+        run: |
+          echo "Creating custom keychain"
+          security create-keychain -p $MY_KEYCHAIN_PASSWORD build.keychain
+
+          echo "Importing signing certificate"
+          security import macos_signing_cert.p12 -k build.keychain -P $APPLE_CERTIFICATE_PASSWORD -T /usr/bin/codesign
+          
+
+          echo "Unlocking keychain"
+          security unlock-keychain -p $MY_KEYCHAIN_PASSWORD build.keychain
+
+          echo "Setting key partition list"
+          security set-key-partition-list -S apple-tool:,apple: -s -k $MY_KEYCHAIN_PASSWORD build.keychain
+
+      - name: Use the custom keychain for signing
+        run: |
+          echo "Using custom keychain for codesign"
+          codesign --deep --force --verify --verbose --sign "Developer ID Application: Mike Carr (EQKLR945TW)" ./OpenIPC_Config.app
+  
+      - name: Verify the signature
+        run: |
+          codesign --verify --verbose=4 MyApp.app
+          spctl --assess --type execute --verbose MyApp.app
+
+      - name: Cleanup custom keychain
+        if: always()
+        run: |
+          echo "Cleaning up the custom keychain"
+          security delete-keychain build.keychain || true
+
+            
       # Linux Icon and Packaging
       - name: Set up Icon and .desktop file
         if: matrix.os == 'ubuntu-latest'
