@@ -136,6 +136,7 @@ jobs:
 
       - name: Use the custom keychain for signing
         run: |
+          security list-keychains -d user -s build.keychain-db
           security find-identity
 
           echo "Using custom keychain for codesign"
