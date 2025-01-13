@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
        os: [macos-latest, windows-latest, ubuntu-latest]
@@ -177,11 +177,6 @@ jobs:
           $PUBLISH_DIR = "./OpenIPC_Config.Desktop/bin/Release/net8.0/win-${{ matrix.arch }}/publish"
           
           $ICON_PATH = "./OpenIPC_Config/Assets/Icons/OpenIPC.ico"
-
-          # Install Chocolatey if not installed
-          Set-ExecutionPolicy Bypass -Scope Process -Force
-          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-          iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
           # Install rcedit to modify the Windows executable icon
           choco install rcedit -y
