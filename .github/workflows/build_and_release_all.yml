@@ -144,7 +144,7 @@ jobs:
   
       - name: Verify the signature
         run: |
-          codesign --verify --verbose=4 MyApp.app
+          codesign --verify --verbose=4 ./OpenIPC_Config.app
           spctl --assess --type execute --verbose ./OpenIPC_Config.app
 
       - name: Cleanup custom keychain
