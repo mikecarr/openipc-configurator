@@ -89,9 +89,10 @@ public class App : Application
     {
         var eventAggregator = ServiceProvider.GetRequiredService<IEventAggregator>();
 
+        //Log.Logger = null;
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
-            .WriteTo.Console() // Keep console logging
+            //.WriteTo.Console() // Keep console logging
             .WriteTo.Sink(new EventAggregatorSink(eventAggregator)) // Add EventAggregatorSink
             .CreateLogger();
 
@@ -101,23 +102,11 @@ public class App : Application
         Log.Information("Logger initialized successfully.");
     }
     
-    // private void InitializeLogger(IConfiguration configuration)
-    // {
-    //     Log.Logger = new LoggerConfiguration()
-    //         .ReadFrom.Configuration(configuration)
-    //         .WriteTo.Sink(new EventAggregatorSink(ServiceProvider?.GetService<IEventAggregator>()))
-    //         .CreateLogger();
-    //
-    //     Log.Information(
-    //         "**********************************************************************************************");
-    //     Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
-    //     Log.Information("Logger initialized successfully.");
-    // }
-    
     public override void OnFrameworkInitializationCompleted()
     {
-        // Step 1: Initialize basic logger
-        InitializeBasicLogger();
+        // Step 1: Initialize basic logger 
+        // not sure if this is needed
+        //InitializeBasicLogger();
 
         // Step 2: Load configuration
         var configuration = LoadConfiguration();
