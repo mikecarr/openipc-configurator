@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -557,7 +558,8 @@ public partial class SetupTabViewModel : ViewModelBase
         {
             ProgressText = "Starting system upgrade...";
             DownloadProgress = 0;
-
+            var outputBuffer = new StringBuilder();
+            
             Log.Information($"Running command: sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
 
             // Pass cancellation token to the command
@@ -566,17 +568,28 @@ public partial class SetupTabViewModel : ViewModelBase
                 $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n",
                 output =>
                 {
-                    // Update the UI incrementally
-                    Dispatcher.UIThread.InvokeAsync(() =>
+                    outputBuffer.AppendLine(output);
+
+                    // Process buffer at intervals
+                    if (outputBuffer.Length > 1000 || output.Contains("sysupgrade") ||
+                        output.Contains("Conditional reboot"))
                     {
-                        //ProgressText = output;
+                        var bufferContent = outputBuffer.ToString();
+                        outputBuffer.Clear();
 
-                        // Dynamically update progress based on command output (if possible)
-                        if (output.Contains("sysupgrade")) DownloadProgress = 80;
-                        if (output.Contains("Conditional reboot")) DownloadProgress = 98;
+                        // Update the UI incrementally
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            ProgressText = output;
 
-                        Log.Information(output);
-                    });
+                            // Dynamically update progress based on command output (if possible)
+                            if (bufferContent.Contains("sysupgrade")) DownloadProgress = 80;
+                            if (bufferContent.Contains("Conditional reboot")) DownloadProgress = 98;
+
+                            //ProgressText = bufferContent;
+                            Log.Information(bufferContent);
+                        });
+                    }
                 },
                 cancellationToken
             );
