@@ -383,7 +383,7 @@ public class App : Application
             ),
             new JProperty("DeviceHostnameMapping",
                 new JObject(
-                    new JProperty("Camera", new JArray("openipc-ssc338q","openipc-ssc330")),
+                    new JProperty("Camera", new JArray("openipc-ssc338q","openipc-ssc30kq")),
                     new JProperty("Radxa", new JArray("radxa", "raspberrypi")),
                     new JProperty("NVR", new JArray("openipc-hi3536dv100"))
                 )
