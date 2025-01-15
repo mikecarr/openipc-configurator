@@ -33,7 +33,8 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           VERSION=${VERSION#release-v} # Remove "release-v" prefix
-          echo "VERSION=$VERSION" >> $GITHUB_ENV        
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "v$VERSION" > OpenIPC_Config/VERSION
         shell: bash
 
       - name: Restore dependencies
