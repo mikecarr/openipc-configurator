@@ -5,58 +5,38 @@
              xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
              xmlns:assets="clr-namespace:OpenIPC_Config.Assets"
              mc:Ignorable="d"
+             d:DesignWidth="400" d:DesignHeight="400"
              x:Class="OpenIPC_Config.Views.SetupRadxaButtonsView"
              x:DataType="vm:SetupTabViewModel">
 
     <!-- Left Panel -->
-    <Panel>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <Panel Grid.Row="0" Grid.ColumnSpan="2" />
-            <Panel Grid.Row="1" Grid.ColumnSpan="2" />
-            <Panel Grid.Row="2" Grid.ColumnSpan="2" />
-            <Panel Grid.Row="3" Grid.ColumnSpan="2" />
-
-
-            <Button Grid.Row="4" Grid.Column="1" Content="Generate Keys"
-                    Command="{Binding GenerateKeysCommand}"
-                    IsEnabled="{Binding CanConnect}"
-                    ToolTip.Tip="{x:Static assets:Resources.GenerateKeysToolTip}"
-                    HorizontalAlignment="Stretch" />
-            <Button Grid.Row="5" Grid.Column="0" Content="Send gs.key"
-                    Command="{Binding SendGSKeyCommand}"
-                    IsEnabled="{Binding CanConnect}"
-                    ToolTip.Tip="{x:Static assets:Resources.SendGsKeyToolTip}"
-                    HorizontalAlignment="Stretch" />
-
-            <Button Grid.Row="5" Grid.Column="1" Content="Rec'v gs.key"
-                    Command="{Binding RecvGSKeyCommand}" IsEnabled="{Binding CanConnect}"
-                    ToolTip.Tip="{x:Static assets:Resources.RecvGsKeyToolTip}"
-                    HorizontalAlignment="Stretch" />
-
-            <TextBlock Grid.Row="6" FontWeight="Bold" Text="Device Checksum" />
-            <TextBlock Grid.Row="7" Grid.ColumnSpan="2"
-                       Text="{Binding KeyChecksum}" 
-                       Foreground="{Binding ChkSumStatusColor}" />
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        
+        
+        <ComboBox x:Name="RadxaKeyComboBox" Grid.Row="0" Grid.Column="0" PlaceholderText="Encryption Key Actions"
+                  ItemsSource="{Binding DroneKeyActionItems}"
+                  SelectedItem="{Binding SelectedDroneKeyAction}"
+                  HorizontalAlignment="Stretch"
+                  ToolTip.Tip="{x:Static assets:Resources.DroneKeyActionsToolTip}" />
+        
+        <Button Grid.Row="0" Grid.Column="1" Content="Execute"
+                Command="{Binding EncryptionKeyActionCommand}"
+                CommandParameter="CameraKeyComboBox"
+                VerticalAlignment="Top"
+                ToolTip.Tip="{x:Static assets:Resources.DeviceChkSumToolTip}"
+                HorizontalAlignment="Stretch" />
+        
 
 
-        </Grid>
-    </Panel>
+    </Grid>
 
 </UserControl>

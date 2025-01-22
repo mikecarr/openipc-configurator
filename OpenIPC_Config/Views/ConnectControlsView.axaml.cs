@@ -11,6 +11,9 @@ public partial class ConnectControlsView : UserControl
         InitializeComponent();
 
         //if (!Design.IsDesignMode) DataContext = new ConnectControlsViewModel();
-        DataContext = App.ServiceProvider.GetService<ConnectControlsViewModel>();
+        if (!Design.IsDesignMode)
+        {
+            DataContext = App.ServiceProvider.GetService<ConnectControlsViewModel>();
+        }
     }
 }

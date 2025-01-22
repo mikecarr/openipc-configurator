@@ -251,4 +251,17 @@ Adjust the transmission power for the 2.4GHz frequency. Lower power conserves en
     <data name="LocalIpToolTip" xml:space="preserve">
         <value>IP of the device running the App</value>
     </data>
+    
+    <data name="DroneKeyActionsToolTip" xml:space="preserve">
+        <value>Send or receive encrypted key to/from connected device</value>
+    </data>
+    <data name="DeviceChkSumToolTip" xml:space="preserve">
+        <value>• Green: matches default key (drone.key or gs.key)
+• Red: does not match default key</value>
+    </data>
+    <data name="PingStatusToolTip" xml:space="preserve">
+        <value>Displays state of Ping Result when valid IP is entered
+• Green : Ping result is valid
+• Red : Ping result is not valid</value>
+    </data>
 </root>

@@ -4,12 +4,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OpenIPC_Config.Views;
 
-public partial class SetupCameraButtonsView : UserControl
+public partial class SetupRadxaButtonsView : UserControl
 {
-    public SetupCameraButtonsView()
+    public SetupRadxaButtonsView()
     {
         InitializeComponent();
-        //if (!Design.IsDesignMode) DataContext = new SetupTabViewModel();
-        DataContext = App.ServiceProvider.GetService<SetupTabViewModel>();
+        if (!Design.IsDesignMode)
+        {
+            DataContext = App.ServiceProvider.GetService<SetupTabViewModel>();
+        }
     }
+
+
+
 }

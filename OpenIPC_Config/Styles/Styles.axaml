@@ -5,7 +5,7 @@
     <!-- Default Window Style -->
     <Style Selector="Window">
         <Setter Property="Width" Value="850" />
-        <Setter Property="Height" Value="800" />
+        <Setter Property="Height" Value="815" />
     </Style>
 
 
@@ -45,7 +45,20 @@
 
 
     <!-- TextBox Style -->
+    <Style Selector="TextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    
+    <!-- RadioButton Style -->
+    <Style Selector="RadioButton">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    
+    <!-- TextBox Style -->
     <Style Selector="TextBox">
+        <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="MinHeight" Value="10" />
         <!-- Default Font Size -->
         <Setter Property="FontSize" Value="14" />
@@ -56,17 +69,17 @@
 
     <!-- Button Style -->
     <Style Selector="Button">
-        <Setter Property="Padding" Value="5,3" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="BorderBrush" Value="Black" />
         <Setter Property="Background" Value="Orange" />
-        <Setter Property="Margin" Value="2" />
-        <Setter Property="MinHeight" Value="30" />
-        <Setter Property="MinWidth" Value="80" />
+        <!-- <Setter Property="Margin" Value="2" /> -->
+        <!-- <Setter Property="MinHeight" Value="30" /> -->
+        <!-- <Setter Property="MinWidth" Value="80" /> -->
         <Setter Property="CornerRadius" Value="5" />
         <Setter Property="Foreground" Value="Black" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        
     </Style>
 
     <Style Selector="ComboBox">

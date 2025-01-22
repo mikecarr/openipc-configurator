@@ -506,14 +506,14 @@ public class SshClientService : ISshClientService
                         }
                          
                         
-                        await Task.Delay(100); // Non-blocking pause
-                        Log.Debug("Waiting for command to complete...");
+                        await Task.Delay(2); // Non-blocking pause
+                        //Log.Debug("Waiting for command to complete...");
                         
                     }
                 }
 
                 // Wait a bit before checking again to avoid a tight loop
-                await Task.Delay(100, cancellationToken);
+                await Task.Delay(1, cancellationToken);
             }
 
             if (!commandCompleted)

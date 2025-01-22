@@ -285,6 +285,21 @@ namespace OpenIPC_Config.Assets {
         {
             get { return ResourceManager.GetString("Select24GHzPowerToolTip", resourceCulture); }
         }
+        
+        public static string DroneKeyActionsToolTip
+        {
+            get { return ResourceManager.GetString("DroneKeyActionsToolTip", resourceCulture); }
+        }
+
+        public static string DeviceChkSumToolTip
+        {
+            get { return ResourceManager.GetString("DeviceChkSumToolTip", resourceCulture); }
+        }
+        
+        public static string PingStatusToolTip
+        {
+            get { return ResourceManager.GetString("PingStatusToolTip", resourceCulture); }
+        }
 
     }
 }

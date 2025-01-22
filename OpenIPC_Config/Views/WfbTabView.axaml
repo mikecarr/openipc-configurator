@@ -48,12 +48,12 @@
                ToolTip.Tip="{x:Static assets:Resources.SelectFecKToolTip}"/>
         <Label Grid.Column="0" Grid.Row="9" Content="FEC N"
                ToolTip.Tip="{x:Static assets:Resources.SelectFecNToolTip}"/>
-
+        
         <ComboBox Grid.Column="1" Grid.Row="0"
                   ToolTip.Tip="{x:Static assets:Resources.Select58GHzFrequencyToolTip}"
                   ItemsSource="{Binding Frequencies58GHz}"
                   SelectedItem="{Binding SelectedFrequency58String, Mode=TwoWay}" />
-
+        
         <ComboBox Grid.Column="1" Grid.Row="1" 
                   ToolTip.Tip="{x:Static assets:Resources.Select58GHzPowerToolTip}"
                   ItemsSource="{Binding Power58GHz}"

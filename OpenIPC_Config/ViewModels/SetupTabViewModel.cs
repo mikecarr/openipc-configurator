@@ -10,16 +10,15 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia.Rendering;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DynamicData.Binding;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
-using Prism.Events;
 using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
@@ -28,14 +27,14 @@ public partial class SetupTabViewModel : ViewModelBase
 {
     public bool IsMobile => App.OSType == "Mobile";
     public bool IsEnabledForView => CanConnect && !IsMobile;
-        
+
     [ObservableProperty] private bool _canConnect;
     [ObservableProperty] private int _downloadProgress;
 
     [ObservableProperty] private string _chkSumStatusColor;
 
     [ObservableProperty] public ObservableCollection<string> _firmwareVersions;
-    
+
     [ObservableProperty] private bool _isCamera;
     [ObservableProperty] private bool _isGS;
     [ObservableProperty] private bool _isProgressBarVisible;
@@ -48,8 +47,14 @@ public partial class SetupTabViewModel : ViewModelBase
     [ObservableProperty] private string _scanMessages;
     [ObservableProperty] private string _selectedFwVersion;
     [ObservableProperty] private string _selectedSensor;
+    [ObservableProperty] private string _selectedScriptFileAction;
+    [ObservableProperty] private string _selectedDroneKeyAction;
     [ObservableProperty] private string _localIp;
-    
+
+    [ObservableProperty] private ObservableCollection<string> _scriptFileActionItems;
+    [ObservableProperty] private ObservableCollection<string> _droneKeyActionItems;
+
+
     private ICommand _firmwareUpdateCommand;
     private ICommand _generateKeysCommand;
     private ICommand _offlineUpdateCommand;
@@ -65,46 +70,52 @@ public partial class SetupTabViewModel : ViewModelBase
     private ICommand _sensorFilesBackupCommand;
     private ICommand _sensorFilesUpdateCommand;
     public ICommand ShowProgressBarCommand;
-    
+
+    private ICommand _scriptFilesCommand;
+    private ICommand _encryptionKeyActionCommand;
+
 
     public SetupTabViewModel(ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService)
         : base(logger, sshClientService, eventSubscriptionService)
     {
-        
         InitializeCollections();
 
         KeyChecksum = string.Empty;
 
         ChkSumStatusColor = "Green";
 
-        LocalIp = "Device IP: " + NetworkHelper.GetLocalIPAddress();
+        //LocalIp = "Device IP: " + NetworkHelper.GetLocalIPAddress();
 
         ScanIpLabel = "192.168.1.";
 
         ShowProgressBarCommand = new RelayCommand(() => IsProgressBarVisible = true);
-        
+
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
-        EventSubscriptionService.Subscribe<DeviceContentUpdateEvent, DeviceContentUpdatedMessage>(OnDeviceContentUpdate);
+        EventSubscriptionService
+            .Subscribe<DeviceContentUpdateEvent, DeviceContentUpdatedMessage>(OnDeviceContentUpdate);
+        
         EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(OnDeviceTypeChange);
-        
-        
-        
     }
 
-    public ICommand GenerateKeysCommand => _generateKeysCommand ??= new RelayCommand(GenerateKeys);
+    // public ICommand GenerateKeysCommand => _generateKeysCommand ??= new RelayCommand(GenerateKeys);
     public ICommand SendGSKeyCommand => _sendGSKeyCommand ??= new RelayCommand(SendGSKey);
-
     public ICommand RecvGSKeyCommand => _recvGSKeyCommand ??= new RelayCommand(RecvGSKey);
 
-    public ICommand ScriptFilesBackupCommand => _scriptFilesBackupCommand ??= new RelayCommand(ScriptFilesBackup);
+    // public ICommand ScriptFilesBackupCommand => _scriptFilesBackupCommand ??= new RelayCommand(ScriptFilesBackup);
+    public ICommand ScriptFilesCommand => _scriptFilesCommand ??= new RelayCommand(ScriptFilesAction);
 
-    public ICommand SensorFilesBackupCommand => _sensorFilesBackupCommand ??= new RelayCommand(SensorFilesBackup);
+    public ICommand EncryptionKeyActionCommand =>
+        _encryptionKeyActionCommand ??= new RelayCommand<string>(EncryptionKeyAction);
 
-    public ICommand SensorDriverUpdateCommand => _sensorDriverUpdateCommand ??= new RelayCommand(SensorDriverUpdate);
 
-    public ICommand ScriptFilesRestoreCommand => _scriptFilesRestoreCommand ??= new RelayCommand(ScriptFilesRestore);
+    // public ICommand SensorFilesBackupCommand => _sensorFilesBackupCommand ??= new RelayCommand(SensorFilesBackup);
+
+
+    // public ICommand SensorDriverUpdateCommand => _sensorDriverUpdateCommand ??= new RelayCommand(SensorDriverUpdate);
+
+    // public ICommand ScriptFilesRestoreCommand => _scriptFilesRestoreCommand ??= new RelayCommand(ScriptFilesRestore);
 
     public ICommand SensorFilesUpdateCommand => _sensorFilesUpdateCommand ??= new RelayCommand(SensorFilesUpdate);
 
@@ -150,7 +161,7 @@ public partial class SetupTabViewModel : ViewModelBase
                 if (!string.IsNullOrEmpty(_deviceContentUpdatedMessage.DeviceConfig.KeyChksum))
                 {
                     KeyChecksum = _deviceContentUpdatedMessage.DeviceConfig.KeyChksum;
-                    if(KeyChecksum != OpenIPC.KeyMD5Sum)
+                    if (KeyChecksum != OpenIPC.KeyMD5Sum)
                     {
                         ChkSumStatusColor = "Red";
                     }
@@ -170,13 +181,16 @@ public partial class SetupTabViewModel : ViewModelBase
 
     private void InitializeCollections()
     {
+        ScriptFileActionItems = new ObservableCollectionExtended<string> { "Backup", "Restore" };
+        DroneKeyActionItems = new ObservableCollectionExtended<string> { "Send", "Receive" };
+
         // load sensor files from local folder
-        
+
         var binariesPath = OpenIPC.GetBinariesPath();
         var directoryPath = Path.Combine(binariesPath, "sensors");
         //var directoryPath = OpenIPC.LocalSensorsFolder;
         PopulateSensorFileNames(directoryPath);
-        
+
 
         FirmwareVersions = new ObservableCollection<string>
         {
@@ -204,6 +218,27 @@ public partial class SetupTabViewModel : ViewModelBase
         };
     }
 
+    private async void ScriptFilesAction()
+    {
+        var action = SelectedScriptFileAction;
+    }
+
+    private async void EncryptionKeyAction(string comboBoxName)
+    {
+        var action = SelectedDroneKeyAction;
+        switch (action)
+        {
+            case "Send":
+                if (comboBoxName.Equals("CameraKeyComboBox")) SendDroneKey();
+                if (comboBoxName.Equals("RadxaKeyComboBox")) SendGSKey();
+                break;
+            case "Receive":
+                if (comboBoxName.Equals("CameraKeyComboBox")) RecvDroneKey();
+                if (comboBoxName.Equals("RadxaKeyComboBox")) RecvGSKey();
+                break;
+        }
+    }
+
     private async void ScriptFilesBackup()
     {
         Log.Debug("Backup script executed");
@@ -225,7 +260,7 @@ public partial class SetupTabViewModel : ViewModelBase
         await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/720p90.sh", "720p90.sh");
         await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/720p60.sh", "720p60.sh");
         await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1080p120.sh", "1080p120.sh");
-        
+
         await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1248p90.sh", "1248p90.sh");
         await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1304p80.sh", "1304p80.sh");
         await SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, "/root/1416p70.sh", "1416p70.sh");
@@ -236,7 +271,7 @@ public partial class SetupTabViewModel : ViewModelBase
 
     private async void ScriptFilesRestore()
     {
-        Log.Debug("Restore script executed");
+        Log.Debug("Restore script executed...not implemented yet");
     }
 
     private void PopulateSensorFileNames(string directoryPath)
@@ -244,7 +279,7 @@ public partial class SetupTabViewModel : ViewModelBase
         try
         {
             Log.Debug($"Directory path: {directoryPath}");
-            
+
             var files = Directory.GetFiles(directoryPath);
             LocalSensors = new ObservableCollection<string>(files.Select(f => Path.GetFileName(f)));
         }
@@ -306,8 +341,8 @@ public partial class SetupTabViewModel : ViewModelBase
         //SshClientService.UploadDirectoryAsync(DeviceConfig.Instance, OpenIPC_Config.LocalSensorsFolder,
         // OpenIPC_Config.RemoteSensorsFolder);
         ProgressText = "Restarting Majestic...";
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,DeviceCommands.MajesticRestartCommand);
-        
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MajesticRestartCommand);
+
         ProgressText = "Done updating sensor...";
         DownloadProgress = 100;
     }
@@ -317,7 +352,7 @@ public partial class SetupTabViewModel : ViewModelBase
         Log.Debug("OfflineUpdate executed");
         IsProgressBarVisible = true;
         DownloadStart();
-        Log.Debug("OfflineUpdate executed..done");
+        //Log.Debug("OfflineUpdate executed..done");
     }
 
     private async void ScanNetwork()
@@ -329,7 +364,7 @@ public partial class SetupTabViewModel : ViewModelBase
         var pingTasks = new List<Task>();
 
         ScanIPResultTextBox = string.Empty;
-        
+
         for (var i = 0; i < 254; i++)
         {
             var host = ScanIpLabel + i;
@@ -382,25 +417,26 @@ public partial class SetupTabViewModel : ViewModelBase
 
     private async Task UploadFirmwareAsync(string firmwarePath, string remotePath)
     {
-        DownloadProgress = 60;
+        DownloadProgress = 50;
         ProgressText = "Uploading firmware...";
         await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath, remotePath);
     }
 
     private async Task DecompressFirmwareAsync(string remoteFilePath)
     {
-        DownloadProgress = 70;
+        DownloadProgress = 75;
         ProgressText = "Decompressing firmware...";
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
     }
 
     private async Task ExtractFirmwareAsync(string tarFilePath, string destinationPath)
     {
-        DownloadProgress = 85;
+        DownloadProgress = 100;
         ProgressText = "Extracting firmware...";
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"tar -xvf {tarFilePath} -C {destinationPath}");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+            $"tar -xvf {tarFilePath} -C {destinationPath}");
     }
-    
+
     /// <summary>
     ///     Downloads the latest firmware version of the selected type from the official OpenIPC_Config repositories.
     /// </summary>
@@ -411,9 +447,8 @@ public partial class SetupTabViewModel : ViewModelBase
     /// </param>
     public async Task DownloadStart()
     {
-        
         //TODO: add more checks here, this can brick a device
-        //updateDeviceConfig();
+        UpdateUIMessage("Upgrading device...");
         IsProgressBarVisible = true; // Show the progress bar when the download starts
         var kernelPath = string.Empty;
         var rootfsPath = string.Empty;
@@ -440,9 +475,10 @@ public partial class SetupTabViewModel : ViewModelBase
 
         if (SelectedFwVersion != string.Empty && sensorType != string.Empty)
         {
-            string firmwarePath = Path.Combine(Models.OpenIPC.AppDataConfigDirectory, "firmware", $"{SelectedFwVersion}.tgz");
-            
-            
+            string firmwarePath = Path.Combine(Models.OpenIPC.AppDataConfigDirectory, "firmware",
+                $"{SelectedFwVersion}.tgz");
+
+
             //var firmwarePath = $"{Models.OpenIPC.AppDataConfigDirectory}/firmware/{SelectedFwVersion}.tgz";
             var localTmpPath = $"{Models.OpenIPC.LocalTempFolder}";
             if (!Directory.Exists(localTmpPath)) Directory.CreateDirectory(localTmpPath);
@@ -482,7 +518,7 @@ public partial class SetupTabViewModel : ViewModelBase
                     }
                 }
             }
-            
+
             // Continue with the rest of the process
             DownloadProgress = 50;
             ProgressText = "Download complete, starting upload...";
@@ -490,76 +526,75 @@ public partial class SetupTabViewModel : ViewModelBase
             // Step 2: Upload file
             string remotePath = $"/tmp/{SelectedFwVersion}.tgz";
             await UploadFirmwareAsync(firmwarePath, remotePath);
-            
-            // await SshClientService.UploadFileAsync(DeviceConfig.Instance, firmwarePath,
-            //     $"{Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tgz");
-            // DownloadProgress = 60;
+
             ProgressText = "Upload complete, decompressing...";
 
             // Step 3: Decompress using gzip
             await DecompressFirmwareAsync(remotePath);
-            
-            // var remoteFilePath = $"/tmp/{SelectedFwVersion}.tgz");
-            // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"gzip -d {remoteFilePath}");
-            // DownloadProgress = 70;
+
             ProgressText = "Decompression complete, extracting files...";
 
             // Step 4: Extract firmware
             string tarFilePath = remotePath.Replace(".tgz", ".tar");
             await ExtractFirmwareAsync(tarFilePath, "/tmp");
 
-            
-            // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
-            //     $"tar -xvf {Models.OpenIPC.RemoteTempFolder}/{SelectedFwVersion}.tar -C /tmp");
-            //DownloadProgress = 85;
+            DownloadProgress = 100;
             ProgressText = "Extraction complete, upgrading system...";
 
             // Step 5: Execute sysupgrade
-            
+
             var msgBox = MessageBoxManager.GetMessageBoxStandard("Confirm",
                 $"This will download and update your camera to {SelectedFwVersion}, continue?", ButtonEnum.OkAbort);
-            
+
             var result = await msgBox.ShowAsync();
             if (result == ButtonResult.Abort)
             {
-                Log.Debug("Upgrade Cancelled!");;
-                UpdateUIMessage("Upgrade Cancelled!" );
+                Log.Debug("Upgrade Cancelled!");
+                ;
+                UpdateUIMessage("Upgrade Cancelled!");
                 DownloadProgress = 100;
                 ProgressText = "Upgrade Cancelled!!";
                 return;
             }
 
-            
+
             kernelPath = $"/tmp/uImage.{sensorType}";
             rootfsPath = $"/tmp/rootfs.squashfs.{sensorType}";
-            
+
             //sysupgrade --kernel=/tmp/uImage.%4 --rootfs=/tmp/rootfs.squashfs.%4 -n
             // await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
             //     $"sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
-            
+
             using var cts = new CancellationTokenSource();
 
             // Provide a way for the user to cancel (e.g., a button)
             CancellationToken cancelToken = cts.Token;
-            
+
             PerformSystemUpgradeAsync(kernelPath, rootfsPath, cancelToken);
-            
-            //DownloadProgress = 100;
-            //UpdateUIMessage("System upgrade complete!" );
-            //ProgressText = "System upgrade complete!";
         }
-        
     }
-    
-    
-    public async Task PerformSystemUpgradeAsync(string kernelPath, string rootfsPath, CancellationToken cancellationToken)
+
+    private readonly List<string> keyMessages = new()
+    {
+        "Checking for sysupgrade update...",
+        "Version checking failed, proceeding with the installed version.",
+        "Kernel",
+        "New version, going to update",
+        "RootFS",
+        "RootFS updated to",
+        "OverlayFS",
+        "Unconditional reboot"
+    };
+
+    public async Task PerformSystemUpgradeAsync(string kernelPath, string rootfsPath,
+        CancellationToken cancellationToken)
     {
         try
         {
             ProgressText = "Starting system upgrade...";
             DownloadProgress = 0;
             var outputBuffer = new StringBuilder();
-            
+
             Log.Information($"Running command: sysupgrade --kernel={kernelPath} --rootfs={rootfsPath} -n");
 
             // Pass cancellation token to the command
@@ -570,24 +605,51 @@ public partial class SetupTabViewModel : ViewModelBase
                 {
                     outputBuffer.AppendLine(output);
 
+
                     // Process buffer at intervals
-                    if (outputBuffer.Length > 1000 || output.Contains("sysupgrade") ||
-                        output.Contains("Conditional reboot"))
+                    if (outputBuffer.Length > 500 || output.Contains("Conditional reboot"))
                     {
                         var bufferContent = outputBuffer.ToString();
                         outputBuffer.Clear();
 
+                        int MaxProgressTextLength = 100;
                         // Update the UI incrementally
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            ProgressText = output;
+                            // Trim the output if it exceeds the maximum length
+                            string trimmedOutput = output.Length > MaxProgressTextLength
+                                ? output.Substring(0, MaxProgressTextLength) + "..."
+                                : output;
+
+                            //ProgressText = trimmedOutput;
+                            //ProcessOutputAsync(trimmedOutput);
+                            if (bufferContent.Contains("Update kernel"))
+                            {
+                                ProgressText = "Updating Kernel";
+                                DownloadProgress = 25;
+                            }
+                            if (bufferContent.Contains("Update rootfs")) 
+                            {
+                                ProgressText = "Updating RootFS";
+                                DownloadProgress = 50;
+                            }
+
+                            if (bufferContent.Contains("Erase overlay partition"))
+                            {
+                                ProgressText = "Erasing overlay partition";
+                                DownloadProgress = 75;
+                            }
 
                             // Dynamically update progress based on command output (if possible)
-                            if (bufferContent.Contains("sysupgrade")) DownloadProgress = 80;
-                            if (bufferContent.Contains("Conditional reboot")) DownloadProgress = 98;
+                            //if (bufferContent.Contains("sysupgrade")) DownloadProgress = 80;
+                            if (bufferContent.Contains("Conditional reboot"))
+                            {
+                                ProgressText = "Rebooting...";
+                                DownloadProgress = 98;
+                            }
 
                             //ProgressText = bufferContent;
-                            Log.Information(bufferContent);
+                            Log.Debug(bufferContent);
                         });
                     }
                 },
@@ -596,7 +658,8 @@ public partial class SetupTabViewModel : ViewModelBase
 
             // Complete progress after execution
             DownloadProgress = 100;
-            ProgressText = "System upgrade complete, please wait!";
+            ProgressText = "System upgrade complete, reboting device!";
+            UpdateUIMessage("Upgrading device...done");
         }
         catch (OperationCanceledException)
         {
@@ -610,6 +673,24 @@ public partial class SetupTabViewModel : ViewModelBase
         }
     }
 
+    private async Task ProcessOutputAsync(string output)
+    {
+        // Check if the output contains any key message
+        if (keyMessages.Any(key => output.Contains(key, StringComparison.OrdinalIgnoreCase)))
+        {
+            // Update ProgressText with the key message
+            await Dispatcher.UIThread.InvokeAsync(() => ProgressText = output);
+            //ProgressText = output;
+
+            // Optionally log the key message
+            Log.Information($"Key message displayed: {output}");
+        }
+        else
+        {
+            // Log non-key messages for debugging (optional)
+            Log.Debug($"Non-key message ignored: {output}");
+        }
+    }
 
     private async void SysUpgradeFirmwareUpdate()
     {
@@ -709,19 +790,16 @@ public partial class SetupTabViewModel : ViewModelBase
 
         try
         {
-            UpdateUIMessage("Generating keys" );
+            UpdateUIMessage("Generating keys");
             await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.BackUpGsKeysIfExist);
             await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GenerateKeys);
             await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.CopyGenerateKeys);
-            UpdateUIMessage("Generating keys...done" );
+            UpdateUIMessage("Generating keys...done");
         }
         catch (Exception e)
         {
             Log.Error(e.ToString());
-            
         }
-
-        
     }
 
     private async void SendGSKey()
@@ -736,7 +814,7 @@ public partial class SetupTabViewModel : ViewModelBase
             await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsWfbStopCommand);
             await Task.Delay(500); // Non-blocking pause
             await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.GsWfbStartCommand);
-            
+
             UpdateUIMessage("Sending keys...done");
         }
         catch (Exception e)
@@ -744,18 +822,16 @@ public partial class SetupTabViewModel : ViewModelBase
             Log.Error(e.ToString());
             throw;
         }
-            
-
     }
 
     private async void RecvGSKey()
     {
-        UpdateUIMessage("Receiving keys..." );
-        
+        UpdateUIMessage("Receiving keys...");
+
         SshClientService.DownloadFileLocalAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteGsKeyPath,
             $"{Models.OpenIPC.LocalTempFolder}/gs.key");
         await Task.Delay(1000); // Non-blocking pause
-        
-        UpdateUIMessage("Receiving keys...done" );
+
+        UpdateUIMessage("Receiving keys...done");
     }
 }
