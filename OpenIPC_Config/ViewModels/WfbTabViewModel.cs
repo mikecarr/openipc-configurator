@@ -327,10 +327,23 @@ public partial class WfbTabViewModel : ViewModelBase
     {
         // Logic to update WfbConfContent with the new values
         var lines = wfbConfContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        
+        // This regex matches configuration lines in the `wfbConfContent` that define specific settings,
+        // while ignoring lines that start with a `#` (comments). It looks for lines that:
+        // - Do NOT start with a `#` (negative lookahead: `^(?!#.*)`).
+        // - Contain one of the following keys: `frequency`, `channel`, `driver_txpower_override`,
+        //   `frequency24`, `bandwidth`, `txpower`, `mcs_index`, `stbc`, `ldpc`, `fec_k`, or `fec_n`.
+        // - Have an equals sign (`=`) followed by any value (`=.*`).
+        // The `RegexOptions.Multiline` ensures that each line in the input is treated separately,
+        // allowing the regex to match lines individually in a multi-line string.
         var regex = new Regex(
-            @"(frequency|channel|driver_txpower_override|frequency24|bandwidth|txpower|mcs_index|stbc|ldpc|fec_k|fec_n)=.*");
+            @"^(?!#.*)(frequency|channel|driver_txpower_override|frequency24|bandwidth|txpower|mcs_index|stbc|ldpc|fec_k|fec_n)=.*",
+            RegexOptions.Multiline);
+        
         var updatedContent = regex.Replace(wfbConfContent, match =>
         {
+            var group = match.Groups[1].Value;
+            Logger.Debug($"group: {group}");
             switch (match.Groups[1].Value)
             {
                 case "frequency":

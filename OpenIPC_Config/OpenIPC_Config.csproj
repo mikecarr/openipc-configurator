@@ -77,6 +77,17 @@
             <DependentUpon>Resources.resx</DependentUpon>
         </Compile>
 
+        <EmbeddedResource Update="Assets\Resources.es.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+
+        <Compile Update="Assets\Resources.es.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Resources.es.resx</DependentUpon>
+        </Compile>
+
 <!--        <Compile Update="Views\PreferencesTabView.axaml.cs">-->
 <!--          <DependentUpon>PreferencesTabView.axaml</DependentUpon>-->
 <!--        </Compile>-->

@@ -9,7 +9,9 @@ public partial class NetworkIPScannerView : UserControl
     public NetworkIPScannerView()
     {
         InitializeComponent();
-        //if (!Design.IsDesignMode) DataContext = new SetupTabViewModel();
-        DataContext = App.ServiceProvider.GetService<SetupTabViewModel>();
+        if (!Design.IsDesignMode)
+        {
+            DataContext = App.ServiceProvider.GetService<SetupTabViewModel>();
+        }
     }
 }

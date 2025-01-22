@@ -9,17 +9,18 @@
              x:DataType="vm:SetupTabViewModel">
 
     <!-- Left Panel -->
+    <!-- <Border BorderThickness="2" Background="Aqua"> -->
     <Panel>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -28,77 +29,77 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Row="0" Grid.Column="0" Content="Script Files Backup"
+            <ComboBox x:Name="ScriptFilesActionComboBox" Grid.Row="0" Grid.Column="0" PlaceholderText="Script File Actions" 
+                      ItemsSource="{Binding ScriptFileActionItems}"
+                      SelectedItem="{Binding SelectedScriptFileAction}"
+                      HorizontalAlignment="Stretch"
 
-                    Command="{Binding ScriptFilesBackupCommand}"
-                    IsEnabled="{Binding CanConnect}"
-                    ToolTip.Tip="{x:Static assets:Resources.ScriptFilesBackupToolTip}"
-                    HorizontalAlignment="Stretch" />
-
-            <Button Grid.Row="0" Grid.Column="1" Content="Script Files Restore"
-                    Command="{Binding ScriptFilesRestoreCommand}"
-                    IsEnabled="{Binding CanConnect}"
+                      ToolTip.Tip="{x:Static assets:Resources.ScriptFilesBackupToolTip}" />
+                
+            
+            <Button Grid.Row="0" Grid.Column="1" 
+                    x:Name="ScriptFilesActionButton"
+                    Content="Execute"
+                    Command="{Binding ScriptFilesCommand}"
+                    IsEnabled="False"
                     ToolTip.Tip="{x:Static assets:Resources.ScriptFilesRestoreToolTip}"
                     HorizontalAlignment="Stretch" />
+            
+            <ComboBox x:Name="CameraKeyComboBox" Grid.Row="1" Grid.Column="0" 
+                      PlaceholderText="Encryption Key Actions" 
+                      ItemsSource="{Binding DroneKeyActionItems}"
+                      SelectedItem="{Binding SelectedDroneKeyAction}"
 
-            <!-- <Button Grid.Row="2" Grid.Column="0" Content="Sensor Bin Backup" Width="150" -->
-            <!--         Command="{Binding SensorFilesBackupCommand}" -->
-            <!--         IsEnabled="{Binding CanConnect}" -->
-            <!--         ToolTip.Tip="{x:Static assets:Resources.SensorBinBackupToolTip}" /> -->
-            <!-- -->
-
-
-            <!-- <Button Grid.Column="1" Grid.Row="1" Content="Sensor Driver Backup" -->
-            <!--         Command="{Binding ScriptFilesBackupCommand}" -->
-            <!--         IsEnabled="{Binding CanConnect}" -->
-            <!--         ToolTip.Tip="{x:Static assets:Resources.SensorDriverBackupToolTip}" -->
-            <!--         HorizontalAlignment="Stretch" /> -->
+                      HorizontalAlignment="Stretch"
+                      ToolTip.Tip="{x:Static assets:Resources.DroneKeyActionsToolTip}" />
+            
+            <Button Grid.Row="1" Grid.Column="1" Content="Execute"
+                    x:Name="CameraKeyActionButton"
+                    Command="{Binding EncryptionKeyActionCommand}"
+                    CommandParameter="CameraKeyComboBox"
+                    IsEnabled="False"
+                    ToolTip.Tip="{x:Static assets:Resources.DeviceChkSumToolTip}"
+                    HorizontalAlignment="Stretch" />
+            <!-- </Border> -->
 
             
-            <ComboBox Grid.Row="3" Grid.Column="0" x:Name="sensorComboBox" PlaceholderText="Select Sensor"
+            <!-- <Border  Grid.Row="2" Grid.Column="0"  BorderBrush="SlateGray" BorderThickness="1"> -->
+            <ComboBox Grid.Row="2" Grid.Column="0" x:Name="SensorComboBox" PlaceholderText="Select Sensor"
                       ItemsSource="{Binding LocalSensors}"
                       SelectedItem="{Binding SelectedSensor, Mode=TwoWay}"
                       IsEnabled="{Binding CanConnect}"
+
+                      HorizontalContentAlignment="Center"
                       HorizontalAlignment="Stretch" />
+            <!-- </Border> -->
             
-            <Button Grid.Row="3" Grid.Column="1"  Content="Sensor Bin Update"
+            <!-- <Border  Grid.Row="2" Grid.Column="1"  BorderBrush="SlateGray" BorderThickness="1"> -->
+            <Button Grid.Row="2" Grid.Column="1"  Content="Update"
+                    x:Name="SensorActionButton"
                     Command="{Binding SensorFilesUpdateCommand}"
-                    IsEnabled="{Binding CanConnect}"
+                    CommandParameter="SensorComboBox"
+                    IsEnabled="False"
                     ToolTip.Tip="{x:Static assets:Resources.SensorBinUpdateToolTip}"
                     HorizontalAlignment="Stretch" />
+            <!-- </Border> -->
 
-            <!-- <Button Grid.Row="2" Grid.Column="1" Content="Sensor Driver Update" -->
-            <!--         Command="{Binding SensorDriverUpdateCommand}" -->
-            <!--         IsEnabled="{Binding CanConnect}" -->
-            <!--         ToolTip.Tip="{x:Static assets:Resources.SensorDriverUpdateToolTip}" -->
-            <!--         HorizontalAlignment="Stretch" /> -->
-
-            <!-- <TextBox Grid.Row="3" Grid.Column="1" Text="sensor_imx415_mipi.ko" HorizontalAlignment="Stretch" /> -->
-            <!-- <Label Grid.Column="0" Grid.Row="5" Content="Select Sensor:" /> -->
+            <!-- <Panel Grid.Row="3" Grid.Column="0" Height="20" /> -->
             
-            <Panel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Height="30" />
+            
+            <Panel Grid.Row="4" Grid.Column="0" Height="20" />
 
-
-            <Button Grid.Row="5" Grid.Column="0" Content="Send drone.key"
-                    Command="{Binding SendDroneKeyCommand}"
-                    IsEnabled="{Binding CanConnect}"
-                    ToolTip.Tip="{x:Static assets:Resources.SendDroneKeyToolTip}"
-                    HorizontalAlignment="Stretch" />
-
-            <Button Grid.Row="5" Grid.Column="1" Content="Rec'v drone.key"
-                    Command="{Binding RecvDroneKeyCommand}" IsEnabled="{Binding CanConnect}"
-                    ToolTip.Tip="{x:Static assets:Resources.RecvDroneKeyToolTip}"
-                    HorizontalAlignment="Stretch" />
-
-            <TextBlock Grid.Row="6" Text="Device Checksum" />
+            <TextBlock Grid.Row="6" Text="Encryption Key Checksum" />
+            
             <TextBlock Grid.Row="7" Grid.ColumnSpan="2"
                        TextWrapping="Wrap"
                        MaxWidth="375"
                        Foreground="{Binding ChkSumStatusColor}"
+                       ToolTip.Tip="{x:Static assets:Resources.DeviceChkSumToolTip}"
                        Text="{Binding KeyChecksum} " />
 
 
         </Grid>
     </Panel>
+        <!-- </Border> -->
 
 </UserControl>

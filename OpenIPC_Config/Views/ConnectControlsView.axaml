@@ -3,6 +3,7 @@
              xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
              xmlns:models="clr-namespace:OpenIPC_Config.Models"
              xmlns:services="clr-namespace:OpenIPC_Config.Services"
+             xmlns:assets="clr-namespace:OpenIPC_Config.Assets"
              x:Class="OpenIPC_Config.Views.ConnectControlsView"
              x:DataType="vm:ConnectControlsViewModel">
 
@@ -21,40 +22,39 @@
 
         <!-- Input Fields and Radio Buttons -->
         <WrapPanel Grid.Row="0"
-                   Margin="5"
                    Orientation="{DynamicResource PlatformOrientation}"
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Top">
 
             <!-- IP Address -->
-            <StackPanel Margin="5">
+            <StackPanel Margin="3">
                 <Label Content="IP Address" />
                 <TextBox MinWidth="150" Height="30" Text="{Binding IpAddress}" />
             </StackPanel>
 
             <!-- Port -->
-            <StackPanel Margin="5">
+            <StackPanel Margin="3">
                 <Label Content="Port" />
                 <TextBox MinWidth="100" Height="30" Text="{Binding Port}" />
             </StackPanel>
 
             <!-- Password -->
-            <StackPanel Margin="5">
+            <StackPanel Margin="3">
                 <Label Content="Password" />
                 <TextBox MinWidth="150" Height="30" PasswordChar="*" Text="{Binding Password}" />
             </StackPanel>
 
             <!-- DeviceType Radio Buttons -->
-            <StackPanel Orientation="Horizontal" Margin="5" VerticalAlignment="Center">
-                <RadioButton Margin="5" Content="None" 
+            <StackPanel Orientation="Horizontal" Margin="5" VerticalAlignment="Bottom">
+                <RadioButton Padding="5" Content="None" 
                              IsChecked="{Binding SelectedDeviceType, 
                              Converter={StaticResource EnumToBoolConverter}, 
                              ConverterParameter={x:Static models:DeviceType.None}}" />
-                <RadioButton Margin="5" Content="Camera" 
+                <RadioButton Padding="5" Content="Camera" 
                              IsChecked="{Binding SelectedDeviceType, 
                              Converter={StaticResource EnumToBoolConverter}, 
                              ConverterParameter={x:Static models:DeviceType.Camera}}" />
-                <RadioButton Margin="5" Content="Radxa" 
+                <RadioButton Padding="5"  Content="Radxa" 
                              IsChecked="{Binding SelectedDeviceType, 
                              Converter={StaticResource EnumToBoolConverter}, 
                              ConverterParameter={x:Static models:DeviceType.Radxa}}" />
@@ -67,15 +67,20 @@
         </WrapPanel>
 
         <!-- Ping Status & Connect Button -->
-        <Grid Grid.Row="1" Margin="5">
+        <Grid Grid.Row="1" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             
             <!-- Ping Status -->
-            <Panel Grid.Column="0" Background="{Binding PingStatusColor}" 
-                   Height="30" Width="50" Margin="5" />
+            <Border Grid.Column="0"
+                    Background="{Binding PingStatusColor}"
+                    Width="50"
+                    Height="30"
+                    CornerRadius="3"
+                    Margin="3" 
+                    ToolTip.Tip="{x:Static assets:Resources.PingStatusToolTip}"/>
             
             <!-- Connect Button -->
             <Button Grid.Column="1" Content="Connect"
