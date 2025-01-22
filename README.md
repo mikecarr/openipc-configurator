@@ -20,6 +20,30 @@ Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator
 * **Multi-platform support**: run the application on Windows, macOS, and Linux platforms
 * **YAML-based configuration files**: easily edit and customize camera settings using YAML configuration files
 
+## Known Issues
+* Device Hostname Error when you select connect
+  * Edit appsettings.json located in one of the below locations:
+      * Android: /data/user/0/org.openipc.OpenIPC/files/.config/openipc-configurator.log
+      * Mac: "$HOME/Library/Application Support/OpenIPC_Config/Logs"
+      * Windows: %APPDATA%\Local\OpenIPC_Config\Logs
+      * Linux: ~/.config/openipc-configurator.log
+  * Change to:
+    * ```
+      "DeviceHostnameMapping": {
+         "Camera": [
+           "openipc-ssc338q",
+           "openipc-ssc30kq"
+         ],
+         "Radxa": [
+           "radxa",
+           "raspberrypi"
+         ],
+         "NVR": [
+           "openipc-hi3536dv100"
+         ]
+      }
+      ```
+
 ## Technical Details
 
 * **Built using Avalonia UI**, a cross-platform XAML-based UI framework
