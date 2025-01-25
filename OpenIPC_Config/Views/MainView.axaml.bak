@@ -1,0 +1,87 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
+             xmlns:views="clr-namespace:OpenIPC_Config.Views"
+             mc:Ignorable="d" 
+             x:Class="OpenIPC_Config.Views.MainView"
+             x:DataType="vm:MainViewModel">
+
+    
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" /> <!-- TabControl -->
+            <RowDefinition Height="127*" /> <!-- Connection Details -->
+            <RowDefinition Height="160" />    <!-- Log Viewer -->
+            <RowDefinition Height="36" />   <!-- Footer -->
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- <Border Grid.Row="0" Background="GreenYellow"> -->
+        <!-- Tab Control -->
+        <TabControl x:Name="MainTabControl" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Padding="2">
+            <TabItem Header="WFB" IsVisible="{Binding !IsVRXEnabled}">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <views:WfbTabView />
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="WFB-GS" IsVisible="{Binding IsVRXEnabled}">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <views:WfbGSTabView />
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Telemetry" IsVisible="{Binding !IsVRXEnabled}">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <views:TelemetryTabView />
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Camera" IsVisible="{Binding !IsVRXEnabled}">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <views:CameraSettingsView />
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="VRX" IsVisible="{Binding IsVRXEnabled}">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <views:VRXTabView />
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Setup">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <views:SetupTabView />
+                </ScrollViewer>
+            </TabItem>
+            
+            
+        </TabControl>
+    <!-- </Border> -->
+
+        <!-- <Border Grid.Row="1"  Background="MistyRose"> -->
+        <!-- Connect Controls -->
+        <views:ConnectControlsView Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" />
+        <!-- </Border> -->
+        
+        <!-- <Border Grid.Row="2" Background="MediumPurple"> -->
+        <!-- Log Viewer -->
+        <views:LogViewer Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5" />
+        <!-- </Border> -->
+        
+        
+        <!-- Footer (Status Bar) -->
+        <Border Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="5"  BorderThickness="1" >
+            <views:StatusBarView />
+        </Border>
+        
+    </Grid>
+        </ScrollViewer>
+</UserControl>

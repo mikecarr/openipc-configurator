@@ -5,11 +5,17 @@
              xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
              xmlns:assets="clr-namespace:OpenIPC_Config.Assets"
              mc:Ignorable="d"
-             x:Class="OpenIPC_Config.Views.CameraSettingsView"
+             x:Class="OpenIPC_Config.Views.CameraSettingsTabView"
              x:DataType="vm:CameraSettingsTabViewModel">
 
 
-    <StackPanel Orientation="Vertical" Spacing="5" Margin="10">
+    <Panel>
+        
+        <Rectangle Height="300" Width="300" Fill="LightGray"/>
+        
+        <Border Background="#F0F0F0" CornerRadius="8" Padding="16" Margin="8">
+            
+    <StackPanel Orientation="Vertical" Spacing="5" >
 
         <Grid>
             <Grid.RowDefinitions>
@@ -27,10 +33,10 @@
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="25*" />
-                <ColumnDefinition Width="25*" />
-                <ColumnDefinition Width="25*" />
-                <ColumnDefinition Width="25*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Content="Resolution"
@@ -145,4 +151,6 @@
         <!-- <TextBlock Text="Be careful what you enter here" HorizontalAlignment="Right" FontSize="12" /> -->
 
     </StackPanel>
+            </Border>
+        </Panel>
 </UserControl>

@@ -133,7 +133,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         set
         {
             // Ignore setting to None if it's due to a binding update
-            if (value == DeviceType.None) return;
+            //if (value == DeviceType.None) return;
 
             if (_selectedDeviceType != value)
             {

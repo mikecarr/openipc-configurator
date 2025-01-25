@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="80"
+             x:Class="OpenIPC_Config.Views.HeaderView"
+             x:DataType="vm:MainViewModel"
+             Height="80">
+    
+    <Grid Background="#555555" Height="80" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Logo and Title -->
+        <StackPanel Orientation="Vertical" Grid.Column="0" >
+            <!-- <Image Source="/Assets/Icons/OpenIPC.png" Width="40" Height="40" Margin="0,0,10,0" /> -->
+            <Svg Width="150" Margin="10,5,0,0"  Path="/Assets/Icons/openipc-logo.svg" />
+                
+            <TextBlock FontSize="14" Foreground="White" Margin="10,5,0,5" >
+                <Run Text="CONFIGURATOR" />
+                <Run Text="{Binding AppVersionText}" />
+            </TextBlock>
+                
+            
+        </StackPanel>
+
+        <!-- Connection Fields -->
+        <Grid Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBox Width="200" Height="30" Watermark="IP Address" 
+                     Text="{Binding IpAddress, Mode=TwoWay}" 
+                     HorizontalAlignment="Left"
+                     Classes="InputBox" Grid.Row="0" Margin="0,0,0,10"/>
+            <StackPanel Orientation="Horizontal" Spacing="10" Grid.Row="1">
+                <ComboBox  Width="120" Height="30" ToolTip.Tip="Device Type" 
+                           ItemsSource="{Binding DeviceTypes}" 
+                           SelectedItem="{Binding SelectedDeviceType, Mode=TwoWay}" />
+                
+                <TextBox Width="50" Height="30" Watermark="Port" Text="{Binding Port, Mode=TwoWay}" Classes="InputBox"/>
+                
+                <TextBox Width="100" Height="30" Watermark="Password" 
+                         PasswordChar="*"
+                         Text="{Binding Password, Mode=TwoWay}" Classes="InputBox"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Circular Connect Button -->
+        <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,10,0" >
+            <Button Width="60" Height="60" Command="{Binding ConnectCommand}"
+                    IsEnabled="{Binding CanConnect}"
+                    Classes="CircularButton" />
+            
+            <TextBlock Text="Connect" Foreground="White" FontSize="12"  HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+    
+</UserControl>

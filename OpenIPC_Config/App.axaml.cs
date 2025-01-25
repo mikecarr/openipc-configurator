@@ -319,15 +319,19 @@ public class App : Application
         // Register ViewModels
         services.AddTransient<MainViewModel>();
 
-        services.AddTransient<CameraSettingsTabViewModel>();
-        services.AddTransient<ConnectControlsViewModel>();
-        services.AddTransient<LogViewerViewModel>();
-        services.AddTransient<SetupTabViewModel>();
-        services.AddTransient<StatusBarViewModel>();
-        services.AddTransient<TelemetryTabViewModel>();
-        services.AddTransient<VRXTabViewModel>();
-        services.AddTransient<WfbGSTabViewModel>();
-        services.AddTransient<WfbTabViewModel>();
+        // Register tab ViewModels as singletons
+        services.AddSingleton<CameraSettingsTabViewModel>();
+        services.AddSingleton<ConnectControlsViewModel>();
+        services.AddSingleton<LogViewerViewModel>();
+        services.AddSingleton<SetupTabViewModel>();
+        services.AddSingleton<StatusBarViewModel>();
+        services.AddSingleton<TelemetryTabViewModel>();
+        services.AddSingleton<VRXTabViewModel>();
+        services.AddSingleton<WfbGSTabViewModel>();
+        services.AddSingleton<WfbTabViewModel>();
+        services.AddSingleton<FirmwareTabViewModel>();
+        
+        
     }
     
     private static void RegisterViews(IServiceCollection services)
@@ -335,7 +339,7 @@ public class App : Application
         // Register Views
         services.AddTransient<MainWindow>();
         services.AddTransient<MainView>();
-        services.AddTransient<CameraSettingsView>();
+        services.AddTransient<CameraSettingsTabView>();
         services.AddTransient<ConnectControlsView>();
         services.AddTransient<LogViewer>();
         services.AddTransient<SetupTabView>();
@@ -343,6 +347,7 @@ public class App : Application
         services.AddTransient<TelemetryTabView>();
         services.AddTransient<VRXTabView>();
         services.AddTransient<WfbGSTabView>();
+        services.AddTransient<FirmwareTabView>();
         services.AddTransient<WfbTabView>();
     }
     

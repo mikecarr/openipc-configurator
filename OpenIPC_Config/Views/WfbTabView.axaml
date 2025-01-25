@@ -8,6 +8,11 @@
              x:Class="OpenIPC_Config.Views.WfbTabView"
              x:DataType="vm:WfbTabViewModel">
     
+    <Panel>
+        
+        <Rectangle Height="300" Width="300" Fill="LightGray"/>
+        
+        <Border Background="#F0F0F0" CornerRadius="8" Padding="16" Margin="8">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -85,7 +90,7 @@
         <ComboBox Grid.Column="1" Grid.Row="7" ToolTip.Tip="{x:Static assets:Resources.SelectLdpcToolTip}"
                   ItemsSource="{Binding Ldpc}"
                   SelectedItem="{Binding SelectedLdpc, Mode=TwoWay}" />
-
+        
         <ComboBox Grid.Column="1" Grid.Row="8" ToolTip.Tip="{x:Static assets:Resources.SelectFecKToolTip}"
                   ItemsSource="{Binding FecK}"
                   SelectedItem="{Binding SelectedFecK, Mode=TwoWay}" />
@@ -99,5 +104,7 @@
                 Command="{Binding RestartWfbCommand}"
                 IsEnabled="{Binding CanConnect}" />
     </Grid>
+            </Border>
+        </Panel>
 
 </UserControl>

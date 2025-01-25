@@ -300,6 +300,11 @@ namespace OpenIPC_Config.Assets {
         {
             get { return ResourceManager.GetString("PingStatusToolTip", resourceCulture); }
         }
+        
+        public static string TelemetryRouterToolTip
+        {
+            get { return ResourceManager.GetString("TelemetryRouterToolTip", resourceCulture); }
+        }
 
     }
 }

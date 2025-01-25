@@ -81,7 +81,7 @@ public class SettingsManagerTests
             IpAddress = "192.168.1.100",
             Username = "user",
             Password = "pass",
-            DeviceType = DeviceType.NVR
+            DeviceType = DeviceType.Camera
         };
 
         // Act

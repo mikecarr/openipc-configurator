@@ -9,6 +9,11 @@
              x:DataType="vm:TelemetryTabViewModel">
 
 
+    <Panel>
+        
+        <Rectangle Height="300" Width="300" Fill="LightGray"/>
+        
+        <Border Background="#F0F0F0" CornerRadius="8" Padding="16" Margin="8">
     <!-- Labels for the left side -->
     <Grid>
         <Grid.ColumnDefinitions>
@@ -33,7 +38,7 @@
 
         <Label Grid.Row="0" Grid.Column="0" Content="Select Serial Port" />
         <Label Grid.Row="1" Grid.Column="0" Content="Select Baud Rate" />
-        <Label Grid.Row="2" Grid.Column="0" Content="Select MAVFWD(0)/MAV-ROUTER(1)/MSPOSD(2)" />
+        <Label Grid.Row="2" Grid.Column="0" Content="Select Router" />
         <Label Grid.Row="3" Grid.Column="0" Content="Select MCS INDEX" />
         <Label Grid.Row="4" Grid.Column="0" Content="Select Aggregate" />
         <Label Grid.Row="5" Grid.Column="0" Content="Select RC Channel" />
@@ -47,7 +52,7 @@
         <ComboBox Grid.Row="1" Grid.Column="1" ToolTip.Tip="Baud Rate" ItemsSource="{Binding BaudRates}"
                   SelectedItem="{Binding SelectedBaudRate, Mode=TwoWay}" Margin="0,0,5,0" />
 
-        <ComboBox Grid.Row="2" Grid.Column="1" ToolTip.Tip="MAVFWD(0)/MAV-ROUTER(1)/MSPOSD(2)"
+        <ComboBox Grid.Row="2" Grid.Column="1" ToolTip.Tip="{x:Static assets:Resources.TelemetryRouterToolTip}"
                   ItemsSource="{Binding Router}"
                   SelectedItem="{Binding SelectedRouter, Mode=TwoWay}" WrapSelection="True" Margin="0,0,5,0" />
 
@@ -98,4 +103,7 @@
                 Command="{Binding SaveAndRestartTelemetryCommand}"
                 IsEnabled="{Binding CanConnect}" />
     </Grid>
+    
+    </Border>
+        </Panel>
 </UserControl>

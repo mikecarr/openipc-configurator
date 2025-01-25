@@ -264,4 +264,10 @@ Adjust the transmission power for the 2.4GHz frequency. Lower power conserves en
 • Green : Ping result is valid
 • Red : Ping result is not valid</value>
     </data>
+    <data name="TelemetryRouterToolTip" xml:space="preserve">
+        <value>1) Mavfwd
+2) Mav-Router
+3) MSPOSD
+        </value>                
+    </data>
 </root>

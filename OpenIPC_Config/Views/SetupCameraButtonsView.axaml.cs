@@ -1,8 +1,6 @@
 using Avalonia.Controls;
-using Avalonia.Input;
 using OpenIPC_Config.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 
 namespace OpenIPC_Config.Views;
 

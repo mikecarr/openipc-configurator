@@ -1,11 +1,20 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+    
+    
     
     <!-- Default Window Style -->
     <Style Selector="Window">
-        <Setter Property="Width" Value="850" />
+        <Setter Property="Width" Value="900" />
         <Setter Property="Height" Value="815" />
+        <!-- <Setter Property="RequestedThemeVariant" Value="Dark" /> -->
+        <Setter Property="RequestedThemeVariant" Value="Light" />
     </Style>
 
 
@@ -14,33 +23,15 @@
         <!-- <Setter Property="FontWeight" Value="Medium" /> -->
     </Style>
     
-    <!-- TabItem Styles -->
-    <Style Selector="TabItem">
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Padding" Value="5,5,5,5" />
-        <Setter Property="Background" Value="LightGray" />
-        <Setter Property="Foreground" Value="Black" />
-        <Setter Property="BorderBrush" Value="Gray" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="5" />
-    </Style>
-
-    <Style Selector="TabItem:hover">
-        <Setter Property="Background" Value="DarkGray" />
-    </Style>
-    <Style Selector="TabItem:selected">
-        <Setter Property="Background" Value="Orange" />
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="BorderBrush" Value="Orange" />
-    </Style>
-
     <!-- ListBoxItem Style -->
     <Style Selector="ListBoxItem">
         <Setter Property="Padding" Value="5" />
         <Setter Property="Margin" Value="1" />
         <Setter Property="MinHeight" Value="10" />
+    </Style>
+    
+    <Style Selector="Label">
+        <Setter Property="Foreground" Value="#555555"/>
     </Style>
 
 
@@ -63,26 +54,98 @@
         <!-- Default Font Size -->
         <Setter Property="FontSize" Value="14" />
         <!-- Default Font Family -->
-        <Setter Property="FontFamily" Value="Segoe UI" />
-
+        <Setter Property="Margin" Value="5,5,5,0"/>
     </Style>
 
     <!-- Button Style -->
     <Style Selector="Button">
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="BorderBrush" Value="Black" />
-        <Setter Property="Background" Value="Orange" />
-        <!-- <Setter Property="Margin" Value="2" /> -->
-        <!-- <Setter Property="MinHeight" Value="30" /> -->
-        <!-- <Setter Property="MinWidth" Value="80" /> -->
-        <Setter Property="CornerRadius" Value="5" />
-        <Setter Property="Foreground" Value="Black" />
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="BorderBrush" Value="#CCCCCC"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,5"/>
+
+        <Setter Property="Background" Value="CornflowerBlue"/>
+        <Setter Property="Foreground" Value="White"/>
+        <!-- <Setter Property="Background" Value="#B0D5FF"/> -->
+        <!-- <Setter Property="Foreground" Value="#000000"/> -->
+        
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        
+    
     </Style>
 
     <Style Selector="ComboBox">
-        <Setter Property="MinWidth" Value="200" />
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="BorderBrush" Value="#CCCCCC"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="Margin" Value="5,5,5,0"/>
+        <Setter Property="Width" Value="150"/>
+    </Style>
+    
+    
+    <Style Selector="TabControl">
+        <Setter Property="TabStripPlacement" Value="Left"/>
+        <Setter Property="Background" Value="#555555"/>
+    </Style>
+    
+    <Style Selector="TabControl.collapsed">
+        <Setter Property="Width" Value="40" />
+    </Style>
+    <Style Selector="TabControl.expanded">
+        <Setter Property="Width" Value="180" />
+    </Style>
+
+    <Style Selector="TabItem">
+        <Setter Property="Background" Value="#E0E0E0"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="15,10"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="BorderBrush" Value="#CCCCCC"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Margin" Value="2"/>
+    </Style>
+
+    <Style Selector="TabItem:hover">
+        <Setter Property="Background" Value="#4C61D8" />
+        <Setter Property="Foreground" Value="Red" />
+    </Style>
+    
+    <Style Selector="TabItem:selected">
+        <Setter Property="Background" Value="#4C61D8"/>
+        <Setter Property="Foreground" Value="#FFFFFF"/>
+    </Style>
+    
+    
+    
+    
+    <!-- Rounded TextBox -->
+    <Style Selector="TextBox.InputBox">
+        <!-- <Setter Property="Background" Value="#F5F5F5"/> -->
+        <!-- <Setter Property="Foreground" Value="#333333"/> -->
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="BorderBrush" Value="#CCCCCC"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <!-- <Setter Property="WatermarkBrush" Value="#A0A0A0"/> -->
+    </Style>
+
+    <!-- Circular Connect Button -->
+    <Style Selector="Button.CircularButton">
+        <Setter Property="Background" Value="#4C61D8"/>
+        <!-- <Setter Property="Foreground" Value="Blue"/> -->
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="30"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <Style Selector="Button.CircularButton:pressed">
+        <Setter Property="Background" Value="#0056B3"/>
     </Style>
 </Styles>

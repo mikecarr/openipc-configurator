@@ -8,6 +8,12 @@ public enum DeviceType
 {
     None,
     Camera,
-    Radxa,
-    NVR
+    Radxa
 }
+// public enum DeviceType
+// {
+//     None,
+//     Camera,
+//     Radxa,
+//     NVR
+// }
