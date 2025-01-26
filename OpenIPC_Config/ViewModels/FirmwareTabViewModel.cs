@@ -49,7 +49,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
         PerformFirmwareUpgradeAsyncCommand = new RelayCommand(
             async () => await PerformFirmwareUpgradeAsync()
         );
-        
+
         SelectFirmwareCommand = new RelayCommand<Window>(async window => await SelectFirmware(window));
         ClearFormCommand = new RelayCommand(() =>
         {
@@ -65,13 +65,12 @@ public partial class FirmwareTabViewModel : ViewModelBase
 
     public ICommand ClearFormCommand { get; }
     public IRelayCommand DownloadFirmwareAsyncCommand { get; }
-    
-    
+
+
     public ObservableCollection<string> Manufacturers { get; set; } = new();
     public ObservableCollection<string> Devices { get; set; } = new();
     public ObservableCollection<string> Firmwares { get; set; } = new();
 
-    
 
     private async Task DisableDropdown()
     {
@@ -120,7 +119,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
         UpdateCanExecuteCommands();
     }
 
-    private async void LoadManufacturers()
+    public async void LoadManufacturers()
     {
         try
         {
@@ -154,7 +153,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
     }
 
 
-    private void LoadDevices(string manufacturer)
+    public void LoadDevices(string manufacturer)
     {
         Devices.Clear();
 
@@ -178,7 +177,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
     }
 
 
-    private void LoadFirmwares(string device)
+    public void LoadFirmwares(string device)
     {
         Firmwares.Clear();
 
@@ -333,113 +332,113 @@ public partial class FirmwareTabViewModel : ViewModelBase
             Logger.Error(ex, "Error downloading firmware");
         }
     }
-    
-    private async Task PerformFirmwareUpgradeAsync()
-{
-    try
+
+    public async Task PerformFirmwareUpgradeAsync()
     {
-        // Check if ManualFirmwareFile is populated
-        if (!string.IsNullOrEmpty(ManualFirmwareFile))
+        try
         {
-            Logger.Information("Performing firmware upgrade using manual file.");
-            await UpgradeFirmwareFromFileAsync(ManualFirmwareFile);
-        }
-        else
-        {
-            // Validate dropdown selections
-            if (string.IsNullOrEmpty(SelectedManufacturer) ||
-                string.IsNullOrEmpty(SelectedDevice) ||
-                string.IsNullOrEmpty(SelectedFirmware))
+            // Check if ManualFirmwareFile is populated
+            if (!string.IsNullOrEmpty(ManualFirmwareFile))
             {
-                Logger.Warning("Cannot perform firmware upgrade. Missing dropdown selections.");
-                return;
-            }
-
-            Logger.Information("Performing firmware upgrade using selected dropdown options.");
-
-            // Construct the firmware file URL
-            var manufacturer = _firmwareData?.Manufacturers
-                .FirstOrDefault(m => m.Name == SelectedManufacturer);
-
-            var device = manufacturer?.Devices
-                .FirstOrDefault(d => d.Name == SelectedDevice);
-
-            var firmwareIdentifier = device?.Firmware
-                .FirstOrDefault(f => f.StartsWith(SelectedFirmware));
-
-            if (!string.IsNullOrEmpty(manufacturer?.Name) &&
-                !string.IsNullOrEmpty(device?.Name) &&
-                !string.IsNullOrEmpty(firmwareIdentifier))
-            {
-                var components = firmwareIdentifier.Split('-');
-                var firmwareType = components[0];
-                var sensor = components[1];
-                var memoryType = components[2];
-
-                var filename = $"{sensor}_{firmwareType}_{SelectedManufacturer}-{device.Name}-{memoryType}.tgz";
-                var downloadUrl = $"https://github.com/OpenIPC/builder/releases/download/latest/{filename}";
-
-                await UpgradeFirmwareFromUrlAsync(downloadUrl);
+                Logger.Information("Performing firmware upgrade using manual file.");
+                await UpgradeFirmwareFromFileAsync(ManualFirmwareFile);
             }
             else
             {
-                Logger.Warning("Failed to construct firmware URL. Missing or invalid data.");
+                // Validate dropdown selections
+                if (string.IsNullOrEmpty(SelectedManufacturer) ||
+                    string.IsNullOrEmpty(SelectedDevice) ||
+                    string.IsNullOrEmpty(SelectedFirmware))
+                {
+                    Logger.Warning("Cannot perform firmware upgrade. Missing dropdown selections.");
+                    return;
+                }
+
+                Logger.Information("Performing firmware upgrade using selected dropdown options.");
+
+                // Construct the firmware file URL
+                var manufacturer = _firmwareData?.Manufacturers
+                    .FirstOrDefault(m => m.Name == SelectedManufacturer);
+
+                var device = manufacturer?.Devices
+                    .FirstOrDefault(d => d.Name == SelectedDevice);
+
+                var firmwareIdentifier = device?.Firmware
+                    .FirstOrDefault(f => f.StartsWith(SelectedFirmware));
+
+                if (!string.IsNullOrEmpty(manufacturer?.Name) &&
+                    !string.IsNullOrEmpty(device?.Name) &&
+                    !string.IsNullOrEmpty(firmwareIdentifier))
+                {
+                    var components = firmwareIdentifier.Split('-');
+                    var firmwareType = components[0];
+                    var sensor = components[1];
+                    var memoryType = components[2];
+
+                    var filename = $"{sensor}_{firmwareType}_{SelectedManufacturer}-{device.Name}-{memoryType}.tgz";
+                    var downloadUrl = $"https://github.com/OpenIPC/builder/releases/download/latest/{filename}";
+
+                    await UpgradeFirmwareFromUrlAsync(downloadUrl);
+                }
+                else
+                {
+                    Logger.Warning("Failed to construct firmware URL. Missing or invalid data.");
+                }
             }
         }
-    }
-    catch (Exception ex)
-    {
-        Logger.Error(ex, "Error performing firmware upgrade");
-    }
-}
-
-private async Task UpgradeFirmwareFromFileAsync(string filePath)
-{
-    try
-    {
-        Logger.Information($"Upgrading firmware from file: {filePath}");
-
-        // Add logic to validate and process the firmware file
-        await Task.Delay(1000); // Simulate firmware upgrade process
-
-        Logger.Information("Firmware upgrade from file completed successfully.");
-    }
-    catch (Exception ex)
-    {
-        Logger.Error(ex, "Error upgrading firmware from file");
-    }
-}
-
-private async Task UpgradeFirmwareFromUrlAsync(string url)
-{
-    try
-    {
-        Logger.Information($"Downloading firmware from: {url}");
-
-        var filename = Path.GetFileName(url);
-        var filePath = Path.Combine(Path.GetTempPath(), filename);
-
-        var response = await _httpClient.GetAsync(url);
-        if (response.IsSuccessStatusCode)
+        catch (Exception ex)
         {
-            await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            await response.Content.CopyToAsync(fs);
-
-            Logger.Information($"Firmware downloaded to: {filePath}");
-
-            // Proceed with firmware upgrade
-            await UpgradeFirmwareFromFileAsync(filePath);
-        }
-        else
-        {
-            Logger.Warning($"Failed to download firmware. Status code: {response.StatusCode}");
+            Logger.Error(ex, "Error performing firmware upgrade");
         }
     }
-    catch (Exception ex)
+
+    private async Task UpgradeFirmwareFromFileAsync(string filePath)
     {
-        Logger.Error(ex, "Error upgrading firmware from URL");
+        try
+        {
+            Logger.Information($"Upgrading firmware from file: {filePath}");
+
+            // Add logic to validate and process the firmware file
+            await Task.Delay(1000); // Simulate firmware upgrade process
+
+            Logger.Information("Firmware upgrade from file completed successfully.");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Error upgrading firmware from file");
+        }
     }
-}
+
+    private async Task UpgradeFirmwareFromUrlAsync(string url)
+    {
+        try
+        {
+            Logger.Information($"Downloading firmware from: {url}");
+
+            var filename = Path.GetFileName(url);
+            var filePath = Path.Combine(Path.GetTempPath(), filename);
+
+            var response = await _httpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+                await response.Content.CopyToAsync(fs);
+
+                Logger.Information($"Firmware downloaded to: {filePath}");
+
+                // Proceed with firmware upgrade
+                await UpgradeFirmwareFromFileAsync(filePath);
+            }
+            else
+            {
+                Logger.Warning($"Failed to download firmware. Status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Error upgrading firmware from URL");
+        }
+    }
 
     private async Task DownloadFileAsync(string url, string filename)
     {
