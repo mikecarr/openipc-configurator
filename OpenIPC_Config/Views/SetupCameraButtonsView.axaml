@@ -29,30 +29,31 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <ComboBox x:Name="ScriptFilesActionComboBox" Grid.Row="0" Grid.Column="0" PlaceholderText="Script File Actions" 
+            <ComboBox x:Name="ScriptFilesActionComboBox" Grid.Row="0" Grid.Column="0"
+                      PlaceholderText="Script File Actions"
                       ItemsSource="{Binding ScriptFileActionItems}"
                       SelectedItem="{Binding SelectedScriptFileAction}"
                       HorizontalAlignment="Stretch"
 
                       ToolTip.Tip="{x:Static assets:Resources.ScriptFilesBackupToolTip}" />
-                
-            
-            <Button Grid.Row="0" Grid.Column="1" 
+
+
+            <Button Grid.Row="0" Grid.Column="1"
                     x:Name="ScriptFilesActionButton"
                     Content="Execute"
                     Command="{Binding ScriptFilesCommand}"
                     IsEnabled="False"
                     ToolTip.Tip="{x:Static assets:Resources.ScriptFilesRestoreToolTip}"
                     HorizontalAlignment="Stretch" />
-            
-            <ComboBox x:Name="CameraKeyComboBox" Grid.Row="1" Grid.Column="0" 
-                      PlaceholderText="Encryption Key Actions" 
+
+            <ComboBox x:Name="CameraKeyComboBox" Grid.Row="1" Grid.Column="0"
+                      PlaceholderText="Encryption Key Actions"
                       ItemsSource="{Binding DroneKeyActionItems}"
                       SelectedItem="{Binding SelectedDroneKeyAction}"
 
                       HorizontalAlignment="Stretch"
                       ToolTip.Tip="{x:Static assets:Resources.DroneKeyActionsToolTip}" />
-            
+
             <Button Grid.Row="1" Grid.Column="1" Content="Execute"
                     x:Name="CameraKeyActionButton"
                     Command="{Binding EncryptionKeyActionCommand}"
@@ -62,7 +63,7 @@
                     HorizontalAlignment="Stretch" />
             <!-- </Border> -->
 
-            
+
             <!-- <Border  Grid.Row="2" Grid.Column="0"  BorderBrush="SlateGray" BorderThickness="1"> -->
             <ComboBox Grid.Row="2" Grid.Column="0" x:Name="SensorComboBox" PlaceholderText="Select Sensor"
                       ItemsSource="{Binding LocalSensors}"
@@ -72,9 +73,9 @@
                       HorizontalContentAlignment="Center"
                       HorizontalAlignment="Stretch" />
             <!-- </Border> -->
-            
+
             <!-- <Border  Grid.Row="2" Grid.Column="1"  BorderBrush="SlateGray" BorderThickness="1"> -->
-            <Button Grid.Row="2" Grid.Column="1"  Content="Update"
+            <Button Grid.Row="2" Grid.Column="1" Content="Update"
                     x:Name="SensorActionButton"
                     Command="{Binding SensorFilesUpdateCommand}"
                     CommandParameter="SensorComboBox"
@@ -84,12 +85,12 @@
             <!-- </Border> -->
 
             <!-- <Panel Grid.Row="3" Grid.Column="0" Height="20" /> -->
-            
-            
+
+
             <Panel Grid.Row="4" Grid.Column="0" Height="20" />
 
             <TextBlock Grid.Row="6" Text="Encryption Key Checksum" />
-            
+
             <TextBlock Grid.Row="7" Grid.ColumnSpan="2"
                        TextWrapping="Wrap"
                        MaxWidth="375"
@@ -100,6 +101,6 @@
 
         </Grid>
     </Panel>
-        <!-- </Border> -->
+    <!-- </Border> -->
 
 </UserControl>

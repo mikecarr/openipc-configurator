@@ -65,10 +65,10 @@ public class WifiConfigParser
                         WifiChannel = int.TryParse(value, out var channel) ? channel : 0;
                         break;
                     case "wifi_region":
-                        WifiRegion =  value;
+                        WifiRegion = value;
                         break;
                     case "peer" when currentSection == "[gs_mavlink]":
-                        GsMavlinkPeer =value;
+                        GsMavlinkPeer = value;
                         break;
                     case "peer" when currentSection == "[gs_video]":
                         GsVideoPeer = value;

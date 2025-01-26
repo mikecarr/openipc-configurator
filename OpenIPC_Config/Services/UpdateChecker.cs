@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -19,8 +18,9 @@ public class UpdateChecker
         _latestJsonUrl = configuration["UpdateChecker:LatestJsonUrl"];
     }
 
-    
-    public async Task<(bool HasUpdate, string ReleaseNotes, string DownloadUrl, string NewVersion)> CheckForUpdateAsync(string currentVersion)
+
+    public async Task<(bool HasUpdate, string ReleaseNotes, string DownloadUrl, string NewVersion)> CheckForUpdateAsync(
+        string currentVersion)
     {
         try
         {
@@ -28,9 +28,7 @@ public class UpdateChecker
             var updateInfo = JsonConvert.DeserializeObject<UpdateInfo>(response);
 
             if (updateInfo != null && IsNewerVersion(updateInfo.Version, currentVersion))
-            {
                 return (true, updateInfo.ReleaseNotes, updateInfo.DownloadUrl, updateInfo.Version);
-            }
         }
         catch (Exception ex)
         {
@@ -48,7 +46,7 @@ public class UpdateChecker
             const string prefix = "v";
             return version.StartsWith(prefix) ? version.Substring(prefix.Length) : version;
         }
-        
+
         // Helper function to remove the "release-v" prefix and extract the version number
         string ExtractGHVersionNumber(string version)
         {
@@ -65,9 +63,9 @@ public class UpdateChecker
     public class UpdateInfo
     {
         public string Version { get; set; }
-        [JsonProperty("release_notes")]
-        public string ReleaseNotes { get; set; }
-        [JsonProperty("download_url")]
-        public string DownloadUrl { get; set; }
+
+        [JsonProperty("release_notes")] public string ReleaseNotes { get; set; }
+
+        [JsonProperty("download_url")] public string DownloadUrl { get; set; }
     }
 }

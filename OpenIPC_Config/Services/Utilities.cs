@@ -23,15 +23,11 @@ public static class Utilities
 
             // Convert the bytes to a hexadecimal string
             var builder = new StringBuilder();
-            foreach (var b in bytes)
-            {
-                builder.Append(b.ToString("x2"));
-            }
+            foreach (var b in bytes) builder.Append(b.ToString("x2"));
 
             return builder.ToString();
         }
     }
-
 
 
     public static string ComputeSha256Hash(string rawData)
@@ -49,7 +45,7 @@ public static class Utilities
             return builder.ToString();
         }
     }
-    
+
     public static bool IsValidIpAddress(string ipAddress)
     {
         var pattern = @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";

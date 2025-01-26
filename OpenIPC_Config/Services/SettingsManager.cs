@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 using OpenIPC_Config.Models;
-using Prism.Events;
 using Serilog;
 
 namespace OpenIPC_Config.Services;
@@ -10,14 +9,13 @@ namespace OpenIPC_Config.Services;
 public static class SettingsManager
 {
     private static readonly string AppSettingsName = "openipc_settings.json";
-    private static string _appSettingFilename = $"{Models.OpenIPC.AppDataConfigDirectory}/openipc_settings.json";
 
     public static string AppSettingFilename
     {
-        get => _appSettingFilename;
-        set => _appSettingFilename = value; // Allow setting a custom filename for testing
-    }
-
+        get;
+        set;
+        // Allow setting a custom filename for testing
+    } = $"{OpenIPC.AppDataConfigDirectory}/openipc_settings.json";
 
 
     /// <summary>
@@ -31,21 +29,18 @@ public static class SettingsManager
     public static DeviceConfig? LoadSettings()
     {
         DeviceConfig deviceConfig;
-        
+
         if (File.Exists(AppSettingFilename))
-        {
             try
             {
                 var json = File.ReadAllText(AppSettingFilename);
                 deviceConfig = JsonConvert.DeserializeObject<DeviceConfig>(json);
 
                 if (deviceConfig != null)
-                {
                     // Optionally publish an event if needed
                     // eventAggregator?.GetEvent<DeviceStateUpdatedEvent>()?.Publish(
                     //     new DeviceStateUpdatedMessage(true, deviceConfig));
                     return deviceConfig;
-                }
 
                 Log.Error("LoadSettings: deviceConfig is null. The file content might be corrupted.");
             }
@@ -61,7 +56,6 @@ public static class SettingsManager
             {
                 Log.Error($"LoadSettings: Unexpected error. Exception: {ex.Message}");
             }
-        }
 
         // Default values if no settings file exists or an error occurs
         return new DeviceConfig

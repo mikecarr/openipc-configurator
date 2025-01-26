@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <root>
-    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root"
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                id="root"
                 xmlns="">
         <xsd:element name="root" msdata:IsDataSet="true">
 
@@ -150,7 +151,7 @@ Step 9: Reboot OpenIPC camera</value>
     <data name="btnSaveAndRestartWfbText" xml:space="preserve">
         <value>Save &amp; Restart WFB</value>
     </data>
-    
+
 
     <data name="FpvEnabledToolTip" xml:space="preserve">
         <value>Enables 3A algorithm with less cpu load and enables FPV section for other functions below.</value>
@@ -247,11 +248,11 @@ Adjust the transmission power for the 2.4GHz frequency. Lower power conserves en
 
         </value>
     </data>
-    
+
     <data name="LocalIpToolTip" xml:space="preserve">
         <value>IP of the device running the App</value>
     </data>
-    
+
     <data name="DroneKeyActionsToolTip" xml:space="preserve">
         <value>Send or receive encrypted key to/from connected device</value>
     </data>

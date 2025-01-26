@@ -7,15 +7,15 @@ namespace OpenIPC_Config.Tests.Services;
 [TestFixture]
 public class YamlConfigServiceTests
 {
-    private Mock<ILogger> _mockLogger;
-    private IYamlConfigService _yamlConfigService;
-
     [SetUp]
     public void SetUp()
     {
         _mockLogger = new Mock<ILogger>();
         _yamlConfigService = new YamlConfigService(_mockLogger.Object);
     }
+
+    private Mock<ILogger> _mockLogger;
+    private IYamlConfigService _yamlConfigService;
 
     [Test]
     public void ParseYaml_ValidContent_ParsesSuccessfully()

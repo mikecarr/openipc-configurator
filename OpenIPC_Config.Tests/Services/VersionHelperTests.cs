@@ -1,15 +1,11 @@
-using System.Reflection;
 using Moq;
 using OpenIPC_Config.Services;
 
 namespace OpenIPC_Config.Tests.Services;
 
-
 [TestFixture]
 public class VersionHelperTests
 {
-    private Mock<IFileSystem> _mockFileSystem;
-
     [SetUp]
     public void SetUp()
     {
@@ -23,6 +19,8 @@ public class VersionHelperTests
         // Reset the file system to the default implementation
         VersionHelper.SetFileSystem(new FileSystem());
     }
+
+    private Mock<IFileSystem> _mockFileSystem;
 
     [Test]
     public void GetAppVersion_ReturnsVersionFromFile_InDevelopmentEnvironment()
@@ -41,7 +39,6 @@ public class VersionHelperTests
         Assert.AreEqual(expectedVersion, version);
     }
 
-    
 
     [Test]
     public void GetAppVersion_ReturnsUnknownVersion_OnException()

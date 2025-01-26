@@ -7,9 +7,6 @@ namespace OpenIPC_Config.Tests.Services;
 [TestFixture]
 public class WfbConfigParserTests
 {
-    private Mock<ILogger> _mockLogger;
-    private WfbConfigParser _wfbConfigParser;
-
     [SetUp]
     public void SetUp()
     {
@@ -21,31 +18,34 @@ public class WfbConfigParserTests
         _wfbConfigParser = new WfbConfigParser();
     }
 
+    private Mock<ILogger> _mockLogger;
+    private WfbConfigParser _wfbConfigParser;
+
     [Test]
     public void ParseConfigString_ValidConfig_SetsProperties()
     {
         // Arrange
         var configContent = """
-            unit = 'test_unit'
-            wlan = 'wlan0'
-            region = 'US'
-            channel = '6'
-            txpower = 30
-            driver_txpower_override = 1
-            bandwidth = 20
-            stbc = 1
-            ldpc = 1
-            mcs_index = 7
-            stream = 2
-            link_id = 12345
-            udp_port = 14550
-            rcv_buf = 1048576
-            frame_type = 'data'
-            fec_k = 10
-            fec_n = 20
-            pool_timeout = 100
-            guard_interval = 'long'
-        """;
+                                unit = 'test_unit'
+                                wlan = 'wlan0'
+                                region = 'US'
+                                channel = '6'
+                                txpower = 30
+                                driver_txpower_override = 1
+                                bandwidth = 20
+                                stbc = 1
+                                ldpc = 1
+                                mcs_index = 7
+                                stream = 2
+                                link_id = 12345
+                                udp_port = 14550
+                                rcv_buf = 1048576
+                                frame_type = 'data'
+                                fec_k = 10
+                                fec_n = 20
+                                pool_timeout = 100
+                                guard_interval = 'long'
+                            """;
 
         // Act
         _wfbConfigParser.ParseConfigString(configContent);
@@ -71,16 +71,16 @@ public class WfbConfigParserTests
         Assert.AreEqual(100, _wfbConfigParser.PoolTimeout);
         Assert.AreEqual("long", _wfbConfigParser.GuardInterval);
     }
-    
+
     [Test]
     public void ParseConfigString_InvalidLine_IgnoresLine()
     {
         // Arrange
         var configContent = """
-            unit = 'test_unit'
-            invalid_line_without_equals
-            channel = '6'
-        """;
+                                unit = 'test_unit'
+                                invalid_line_without_equals
+                                channel = '6'
+                            """;
 
         // Act
         _wfbConfigParser.ParseConfigString(configContent);
@@ -88,6 +88,5 @@ public class WfbConfigParserTests
         // Assert
         Assert.AreEqual("test_unit", _wfbConfigParser.Unit);
         Assert.AreEqual("6", _wfbConfigParser.Channel);
-        
     }
 }

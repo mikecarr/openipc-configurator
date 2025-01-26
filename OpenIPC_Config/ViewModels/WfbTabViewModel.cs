@@ -11,7 +11,6 @@ using MsBox.Avalonia;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
-using Prism.Events;
 using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
@@ -27,7 +26,6 @@ public partial class WfbTabViewModel : ViewModelBase
         IEventSubscriptionService eventSubscriptionService)
         : base(logger, sshClientService, eventSubscriptionService)
     {
-        
         InitializeCollections();
 
         RestartWfbCommand = new RelayCommand(RestartWfb);
@@ -46,7 +44,7 @@ public partial class WfbTabViewModel : ViewModelBase
     [ObservableProperty] private int _selectedChannel;
 
     [ObservableProperty] private int _selectedPower24GHz;
-    
+
     [ObservableProperty] private int _selectedBandwidth;
 
     [ObservableProperty] private int _selectedPower;
@@ -99,7 +97,7 @@ public partial class WfbTabViewModel : ViewModelBase
         Frequencies24GHz = new ObservableCollectionExtended<string>(_24FrequencyMapping.Values);
         Power58GHz = new ObservableCollectionExtended<int> { 1, 5, 10, 15, 20, 25, 30 };
         Power24GHz = new ObservableCollectionExtended<int> { 1, 20, 25, 30, 35, 40 };
-        Bandwidth = new ObservableCollectionExtended<int> { 20,40 };
+        Bandwidth = new ObservableCollectionExtended<int> { 20, 40 };
         McsIndex = new ObservableCollectionExtended<int>(Enumerable.Range(1, 31));
         Stbc = new ObservableCollectionExtended<int> { 0, 1 };
         Ldpc = new ObservableCollectionExtended<int> { 0, 1 };
@@ -109,7 +107,8 @@ public partial class WfbTabViewModel : ViewModelBase
 
     private void SubscribeToEvents()
     {
-        EventSubscriptionService.Subscribe<WfbConfContentUpdatedEvent, WfbConfContentUpdatedMessage>(OnWfbConfContentUpdated);
+        EventSubscriptionService.Subscribe<WfbConfContentUpdatedEvent, WfbConfContentUpdatedMessage>(
+            OnWfbConfContentUpdated);
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
     }
 
@@ -235,11 +234,11 @@ public partial class WfbTabViewModel : ViewModelBase
     private async void RestartWfb()
     {
         UpdateUIMessage("Restarting WFB...");
-        
+
         EventSubscriptionService.Publish<TabMessageEvent, string>("Restart Pushed");
-        
+
         UpdateUIMessage("Getting new content");
-        
+
         var newFrequency58 = SelectedFrequency58String;
         var newFrequency24 = SelectedFrequency24String;
 
@@ -280,9 +279,9 @@ public partial class WfbTabViewModel : ViewModelBase
 
         Logger.Information($"Uploading new : {OpenIPC.WfbConfFileLoc}");
         await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.WfbConfFileLoc, WfbConfContent);
-        
+
         UpdateUIMessage("Restarting Wfb");
-        
+
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.WfbRestartCommand);
         UpdateUIMessage("Restarting Wfb..done");
     }
@@ -327,7 +326,7 @@ public partial class WfbTabViewModel : ViewModelBase
     {
         // Logic to update WfbConfContent with the new values
         var lines = wfbConfContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-        
+
         // This regex matches configuration lines in the `wfbConfContent` that define specific settings,
         // while ignoring lines that start with a `#` (comments). It looks for lines that:
         // - Do NOT start with a `#` (negative lookahead: `^(?!#.*)`).
@@ -339,7 +338,7 @@ public partial class WfbTabViewModel : ViewModelBase
         var regex = new Regex(
             @"^(?!#.*)(frequency|channel|driver_txpower_override|frequency24|bandwidth|txpower|mcs_index|stbc|ldpc|fec_k|fec_n)=.*",
             RegexOptions.Multiline);
-        
+
         var updatedContent = regex.Replace(wfbConfContent, match =>
         {
             var group = match.Groups[1].Value;

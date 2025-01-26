@@ -1,8 +1,6 @@
 using Moq;
 using OpenIPC_Config.Services;
 using Serilog;
-using System;
-using System.IO;
 using Serilog.Events;
 using Xunit;
 using Assert = Xunit.Assert;
@@ -11,9 +9,9 @@ namespace OpenIPC_Config.Tests.Services;
 
 public class WfbGsConfigParserTests : IDisposable
 {
-    private readonly WfbGsConfigParser _parser;
     private readonly Mock<ILogger> _loggerMock;
     private readonly StringWriter _logOutput;
+    private readonly WfbGsConfigParser _parser;
 
     public WfbGsConfigParserTests()
     {

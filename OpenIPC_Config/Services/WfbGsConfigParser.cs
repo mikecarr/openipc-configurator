@@ -13,6 +13,45 @@ public class WfbGsConfigParser : IWfbGsConfigParser
     // Properties to store parsed values
     public string TxPower { get; set; }
 
+    // Method to generate the updated configuration string while preserving comments
+    public string GetUpdatedConfigString()
+    {
+        if (string.IsNullOrEmpty(_originalConfigContent))
+        {
+            Log.Warning("Original config content is empty or null.");
+            return string.Empty;
+        }
+
+        var lines = _originalConfigContent.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        var updatedConfig = new StringBuilder();
+        var optionsRegex = new Regex(@"^\s*options\s+88XXau_wfb\s+(.+)$");
+
+        foreach (var line in lines)
+        {
+            var trimmedLine = line.Trim();
+
+            // Check for the options line
+            var optionsMatch = optionsRegex.Match(trimmedLine);
+            if (optionsMatch.Success)
+            {
+                // Update the TxPower value in the options line
+                var newOptionsLine = $"options 88XXau_wfb rtw_tx_pwr_idx_override={TxPower}";
+                updatedConfig.AppendLine(newOptionsLine);
+                Log.Information($"Updated TxPower to: {TxPower}");
+            }
+            else
+            {
+                // Preserve the original line (including comments)
+                updatedConfig.AppendLine(line);
+            }
+        }
+
+        var result = updatedConfig.ToString();
+        Log.Information("Configuration string updated successfully.");
+        Log.Debug($"Updated Config:\n{result}");
+        return result;
+    }
+
     // Method to parse configuration from a string
     public void ParseConfigString(string configContent)
     {
@@ -54,44 +93,5 @@ public class WfbGsConfigParser : IWfbGsConfigParser
         }
 
         Log.Debug("WFB Configuration Parsed Successfully.");
-    }
-
-    // Method to generate the updated configuration string while preserving comments
-    public string GetUpdatedConfigString()
-    {
-        if (string.IsNullOrEmpty(_originalConfigContent))
-        {
-            Log.Warning("Original config content is empty or null.");
-            return string.Empty;
-        }
-
-        var lines = _originalConfigContent.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-        var updatedConfig = new StringBuilder();
-        var optionsRegex = new Regex(@"^\s*options\s+88XXau_wfb\s+(.+)$");
-
-        foreach (var line in lines)
-        {
-            var trimmedLine = line.Trim();
-
-            // Check for the options line
-            var optionsMatch = optionsRegex.Match(trimmedLine);
-            if (optionsMatch.Success)
-            {
-                // Update the TxPower value in the options line
-                var newOptionsLine = $"options 88XXau_wfb rtw_tx_pwr_idx_override={TxPower}";
-                updatedConfig.AppendLine(newOptionsLine);
-                Log.Information($"Updated TxPower to: {TxPower}");
-            }
-            else
-            {
-                // Preserve the original line (including comments)
-                updatedConfig.AppendLine(line);
-            }
-        }
-
-        var result = updatedConfig.ToString();
-        Log.Information("Configuration string updated successfully.");
-        Log.Debug($"Updated Config:\n{result}");
-        return result;
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,53 +7,75 @@ using System.Windows.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DynamicData.Binding;
 using Microsoft.Extensions.DependencyInjection;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
-using Prism.Events;
 using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    #region Observable Properties
-    [ObservableProperty] private bool _canConnect;
-    [ObservableProperty] private string _appVersionText;
-    [ObservableProperty] private string _ipAddress;
-    [ObservableProperty] private int _port;
-    [ObservableProperty] private string _password;
-    [ObservableProperty] private string _device;
-    [ObservableProperty] private bool isVRXEnabled;
-    [ObservableProperty] private DeviceConfig _deviceConfig;
-    [ObservableProperty] private TabItemViewModel _selectedTab;
-    
-    
-    #endregion
-    
-    
-    
     private bool _isTabsCollapsed;
+    private DeviceType _selectedDeviceType;
+
+    public MainViewModel(ILogger logger,
+        ISshClientService sshClientService,
+        IEventSubscriptionService eventSubscriptionService,
+        IServiceProvider serviceProvider)
+        : base(logger, sshClientService, eventSubscriptionService)
+    {
+        _appVersionText = GetFormattedAppVersion();
+        CanConnect = false;
+
+        ToggleTabsCommand = new RelayCommand(() => IsTabsCollapsed = !IsTabsCollapsed);
+
+        LoadSettings();
+
+        ConnectCommand = new RelayCommand(() => Connect());
+
+        DeviceTypes = new ObservableCollection<DeviceType>(Enum.GetValues(typeof(DeviceType)).Cast<DeviceType>());
+
+        Tabs = new ObservableCollection<TabItemViewModel>
+        {
+            new("Firmware", "avares://OpenIPC_Config/Assets/Icons/iconoir_cube.svg",
+                serviceProvider.GetRequiredService<FirmwareTabViewModel>(), IsTabsCollapsed = IsTabsCollapsed),
+            new("WFB", "avares://OpenIPC_Config/Assets/Icons/iconoir_wifi.svg",
+                serviceProvider.GetRequiredService<WfbTabViewModel>(), IsTabsCollapsed = IsTabsCollapsed),
+            new("Camera", "avares://OpenIPC_Config/Assets/Icons/iconoir_camera.svg",
+                serviceProvider.GetRequiredService<CameraSettingsTabViewModel>(), IsTabsCollapsed = IsTabsCollapsed),
+            new("Telemetry", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg",
+                serviceProvider.GetRequiredService<TelemetryTabViewModel>(), IsTabsCollapsed = IsTabsCollapsed)
+
+            // new TabItemViewModel("Presets", new PresetsViewModel()),
+            // new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg", new SetupViewModel())
+        };
+
+        // Subscribe to device type change events
+        EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(
+            OnDeviceTypeChangeEvent);
+
+        IsVRXEnabled = false;
+    }
 
     public bool IsTabsCollapsed
     {
         get => _isTabsCollapsed;
         set => SetProperty(ref _isTabsCollapsed, value);
     }
-    
+
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
     public ObservableCollection<DeviceType> DeviceTypes { get; set; }
 
-    
+
     public int SelectedTabIndex { get; set; }
 
     public ICommand ConnectCommand { get; private set; }
     public ICommand ToggleTabsCommand { get; }
-    
+
     public WfbTabViewModel WfbTabViewModel { get; }
     public WfbGSTabViewModel WfbGSTabViewModel { get; }
     public TelemetryTabViewModel TelemetryTabViewModel { get; }
@@ -65,44 +86,6 @@ public partial class MainViewModel : ViewModelBase
     public LogViewerViewModel LogViewerViewModel { get; }
     public StatusBarViewModel StatusBarViewModel { get; }
 
-    public MainViewModel(ILogger logger,
-        ISshClientService sshClientService,
-        IEventSubscriptionService eventSubscriptionService,
-        IServiceProvider serviceProvider)
-        : base(logger, sshClientService, eventSubscriptionService)
-    {
-        _appVersionText = GetFormattedAppVersion();
-        CanConnect = false;
-        
-        ToggleTabsCommand = new RelayCommand(() => IsTabsCollapsed = !IsTabsCollapsed);
-        
-        LoadSettings();
-        
-        ConnectCommand = new RelayCommand(() => Connect());
-        
-        DeviceTypes = new ObservableCollection<DeviceType>(Enum.GetValues(typeof(DeviceType)).Cast<DeviceType>());
-        
-        Tabs = new ObservableCollection<TabItemViewModel>
-        {
-            new TabItemViewModel("Firmware", "avares://OpenIPC_Config/Assets/Icons/iconoir_cube.svg",serviceProvider.GetRequiredService<FirmwareTabViewModel>(),IsTabsCollapsed = this.IsTabsCollapsed),
-            new TabItemViewModel("WFB", "avares://OpenIPC_Config/Assets/Icons/iconoir_wifi.svg", serviceProvider.GetRequiredService<WfbTabViewModel>(),IsTabsCollapsed = this.IsTabsCollapsed),
-            new TabItemViewModel("Camera", "avares://OpenIPC_Config/Assets/Icons/iconoir_camera.svg", serviceProvider.GetRequiredService<CameraSettingsTabViewModel>(),IsTabsCollapsed = this.IsTabsCollapsed),
-            new TabItemViewModel("Telemetry", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg", serviceProvider.GetRequiredService<TelemetryTabViewModel>(),IsTabsCollapsed = this.IsTabsCollapsed),
-            
-            // new TabItemViewModel("Presets", new PresetsViewModel()),
-            // new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg", new SetupViewModel())
-        };
-        
-        // Subscribe to device type change events
-        EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(
-            OnDeviceTypeChangeEvent);
-        
-        IsVRXEnabled = false;
-
-        
-
-    }
-    private DeviceType _selectedDeviceType;
     public DeviceType SelectedDeviceType
     {
         get => _selectedDeviceType;
@@ -124,7 +107,7 @@ public partial class MainViewModel : ViewModelBase
             }
         }
     }
-    
+
     private string GetFormattedAppVersion()
     {
         var fullVersion = VersionHelper.GetAppVersion();
@@ -133,7 +116,7 @@ public partial class MainViewModel : ViewModelBase
         var truncatedVersion = fullVersion.Split('+')[0]; // Handles semantic versions like "1.0.0+buildinfo"
         return truncatedVersion.Length > 10 ? truncatedVersion.Substring(0, 10) : truncatedVersion;
     }
-    
+
     private void CheckIfCanConnect()
     {
         Dispatcher.UIThread.InvokeAsync(() =>
@@ -144,7 +127,7 @@ public partial class MainViewModel : ViewModelBase
                          && !SelectedDeviceType.Equals(DeviceType.None);
         });
     }
-    
+
     partial void OnPortChanged(int value)
     {
         CheckIfCanConnect();
@@ -154,17 +137,17 @@ public partial class MainViewModel : ViewModelBase
     {
         CheckIfCanConnect();
     }
-    
+
     private void SendDeviceTypeMessage(DeviceType deviceType)
     {
         // Insert logic to send a message based on the selected device type
         // For example, use an event aggregator, messenger, or direct call
         Log.Debug($"Device type selected: {deviceType}");
         //Console.WriteLine($"Device type selected: {deviceType}");
-        
+
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(deviceType);
     }
-    
+
     private async void Connect()
     {
         var appMessage = new AppMessage();
@@ -199,14 +182,14 @@ public partial class MainViewModel : ViewModelBase
                 return;
             }
         }
-        
-        
+
+
         // Save the config to app settings
         SaveConfig();
-        
+
         // Publish the event
-        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { DeviceConfig = _deviceConfig});
-            
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { DeviceConfig = _deviceConfig });
+
 
         appMessage.DeviceConfig = _deviceConfig;
 
@@ -214,7 +197,7 @@ public partial class MainViewModel : ViewModelBase
         {
             if (_deviceConfig.DeviceType == DeviceType.Camera)
             {
-                UpdateUIMessage("Processing Camera..." );
+                UpdateUIMessage("Processing Camera...");
                 processCameraFiles();
                 UpdateUIMessage("Processing Camera...done");
             }
@@ -228,7 +211,7 @@ public partial class MainViewModel : ViewModelBase
 
         UpdateUIMessage("Connected");
     }
-    
+
     private void SaveConfig()
     {
         _deviceConfig.DeviceType = SelectedDeviceType;
@@ -239,7 +222,7 @@ public partial class MainViewModel : ViewModelBase
         // save config to file
         SettingsManager.SaveSettings(_deviceConfig);
     }
-    
+
     /// <summary>
     ///     Retrieves the hostname of the device asynchronously using SSH.
     ///     <para>
@@ -278,26 +261,24 @@ public partial class MainViewModel : ViewModelBase
         // Cleanup
         cts.Dispose();
     }
-    
+
     private async void processCameraFiles()
     {
         // download file wfb.conf
-        var wfbConfContent = await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WfbConfFileLoc);
+        var wfbConfContent = await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WfbConfFileLoc);
 
-        
 
         if (wfbConfContent != null)
-            EventSubscriptionService.Publish<WfbConfContentUpdatedEvent, 
+            EventSubscriptionService.Publish<WfbConfContentUpdatedEvent,
                 WfbConfContentUpdatedMessage>(new WfbConfContentUpdatedMessage(wfbConfContent));
 
         try
         {
             var majesticContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.MajesticFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.MajesticFileLoc);
             // Publish a message to WfbSettingsTabViewModel
-            EventSubscriptionService.Publish<MajesticContentUpdatedEvent, 
+            EventSubscriptionService.Publish<MajesticContentUpdatedEvent,
                 MajesticContentUpdatedMessage>(new MajesticContentUpdatedMessage(majesticContent));
-            
         }
         catch (Exception e)
         {
@@ -307,12 +288,11 @@ public partial class MainViewModel : ViewModelBase
         try
         {
             var telemetryContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.TelemetryConfFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.TelemetryConfFileLoc);
             // Publish a message to WfbSettingsTabViewModel
-            
-            EventSubscriptionService.Publish<TelemetryContentUpdatedEvent, 
-                TelemetryContentUpdatedMessage>(new TelemetryContentUpdatedMessage(telemetryContent));
 
+            EventSubscriptionService.Publish<TelemetryContentUpdatedEvent,
+                TelemetryContentUpdatedMessage>(new TelemetryContentUpdatedMessage(telemetryContent));
         }
         catch (Exception e)
         {
@@ -324,14 +304,13 @@ public partial class MainViewModel : ViewModelBase
         {
             // get /home/radxa/scripts/screen-mode
             var droneKeyContent =
-                await SshClientService.DownloadFileBytesAsync(_deviceConfig, Models.OpenIPC.RemoteDroneKeyPath);
+                await SshClientService.DownloadFileBytesAsync(_deviceConfig, OpenIPC.RemoteDroneKeyPath);
 
-            
-            
+
             if (droneKeyContent != null)
             {
                 //byte[] fileBytes = Encoding.UTF8.GetBytes(droneKeyContent);
-                
+
                 var droneKey = Utilities.ComputeMd5Hash(droneKeyContent);
 
                 var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
@@ -339,9 +318,8 @@ public partial class MainViewModel : ViewModelBase
                 _deviceConfig.KeyChksum = droneKey;
                 deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
 
-                EventSubscriptionService.Publish<DeviceContentUpdateEvent, 
+                EventSubscriptionService.Publish<DeviceContentUpdateEvent,
                     DeviceContentUpdatedMessage>(deviceContentUpdatedMessage);
-                
             }
         }
         catch (Exception e)
@@ -350,30 +328,28 @@ public partial class MainViewModel : ViewModelBase
             throw;
         }
 
-        EventSubscriptionService.Publish<AppMessageEvent, 
-            AppMessage>(new AppMessage() { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
-
-        
+        EventSubscriptionService.Publish<AppMessageEvent,
+            AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
     }
-    
+
     private async void processRadxaFiles()
     {
         try
         {
-            UpdateUIMessage("Downloading wifibroadcast.cfg" );
+            UpdateUIMessage("Downloading wifibroadcast.cfg");
 
             // get /etc/wifibroadcast.cfg
             var wifibroadcastContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WifiBroadcastFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WifiBroadcastFileLoc);
 
             if (!string.IsNullOrEmpty(wifibroadcastContent))
             {
                 var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
                 radxaContentUpdatedMessage.WifiBroadcastContent = wifibroadcastContent;
 
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
-                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { WifiBroadcastContent = wifibroadcastContent });
-                
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
+                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage
+                    { WifiBroadcastContent = wifibroadcastContent });
             }
             else
             {
@@ -390,20 +366,18 @@ public partial class MainViewModel : ViewModelBase
 
         try
         {
-            UpdateUIMessage("Downloading modprod.d/wfb.conf" );
+            UpdateUIMessage("Downloading modprod.d/wfb.conf");
             // get /etc/modprobe.d/wfb.conf
             var wfbModProbeContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WifiBroadcastModProbeFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WifiBroadcastModProbeFileLoc);
 
             if (wfbModProbeContent != null)
             {
                 var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
                 radxaContentUpdatedMessage.WfbConfContent = wfbModProbeContent;
 
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
                     RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { WfbConfContent = wfbModProbeContent });
-
-                
             }
         }
         catch (Exception e)
@@ -418,16 +392,16 @@ public partial class MainViewModel : ViewModelBase
             UpdateUIMessage("Downloading screen-mode");
             // get /home/radxa/scripts/screen-mode
             var screenModeContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.ScreenModeFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.ScreenModeFileLoc);
 
             if (screenModeContent != null)
             {
                 var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
                 radxaContentUpdatedMessage.ScreenModeContent = screenModeContent;
 
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
-                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { ScreenModeContent = screenModeContent });
-                
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
+                    RadxaContentUpdatedMessage>(
+                    new RadxaContentUpdatedMessage { ScreenModeContent = screenModeContent });
             }
         }
         catch (Exception e)
@@ -438,28 +412,24 @@ public partial class MainViewModel : ViewModelBase
 
         try
         {
-            UpdateUIMessage("Downloading gskey" );
+            UpdateUIMessage("Downloading gskey");
 
             var gsKeyContent =
-                await SshClientService.DownloadFileBytesAsync(_deviceConfig, Models.OpenIPC.RemoteGsKeyPath);
+                await SshClientService.DownloadFileBytesAsync(_deviceConfig, OpenIPC.RemoteGsKeyPath);
 
             if (gsKeyContent != null)
             {
                 var droneKey = Utilities.ComputeMd5Hash(gsKeyContent);
                 if (droneKey != OpenIPC.KeyMD5Sum)
-                {
                     Log.Warning("GS key MD5 checksum mismatch");
-                }
                 else
-                {
                     Log.Information("GS key MD5 checksum matched default key");
-                }
 
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
                     RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { DroneKeyContent = droneKey });
-                
 
-                UpdateUIMessage("Downloading gskey...done" );
+
+                UpdateUIMessage("Downloading gskey...done");
             }
         }
         catch (Exception e)
@@ -468,11 +438,10 @@ public partial class MainViewModel : ViewModelBase
             throw;
         }
 
-        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
-        
-
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage
+            { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
     }
-    
+
     private void LoadSettings()
     {
         // Load settings via the SettingsManager
@@ -485,7 +454,6 @@ public partial class MainViewModel : ViewModelBase
 
         // Publish the initial device type
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(settings.DeviceType);
-        
     }
 
     private void OnDeviceTypeChangeEvent(DeviceType deviceTypeEvent)
@@ -501,4 +469,18 @@ public partial class MainViewModel : ViewModelBase
         // Notify the view of tab changes
         //EventSubscriptionService.Publish<TabSelectionChangeEvent, string>(SelectedTab);
     }
+
+    #region Observable Properties
+
+    [ObservableProperty] private bool _canConnect;
+    [ObservableProperty] private string _appVersionText;
+    [ObservableProperty] private string _ipAddress;
+    [ObservableProperty] private int _port;
+    [ObservableProperty] private string _password;
+    [ObservableProperty] private string _device;
+    [ObservableProperty] private bool isVRXEnabled;
+    [ObservableProperty] private DeviceConfig _deviceConfig;
+    [ObservableProperty] private TabItemViewModel _selectedTab;
+
+    #endregion
 }

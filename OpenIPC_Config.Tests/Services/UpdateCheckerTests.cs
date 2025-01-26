@@ -51,5 +51,4 @@ public class UpdateCheckerTests
         Assert.AreEqual("https://example.com/download", result.DownloadUrl);
         Assert.AreEqual("release-v1.2.0", result.NewVersion);
     }
-
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
@@ -17,18 +16,12 @@ public class NetworkHelper
                 // Ignore loopback and inactive interfaces
                 if (netInterface.OperationalStatus != OperationalStatus.Up ||
                     netInterface.NetworkInterfaceType == NetworkInterfaceType.Loopback)
-                {
                     continue;
-                }
 
                 var properties = netInterface.GetIPProperties();
                 foreach (var address in properties.UnicastAddresses)
-                {
                     if (address.Address.AddressFamily == AddressFamily.InterNetwork) // IPv4
-                    {
                         return address.Address.ToString();
-                    }
-                }
             }
 
             throw new Exception("No valid network interfaces found.");

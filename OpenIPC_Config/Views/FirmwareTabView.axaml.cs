@@ -9,10 +9,7 @@ public partial class FirmwareTabView : UserControl
     public FirmwareTabView()
     {
         InitializeComponent();
-        
-        if (!Design.IsDesignMode)
-        {
-            DataContext = App.ServiceProvider.GetService<FirmwareTabViewModel>();
-        }
+
+        if (!Design.IsDesignMode) DataContext = App.ServiceProvider.GetService<FirmwareTabViewModel>();
     }
 }

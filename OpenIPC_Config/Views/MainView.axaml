@@ -12,10 +12,9 @@
 
     <UserControl.Resources>
         <!-- Converters -->
-        <converters:BooleanToTextConverter x:Key="BooleanToTextConverter" />
         <converters:BooleanToWidthConverter x:Key="BooleanToWidthConverter" />
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        
+
         <converters:InvertedBooleanConverter x:Key="InvertedBooleanConverter" />
     </UserControl.Resources>
 
@@ -29,7 +28,6 @@
                       OnContent="Expand" OffContent="Collapse"
                       Margin="0"
                       IsChecked="{Binding IsTabsCollapsed, Converter={StaticResource InvertedBooleanConverter}}" />
-                        
 
 
         <!-- Sidebar Tabs -->
@@ -53,7 +51,7 @@
 
                         <!-- Icon aligned to the far left -->
                         <Svg Grid.Column="0" Path="{Binding Icon}"
-                             
+
                              VerticalAlignment="Center"
                              HorizontalAlignment="Center" />
 

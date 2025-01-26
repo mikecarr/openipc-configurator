@@ -1,6 +1,6 @@
 using Avalonia.Controls;
-using OpenIPC_Config.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using OpenIPC_Config.ViewModels;
 
 namespace OpenIPC_Config.Views;
 
@@ -11,9 +11,6 @@ public partial class ConnectControlsView : UserControl
         InitializeComponent();
 
         //if (!Design.IsDesignMode) DataContext = new ConnectControlsViewModel();
-        if (!Design.IsDesignMode)
-        {
-            DataContext = App.ServiceProvider.GetService<ConnectControlsViewModel>();
-        }
+        if (!Design.IsDesignMode) DataContext = App.ServiceProvider.GetService<ConnectControlsViewModel>();
     }
 }

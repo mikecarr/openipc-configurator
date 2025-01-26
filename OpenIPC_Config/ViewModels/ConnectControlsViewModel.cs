@@ -1,14 +1,10 @@
 using System;
-using System.IO;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Layout;
-using Avalonia.Logging;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -19,7 +15,6 @@ using MsBox.Avalonia.Enums;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
-using Prism.Events;
 using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
@@ -27,15 +22,17 @@ namespace OpenIPC_Config.ViewModels;
 public partial class ConnectControlsViewModel : ViewModelBase
 {
     private readonly CancellationTokenSource? _cancellationTokenSourc;
-    
-    private readonly IEventSubscriptionService _eventSubscriptionService;
 
     private readonly DispatcherTimer _dispatcherTimer;
+
+    private readonly IEventSubscriptionService _eventSubscriptionService;
 
     private readonly SolidColorBrush _offlineColorBrush = new(Colors.Red);
     private readonly SolidColorBrush _onlineColorBrush = new(Colors.Green);
     private readonly Ping _ping = new();
-    private DispatcherTimer _pingTimer;
+
+    private readonly TimeSpan _pingInterval = TimeSpan.FromSeconds(1);
+    private readonly TimeSpan _pingTimeout = TimeSpan.FromMilliseconds(500);
 
     private bool _canConnect;
 
@@ -45,21 +42,18 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
     [ObservableProperty] private string _password;
 
+    private SolidColorBrush _pingStatusColor = new(Colors.Red);
+    private DispatcherTimer _pingTimer;
+
     [ObservableProperty] private int _port = 22;
 
-    private SolidColorBrush _pingStatusColor = new(Colors.Red);
-    
     private DeviceType _selectedDeviceType;
-
-    private readonly TimeSpan _pingInterval = TimeSpan.FromSeconds(1);
-    private readonly TimeSpan _pingTimeout = TimeSpan.FromMilliseconds(500);
 
     public ConnectControlsViewModel(ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService)
         : base(logger, sshClientService, eventSubscriptionService)
     {
-        
         SetDefaults();
         LoadSettings();
 
@@ -68,7 +62,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         _eventSubscriptionService = eventSubscriptionService ??
                                     throw new ArgumentNullException(nameof(eventSubscriptionService));
 
-        
+
         UpdateUIMessage("Ready");
     }
 
@@ -83,30 +77,6 @@ public partial class ConnectControlsViewModel : ViewModelBase
                 RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 return Orientation.Horizontal;
             return Orientation.Vertical;
-        }
-    }
-
-    partial void OnPortChanged(int value)
-    {
-        CheckIfCanConnect();
-    }
-
-    partial void OnPasswordChanged(string value)
-    {
-        CheckIfCanConnect();
-    }
-
-    partial void OnIpAddressChanged(string value)
-    {
-        CheckIfCanConnect();
-        if (Utilities.IsValidIpAddress(IpAddress))
-        {
-            Log.Debug("Valid IP address: {IpAddress}", IpAddress);
-            StartPingTimer();
-        }
-        else
-        {
-            StopPingTimer();
         }
     }
 
@@ -149,6 +119,30 @@ public partial class ConnectControlsViewModel : ViewModelBase
         }
     }
 
+    partial void OnPortChanged(int value)
+    {
+        CheckIfCanConnect();
+    }
+
+    partial void OnPasswordChanged(string value)
+    {
+        CheckIfCanConnect();
+    }
+
+    partial void OnIpAddressChanged(string value)
+    {
+        CheckIfCanConnect();
+        if (Utilities.IsValidIpAddress(IpAddress))
+        {
+            Log.Debug("Valid IP address: {IpAddress}", IpAddress);
+            StartPingTimer();
+        }
+        else
+        {
+            StopPingTimer();
+        }
+    }
+
     private void LoadSettings()
     {
         var settings = SettingsManager.LoadSettings();
@@ -156,9 +150,8 @@ public partial class ConnectControlsViewModel : ViewModelBase
         IpAddress = settings.IpAddress;
         Password = settings.Password;
         SelectedDeviceType = settings.DeviceType;
-        
+
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(SelectedDeviceType);
-        
     }
 
 
@@ -174,7 +167,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         // For example, use an event aggregator, messenger, or direct call
         Log.Debug($"Device type selected: {deviceType}");
         //Console.WriteLine($"Device type selected: {deviceType}");
-        
+
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(deviceType);
     }
 
@@ -199,6 +192,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
             };
             _pingTimer.Tick += PingTimer_Tick;
         }
+
         _pingTimer.Start();
     }
 
@@ -220,7 +214,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
             PingStatusColor = _offlineColorBrush;
         }
     }
-    
+
     private async void Connect()
     {
         var appMessage = new AppMessage();
@@ -255,7 +249,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
                 return;
             }
         }
-        
+
         // if ((_deviceConfig.Hostname.Contains("radxa") && _deviceConfig.DeviceType != DeviceType.Radxa) ||
         //     (_deviceConfig.Hostname.Contains("openipc") && _deviceConfig.DeviceType != DeviceType.Camera))
         // {
@@ -274,10 +268,10 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
         // Save the config to app settings
         SaveConfig();
-        
+
         // Publish the event
-        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { DeviceConfig = _deviceConfig});
-            
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { DeviceConfig = _deviceConfig });
+
 
         appMessage.DeviceConfig = _deviceConfig;
 
@@ -285,7 +279,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         {
             if (_deviceConfig.DeviceType == DeviceType.Camera)
             {
-                UpdateUIMessage("Processing Camera..." );
+                UpdateUIMessage("Processing Camera...");
                 processCameraFiles();
                 UpdateUIMessage("Processing Camera...done");
             }
@@ -304,20 +298,20 @@ public partial class ConnectControlsViewModel : ViewModelBase
     {
         try
         {
-            UpdateUIMessage("Downloading wifibroadcast.cfg" );
+            UpdateUIMessage("Downloading wifibroadcast.cfg");
 
             // get /etc/wifibroadcast.cfg
             var wifibroadcastContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WifiBroadcastFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WifiBroadcastFileLoc);
 
             if (!string.IsNullOrEmpty(wifibroadcastContent))
             {
                 var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
                 radxaContentUpdatedMessage.WifiBroadcastContent = wifibroadcastContent;
 
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
-                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { WifiBroadcastContent = wifibroadcastContent });
-                
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
+                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage
+                    { WifiBroadcastContent = wifibroadcastContent });
             }
             else
             {
@@ -334,20 +328,18 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
         try
         {
-            UpdateUIMessage("Downloading modprod.d/wfb.conf" );
+            UpdateUIMessage("Downloading modprod.d/wfb.conf");
             // get /etc/modprobe.d/wfb.conf
             var wfbModProbeContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WifiBroadcastModProbeFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WifiBroadcastModProbeFileLoc);
 
             if (wfbModProbeContent != null)
             {
                 var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
                 radxaContentUpdatedMessage.WfbConfContent = wfbModProbeContent;
 
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
                     RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { WfbConfContent = wfbModProbeContent });
-
-                
             }
         }
         catch (Exception e)
@@ -362,16 +354,16 @@ public partial class ConnectControlsViewModel : ViewModelBase
             UpdateUIMessage("Downloading screen-mode");
             // get /home/radxa/scripts/screen-mode
             var screenModeContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.ScreenModeFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.ScreenModeFileLoc);
 
             if (screenModeContent != null)
             {
                 var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
                 radxaContentUpdatedMessage.ScreenModeContent = screenModeContent;
 
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
-                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { ScreenModeContent = screenModeContent });
-                
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
+                    RadxaContentUpdatedMessage>(
+                    new RadxaContentUpdatedMessage { ScreenModeContent = screenModeContent });
             }
         }
         catch (Exception e)
@@ -382,28 +374,24 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
         try
         {
-            UpdateUIMessage("Downloading gskey" );
+            UpdateUIMessage("Downloading gskey");
 
             var gsKeyContent =
-                await SshClientService.DownloadFileBytesAsync(_deviceConfig, Models.OpenIPC.RemoteGsKeyPath);
+                await SshClientService.DownloadFileBytesAsync(_deviceConfig, OpenIPC.RemoteGsKeyPath);
 
             if (gsKeyContent != null)
             {
                 var droneKey = Utilities.ComputeMd5Hash(gsKeyContent);
                 if (droneKey != OpenIPC.KeyMD5Sum)
-                {
                     Log.Warning("GS key MD5 checksum mismatch");
-                }
                 else
-                {
                     Log.Information("GS key MD5 checksum matched default key");
-                }
 
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
+                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
                     RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { DroneKeyContent = droneKey });
-                
 
-                UpdateUIMessage("Downloading gskey...done" );
+
+                UpdateUIMessage("Downloading gskey...done");
             }
         }
         catch (Exception e)
@@ -412,30 +400,27 @@ public partial class ConnectControlsViewModel : ViewModelBase
             throw;
         }
 
-        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
-        
-
+        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage
+            { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
     }
 
     private async void processCameraFiles()
     {
         // download file wfb.conf
-        var wfbConfContent = await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WfbConfFileLoc);
+        var wfbConfContent = await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WfbConfFileLoc);
 
-        
 
         if (wfbConfContent != null)
-            EventSubscriptionService.Publish<WfbConfContentUpdatedEvent, 
+            EventSubscriptionService.Publish<WfbConfContentUpdatedEvent,
                 WfbConfContentUpdatedMessage>(new WfbConfContentUpdatedMessage(wfbConfContent));
 
         try
         {
             var majesticContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.MajesticFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.MajesticFileLoc);
             // Publish a message to WfbSettingsTabViewModel
-            EventSubscriptionService.Publish<MajesticContentUpdatedEvent, 
+            EventSubscriptionService.Publish<MajesticContentUpdatedEvent,
                 MajesticContentUpdatedMessage>(new MajesticContentUpdatedMessage(majesticContent));
-            
         }
         catch (Exception e)
         {
@@ -445,12 +430,11 @@ public partial class ConnectControlsViewModel : ViewModelBase
         try
         {
             var telemetryContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.TelemetryConfFileLoc);
+                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.TelemetryConfFileLoc);
             // Publish a message to WfbSettingsTabViewModel
-            
-            EventSubscriptionService.Publish<TelemetryContentUpdatedEvent, 
-                TelemetryContentUpdatedMessage>(new TelemetryContentUpdatedMessage(telemetryContent));
 
+            EventSubscriptionService.Publish<TelemetryContentUpdatedEvent,
+                TelemetryContentUpdatedMessage>(new TelemetryContentUpdatedMessage(telemetryContent));
         }
         catch (Exception e)
         {
@@ -462,14 +446,13 @@ public partial class ConnectControlsViewModel : ViewModelBase
         {
             // get /home/radxa/scripts/screen-mode
             var droneKeyContent =
-                await SshClientService.DownloadFileBytesAsync(_deviceConfig, Models.OpenIPC.RemoteDroneKeyPath);
+                await SshClientService.DownloadFileBytesAsync(_deviceConfig, OpenIPC.RemoteDroneKeyPath);
 
-            
-            
+
             if (droneKeyContent != null)
             {
                 //byte[] fileBytes = Encoding.UTF8.GetBytes(droneKeyContent);
-                
+
                 var droneKey = Utilities.ComputeMd5Hash(droneKeyContent);
 
                 var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
@@ -477,9 +460,8 @@ public partial class ConnectControlsViewModel : ViewModelBase
                 _deviceConfig.KeyChksum = droneKey;
                 deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
 
-                EventSubscriptionService.Publish<DeviceContentUpdateEvent, 
+                EventSubscriptionService.Publish<DeviceContentUpdateEvent,
                     DeviceContentUpdatedMessage>(deviceContentUpdatedMessage);
-                
             }
         }
         catch (Exception e)
@@ -488,10 +470,8 @@ public partial class ConnectControlsViewModel : ViewModelBase
             throw;
         }
 
-        EventSubscriptionService.Publish<AppMessageEvent, 
-            AppMessage>(new AppMessage() { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
-
-        
+        EventSubscriptionService.Publish<AppMessageEvent,
+            AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
     }
 
     /// <summary>

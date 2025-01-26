@@ -20,21 +20,20 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        
-        
+
+
         <ComboBox x:Name="RadxaKeyComboBox" Grid.Row="0" Grid.Column="0" PlaceholderText="Encryption Key Actions"
                   ItemsSource="{Binding DroneKeyActionItems}"
                   SelectedItem="{Binding SelectedDroneKeyAction}"
                   HorizontalAlignment="Stretch"
                   ToolTip.Tip="{x:Static assets:Resources.DroneKeyActionsToolTip}" />
-        
+
         <Button Grid.Row="0" Grid.Column="1" Content="Execute"
                 Command="{Binding EncryptionKeyActionCommand}"
                 CommandParameter="CameraKeyComboBox"
                 VerticalAlignment="Top"
                 ToolTip.Tip="{x:Static assets:Resources.DeviceChkSumToolTip}"
                 HorizontalAlignment="Stretch" />
-        
 
 
     </Grid>

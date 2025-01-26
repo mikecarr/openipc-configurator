@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using OpenIPC_Config.Models;
 
 namespace OpenIPC_Config.Services;
@@ -25,11 +22,8 @@ public class DeviceConfigValidator
     public bool IsDeviceConfigValid(DeviceConfig deviceConfig)
     {
         if (_deviceHostnameMapping.TryGetValue(deviceConfig.DeviceType, out var allowedHostnames))
-        {
             return allowedHostnames.Any(hostname => deviceConfig.Hostname.Contains(hostname));
-        }
 
         return false; // Invalid if no mapping exists
     }
 }
-

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Android.App;
 using Android.Content;
 using Android.Content.Res;
 using Android.Util;
@@ -11,8 +12,8 @@ public class AndroidFileHelper
     public static string ReadAssetFile(string relativePath)
     {
         // var assets = Android.App.Application.Context.Assets;
-        var assets = global::Android.App.Application.Context.Assets;
-        
+        var assets = Application.Context.Assets;
+
         using (var stream = assets.Open(relativePath))
         using (var reader = new StreamReader(stream))
         {
@@ -22,14 +23,14 @@ public class AndroidFileHelper
 
     public static string[] ListAssetFiles(string folderPath)
     {
-        var assets = global::Android.App.Application.Context.Assets;
+        var assets = Application.Context.Assets;
         return assets.List(folderPath); // Lists all files in the folder
     }
-    
+
     public static void CopyAssetsToInternalStorage(Context context)
     {
-        AssetManager assets = context.Assets;
-        string internalStoragePath = context.FilesDir.AbsolutePath; // Internal storage path
+        var assets = context.Assets;
+        var internalStoragePath = context.FilesDir.AbsolutePath; // Internal storage path
 
         // Start recursive copy from the root "binaries" folder
         CopyFolder(assets, "binaries", internalStoragePath);
@@ -45,10 +46,10 @@ public class AndroidFileHelper
             // List all items (files and folders) in the source folder
             string[] items = assets.List(sourceFolder);
 
-            foreach (string item in items)
+            foreach (var item in items)
             {
-                string sourcePath = string.IsNullOrEmpty(sourceFolder) ? item : $"{sourceFolder}/{item}";
-                string destinationPath = Path.Combine(destinationFolder, item);
+                var sourcePath = string.IsNullOrEmpty(sourceFolder) ? item : $"{sourceFolder}/{item}";
+                var destinationPath = Path.Combine(destinationFolder, item);
 
                 // Check if the item is a directory or file
                 if (assets.List(sourcePath).Length > 0)
@@ -59,8 +60,8 @@ public class AndroidFileHelper
                 else
                 {
                     // If it's a file, copy it
-                    using (Stream input = assets.Open(sourcePath))
-                    using (FileStream output = new FileStream(destinationPath, FileMode.Create))
+                    using (var input = assets.Open(sourcePath))
+                    using (var output = new FileStream(destinationPath, FileMode.Create))
                     {
                         input.CopyTo(output);
                     }

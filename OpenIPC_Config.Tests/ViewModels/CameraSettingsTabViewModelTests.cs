@@ -1,10 +1,9 @@
+using Moq;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
 using OpenIPC_Config.ViewModels;
 using Serilog;
-using Moq;
-using Xunit;
 using Assert = NUnit.Framework.Assert;
 
 namespace OpenIPC_Config.Tests.ViewModels;
@@ -12,15 +11,6 @@ namespace OpenIPC_Config.Tests.ViewModels;
 [TestFixture]
 public class CameraSettingsTabViewModelTests : ViewModelTestBase
 {
-    
-    private CameraSettingsTabViewModel _viewModel;
-    private Mock<ILogger> _mockLogger;
-    private Mock<ISshClientService> _mockSshClientService;
-    private Mock<IEventSubscriptionService> _mockEventSubscriptionService;
-    private Mock<IYamlConfigService> _mockYamlConfigService;
-    private Mock<EventAggregator> _mockEventAggregatorMock;
-    private readonly DeviceConfig _deviceConfigMock;
-
     [SetUp]
     public void SetUp()
     {
@@ -35,10 +25,17 @@ public class CameraSettingsTabViewModelTests : ViewModelTestBase
             _mockSshClientService.Object,
             _mockEventSubscriptionService.Object,
             _mockYamlConfigService.Object
-
         );
     }
-    
+
+    private CameraSettingsTabViewModel _viewModel;
+    private Mock<ILogger> _mockLogger;
+    private Mock<ISshClientService> _mockSshClientService;
+    private Mock<IEventSubscriptionService> _mockEventSubscriptionService;
+    private Mock<IYamlConfigService> _mockYamlConfigService;
+    private Mock<EventAggregator> _mockEventAggregatorMock;
+    private readonly DeviceConfig _deviceConfigMock;
+
     [Test]
     public void OnSelectedResolutionChanged_Should_UpdateYamlConfig()
     {
@@ -49,8 +46,8 @@ public class CameraSettingsTabViewModelTests : ViewModelTestBase
         _viewModel.SelectedResolution = testResolution;
 
         Assert.That(testResolution, Is.EqualTo(_viewModel.SelectedResolution));
-        
-        
+
+
         // Validate that the config is updated
         // Since _yamlConfig is private, validate the behavior indirectly
     }
@@ -61,14 +58,14 @@ public class CameraSettingsTabViewModelTests : ViewModelTestBase
         var testResolution = "1920x1080";
         var testFps = "60";
         var testCodec = "h265";
-        
+
         // Arrange
         var testYamlContent = new Dictionary<string, string>
         {
             { Majestic.VideoSize, testResolution },
             { Majestic.VideoFps, testFps },
             { Majestic.VideoCodec, testCodec },
-            {Majestic.FpvRoiRect, "100x200x1080x1920"}
+            { Majestic.FpvRoiRect, "100x200x1080x1920" }
         };
 
         _mockYamlConfigService.Setup(y => y.ParseYaml(It.IsAny<string>(), It.IsAny<Dictionary<string, string>>()))
@@ -86,13 +83,11 @@ public class CameraSettingsTabViewModelTests : ViewModelTestBase
         Assert.That(_viewModel.SelectedResolution, Is.EqualTo(testResolution));
         Assert.That(_viewModel.SelectedFps, Is.EqualTo(testFps));
         Assert.That(_viewModel.SelectedCodec, Is.EqualTo(testCodec));
-        
+
         //$"{FpvRoiRectLeft[0]}x{FpvRoiRectTop[0]}x{FpvRoiRectHeight[0]}x{FpvRoiRectWidth[0]}";
         Assert.That(_viewModel.FpvRoiRectLeft[0], Is.EqualTo("100"));
         Assert.That(_viewModel.FpvRoiRectTop[0], Is.EqualTo("200"));
         Assert.That(_viewModel.FpvRoiRectHeight[0], Is.EqualTo("1080"));
         Assert.That(_viewModel.FpvRoiRectWidth[0], Is.EqualTo("1920"));
-
     }
-
 }

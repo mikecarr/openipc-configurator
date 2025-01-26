@@ -4,7 +4,7 @@
              xmlns:assets="clr-namespace:OpenIPC_Config.Assets"
              x:Class="OpenIPC_Config.Views.NetworkIPScannerView"
              x:DataType="vm:SetupTabViewModel">
-    
+
 
     <!-- Scan IP -->
     <Panel Margin="5">
@@ -27,7 +27,7 @@
 
             </Grid.ColumnDefinitions>
 
-            
+
             <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" FontSize="12" Margin="5 5" xml:space="preserve">1. Type the IP subnet to scan (e.g. 192.168.0.)
 2. Press [SCAN]
 3. Wait for the [Scan Completed] message to appear
@@ -36,14 +36,13 @@ Do not touch anything until finished</TextBlock>
 
             <TextBox Grid.Row="2" Grid.Column="0"
                      Text="{Binding ScanIpLabel, Mode=TwoWay}" />
-                     
+
             <!-- -->
             <!-- <TextBlock Grid.Row="1" Grid.Column="0" Text="Text IP" DataContext="{Binding ScanIPDescription}" /> -->
 
             <Button Grid.Row="2" Grid.Column="1" Content="SCAN"
                     Command="{Binding ScanCommand}"
                     ToolTip.Tip="{x:Static assets:Resources.ScanIpToolTip}" />
-            
 
 
             <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" BorderThickness="0"
@@ -58,11 +57,11 @@ Do not touch anything until finished</TextBlock>
                          Height="125"
                          Text="{Binding ScanIPResultTextBox}" />
             </ScrollViewer>
-            
-            <TextBlock Grid.Row="6" Grid.Column="0" 
+
+            <TextBlock Grid.Row="6" Grid.Column="0"
                        FontStyle="Italic"
                        TextAlignment="Left"
-                       VerticalAlignment="Center" 
+                       VerticalAlignment="Center"
                        FontSize="12"
                        Text="{Binding LocalIp}"
                        ToolTip.Tip="{x:Static assets:Resources.LocalIpToolTip}" />

@@ -1,6 +1,6 @@
-namespace OpenIPC_Config.Models;
-
 using System.Collections.Generic;
+
+namespace OpenIPC_Config.Models;
 
 public static class FrequencyMappings
 {
