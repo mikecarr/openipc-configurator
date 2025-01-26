@@ -341,37 +341,22 @@ public partial class WfbTabViewModel : ViewModelBase
 
         var updatedContent = regex.Replace(wfbConfContent, match =>
         {
-            var group = match.Groups[1].Value;
-            Logger.Debug($"group: {group}");
-            switch (match.Groups[1].Value)
+            var key = match.Groups[1].Value;
+            Logger.Debug($"Updating key: {key}");
+
+            return key switch
             {
-                case "frequency":
-                // TODO: what should we do here?
-                //return $"frequency={newFrequency58}";
-                case "channel":
-                    return $"channel={newChannel}";
-                case "frequency24":
-                // TODO: what should we do here?
-                //return $"frequency24={newFrequency24}";
-                case "driver_txpower_override":
-                    return $"driver_txpower_override={newPower58}";
-                case "txpower":
-                    return $"txpower={newPower24}";
-                case "bandwidth":
-                    return $"bandwidth={newBandwidth}";
-                case "mcs_index":
-                    return $"mcs_index={newMcsIndex}";
-                case "stbc":
-                    return $"stbc={newStbc}";
-                case "ldpc":
-                    return $"ldpc={newLdpc}";
-                case "fec_k":
-                    return $"fec_k={newFecK}";
-                case "fec_n":
-                    return $"fec_n={newFecN}";
-                default:
-                    return match.Value;
-            }
+                "channel" => $"channel={newChannel}",
+                "driver_txpower_override" => $"driver_txpower_override={newPower58}",
+                "txpower" => $"txpower={newPower24}",
+                "bandwidth" => $"bandwidth={newBandwidth}",
+                "mcs_index" => $"mcs_index={newMcsIndex}",
+                "stbc" => $"stbc={newStbc}",
+                "ldpc" => $"ldpc={newLdpc}",
+                "fec_k" => $"fec_k={newFecK}",
+                "fec_n" => $"fec_n={newFecN}",
+                _ => match.Value // Default: return the original line
+            };
         });
         return updatedContent;
     }
