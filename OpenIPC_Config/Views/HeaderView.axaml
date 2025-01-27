@@ -37,16 +37,20 @@
             <TextBox Width="200" Height="30" Watermark="IP Address"
                      Text="{Binding IpAddress, Mode=TwoWay}"
                      HorizontalAlignment="Left"
-                     Classes="InputBox" Grid.Row="0" Margin="0,0,0,10" />
+                     Classes="InputBox" Grid.Row="0" Margin="0,5,0,5" />
             <StackPanel Orientation="Horizontal" Spacing="10" Grid.Row="1">
                 <ComboBox Width="120" Height="30" ToolTip.Tip="Device Type"
+                          Margin="0,5,0,5"
                           ItemsSource="{Binding DeviceTypes}"
                           SelectedItem="{Binding SelectedDeviceType, Mode=TwoWay}" />
 
-                <TextBox Width="50" Height="30" Watermark="Port" Text="{Binding Port, Mode=TwoWay}" Classes="InputBox" />
+                <TextBox Width="50" Height="30" Watermark="Port"
+                         Margin="0,5,0,5"
+                         Text="{Binding Port, Mode=TwoWay}" Classes="InputBox" />
 
                 <TextBox Width="100" Height="30" Watermark="Password"
                          PasswordChar="*"
+                         Margin="0,5,0,5"
                          Text="{Binding Password, Mode=TwoWay}" Classes="InputBox" />
             </StackPanel>
         </Grid>
