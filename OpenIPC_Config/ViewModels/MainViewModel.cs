@@ -23,15 +23,25 @@ public partial class MainViewModel : ViewModelBase
     private bool _isTabsCollapsed;
     private DeviceType _selectedDeviceType;
 
+    private IServiceProvider _serviceProvider;
+    
+
     public MainViewModel(ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService,
         IServiceProvider serviceProvider)
         : base(logger, sshClientService, eventSubscriptionService)
     {
+        _serviceProvider = serviceProvider;
         _appVersionText = GetFormattedAppVersion();
         CanConnect = false;
+        
+        Tabs = new ObservableCollection<TabItemViewModel> { };
+        // Subscribe to device type change events
+        EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(
+            OnDeviceTypeChangeEvent);
 
+        
         ToggleTabsCommand = new RelayCommand(() => IsTabsCollapsed = !IsTabsCollapsed);
 
         LoadSettings();
@@ -42,28 +52,41 @@ public partial class MainViewModel : ViewModelBase
 
         DeviceTypes = new ObservableCollection<DeviceType>(Enum.GetValues(typeof(DeviceType)).Cast<DeviceType>());
 
-        Tabs = new ObservableCollection<TabItemViewModel>
-        {
-            new("Firmware", "avares://OpenIPC_Config/Assets/Icons/iconoir_cube.svg",
-                serviceProvider.GetRequiredService<FirmwareTabViewModel>(), IsTabsCollapsed = IsTabsCollapsed),
-            new("WFB", "avares://OpenIPC_Config/Assets/Icons/iconoir_wifi.svg",
-                serviceProvider.GetRequiredService<WfbTabViewModel>(), IsTabsCollapsed = IsTabsCollapsed),
-            new("Camera", "avares://OpenIPC_Config/Assets/Icons/iconoir_camera.svg",
-                serviceProvider.GetRequiredService<CameraSettingsTabViewModel>(), IsTabsCollapsed = IsTabsCollapsed),
-            new("Telemetry", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg",
-                serviceProvider.GetRequiredService<TelemetryTabViewModel>(), IsTabsCollapsed = IsTabsCollapsed)
+        
 
-            // new TabItemViewModel("Presets", new PresetsViewModel()),
-            // new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg", new SetupViewModel())
-        };
-
-        // Subscribe to device type change events
-        EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(
-            OnDeviceTypeChangeEvent);
-
+        
         IsVRXEnabled = false;
     }
 
+    private void InitializeTabs(DeviceType deviceType)
+    {
+        Tabs.Clear();
+
+
+        if (deviceType == DeviceType.Camera)
+        {
+            Tabs.Add(new TabItemViewModel("Firmware", "avares://OpenIPC_Config/Assets/Icons/iconoir_cube.svg",
+                _serviceProvider.GetRequiredService<FirmwareTabViewModel>(), IsTabsCollapsed));
+            Tabs.Add(new TabItemViewModel("WFB", "avares://OpenIPC_Config/Assets/Icons/iconoir_wifi.svg",
+                _serviceProvider.GetRequiredService<WfbTabViewModel>(), IsTabsCollapsed));
+            Tabs.Add(new TabItemViewModel("Camera", "avares://OpenIPC_Config/Assets/Icons/iconoir_camera.svg",
+                _serviceProvider.GetRequiredService<CameraSettingsTabViewModel>(), IsTabsCollapsed));
+            Tabs.Add(new TabItemViewModel("Telemetry", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg",
+                _serviceProvider.GetRequiredService<TelemetryTabViewModel>(), IsTabsCollapsed));
+            Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg",
+                _serviceProvider.GetRequiredService<SetupTabViewModel>(), IsTabsCollapsed));
+        }
+        else if (deviceType == DeviceType.Radxa)
+        {
+            // Need these spaces for some reason
+            Tabs.Add(new TabItemViewModel("WFB         ", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg",
+                _serviceProvider.GetRequiredService<WfbTabViewModel>(), IsTabsCollapsed));
+            Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg",
+                _serviceProvider.GetRequiredService<SetupTabViewModel>(), IsTabsCollapsed));
+            
+        }
+    }
+    
     public bool IsTabsCollapsed
     {
         get => _isTabsCollapsed;
@@ -466,6 +489,8 @@ public partial class MainViewModel : ViewModelBase
     {
         Log.Debug($"Device type changed to: {deviceTypeEvent}");
 
+        InitializeTabs(deviceTypeEvent);
+        
         // Update IsVRXEnabled based on the device type
         //IsVRXEnabled = deviceTypeEvent == DeviceType.Radxa || deviceTypeEvent == DeviceType.NVR;
 

@@ -46,6 +46,7 @@ Do not touch anything until finished</TextBlock>
 
 
             <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" BorderThickness="0"
+                     Background="Transparent"
                      Text="{Binding ScanMessages}" />
 
             <TextBox Grid.Row="4" Grid.Column="0"

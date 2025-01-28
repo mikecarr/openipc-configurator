@@ -67,6 +67,8 @@
                 </DataTemplate>
 
             </TabControl.ItemTemplate>
+            
+
         </TabControl>
 
         <!-- Main Content -->
