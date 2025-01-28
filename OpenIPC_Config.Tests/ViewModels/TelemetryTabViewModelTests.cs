@@ -157,41 +157,6 @@ public class TelemetryTabViewModelTests
     }
 
     [Test]
-    public void OnBoardRecCommand_ExecutesOnAndOffCommands()
-    {
-        // Arrange
-        _viewModel.IsOnboardRecOn = true;
-
-        // Act
-        _viewModel.OnBoardRecCommand.Execute(null);
-
-        // Assert
-        _mockSshClientService.Verify(
-            service => service.ExecuteCommandAsync(
-                It.IsAny<DeviceConfig>(),
-                "yaml-cli .records.enabled true"
-            ),
-            Times.Once
-        );
-
-        // Arrange
-        _viewModel.IsOnboardRecOn = false;
-        _viewModel.IsOnboardRecOff = true;
-
-        // Act
-        _viewModel.OnBoardRecCommand.Execute(null);
-
-        // Assert
-        _mockSshClientService.Verify(
-            service => service.ExecuteCommandAsync(
-                It.IsAny<DeviceConfig>(),
-                "yaml-cli .records.enabled false"
-            ),
-            Times.Once
-        );
-    }
-
-    [Test]
     public void AddMavlinkCommand_ExecutesCommands()
     {
         // Act

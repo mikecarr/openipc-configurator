@@ -11,7 +11,7 @@
 
     <Panel>
 
-        <Rectangle Height="300" Width="300" Fill="LightGray" />
+        <Rectangle Height="300" Width="310" Fill="LightGray" />
 
         <Border Background="#F0F0F0" CornerRadius="8" Padding="16" Margin="8">
 
@@ -19,6 +19,7 @@
 
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -53,6 +54,7 @@
                     <Label Grid.Row="8" Grid.Column="0" Content="Luminance" ToolTip.Tip="Select Luminance" />
                     <Label Grid.Row="9" Grid.Column="0" Content="Flip" ToolTip.Tip="Select Flip" />
                     <Label Grid.Row="10" Grid.Column="0" Content="Mirror" ToolTip.Tip="Select Mirror" />
+                    <Label Grid.Row="11" Grid.Column="0" Content="Onboard Record" ToolTip.Tip="Onboard Record" />
 
                     <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Resolution}"
                               SelectedItem="{Binding SelectedResolution, Mode=TwoWay}" />
@@ -78,6 +80,13 @@
                     <ComboBox Grid.Row="10" Grid.Column="1" ItemsSource="{Binding Mirror}"
                               SelectedItem="{Binding SelectedMirror, Mode=TwoWay}" />
 
+                    <!-- Onboard REC Toggle with RadioButtons -->
+                    <ToggleSwitch Grid.Row="11" Grid.Column="1" 
+                                  OnContent="ON" OffContent="OFF"
+                                  Padding="0,5,0,0"
+                                  IsChecked="{Binding IsOnboardRecOn}"
+                                  ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" />
+                    
                     <Label Grid.Row="0" Grid.Column="2" Margin="5,0,0,0" Content="FPV Enabled"
                            ToolTip.Tip="{x:Static assets:Resources.FpvEnabledToolTip}" />
 
@@ -125,11 +134,15 @@
                               ItemsSource="{Binding FpvIntraQp}"
                               SelectedItem="{Binding SelectedFpvIntraQp, Mode=TwoWay}" />
 
-                    <StackPanel Grid.Row="7" Grid.Column="3" Orientation="Horizontal">
+                    <StackPanel Grid.Row="7" Grid.Column="3"
+                                Orientation="Horizontal">
                         <TextBox Watermark="Left"
                                  Text="{Binding FpvRoiRectLeft[0], Mode=TwoWay}" />
                         <TextBox Watermark="Top"
                                  Text="{Binding FpvRoiRectTop[0], Mode=TwoWay}" />
+                        </StackPanel>
+                    <StackPanel Grid.Row="8" Grid.Column="3"
+                                Orientation="Horizontal">
                         <TextBox Watermark="Height"
                                  Text="{Binding FpvRoiRectHeight[0], Mode=TwoWay}" />
                         <TextBox Watermark="Width"

@@ -88,15 +88,20 @@
                         IsEnabled="{Binding CanConnect}"
                         ToolTip.Tip="{x:Static assets:Resources.UploadINavFontsToolTip}" />
                 <Button Grid.Row="6" Grid.Column="3" Content="Onboard REC" Command="{Binding OnBoardRecCommand}"
-                        IsEnabled="{Binding CanConnect}"
-                        ToolTip.Tip="{x:Static assets:Resources.OnBoardRecToolTip}" />
+                IsEnabled="{Binding CanConnect}"
+                ToolTip.Tip="{x:Static assets:Resources.OnBoardRecToolTip}" />
 
 
-                <!-- Onboard REC Toggle with RadioButtons -->
-                <RadioButton Grid.Row="6" Grid.Column="4" Content="ON" IsChecked="{Binding IsOnboardRecOn}"
-                             ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" Padding="3" />
-                <RadioButton Grid.Row="6" Grid.Column="5" Content="OFF" IsChecked="{Binding IsOnboardRecOff}"
-                             ToolTip.Tip="{x:Static assets:Resources.RecOffToolTip}" Padding="3" />
+                <!-- ~1~ Onboard REC Toggle with RadioButtons @1@ -->
+                <!-- <ToggleSwitch Grid.Row="6" Grid.Column="4"  -->
+                <!--               OnContent="ON" OffContent="OFF" -->
+                <!--               IsChecked="{Binding IsOnboardRecOn}" -->
+                <!--               ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" /> -->
+                    
+                <!-- <RadioButton Grid.Row="6" Grid.Column="4" Content="ON" IsChecked="{Binding IsOnboardRecOn}" -->
+                <!--              ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" Padding="3" /> -->
+                <!-- <RadioButton Grid.Row="6" Grid.Column="5" Content="OFF" IsChecked="{Binding IsOnboardRecOff}" -->
+                <!--              ToolTip.Tip="{x:Static assets:Resources.RecOffToolTip}" Padding="3" /> -->
 
 
                 <!-- Save and Restart Button at the bottom left -->

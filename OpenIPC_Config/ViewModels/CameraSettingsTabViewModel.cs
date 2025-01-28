@@ -89,6 +89,8 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
 
     [ObservableProperty] private string _selectedSaturation;
 
+    [ObservableProperty] private bool _isOnboardRecOn;
+
     public CameraSettingsTabViewModel(
         ILogger logger,
         ISshClientService sshClientService,
@@ -115,11 +117,11 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
 
     private void OnAppMessageEvent(AppMessage appMessage)
     {
-        if (appMessage != null)
-            // controls buttons
-            CanConnect = appMessage.CanConnect;
+        // controls buttons
+        CanConnect = appMessage.CanConnect;
     }
 
+    
     partial void OnSelectedResolutionChanged(string value)
     {
         // Custom logic when the property changes
@@ -202,6 +204,16 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         // Custom logic when the property changes
         Log.Debug($"SlectedFpvEnabledChanged updated to {value}");
         UpdateYamlConfig(Majestic.FpvEnabled, value);
+    }
+    
+    // Partial method invoked when the property changes
+    partial void OnIsOnboardRecOnChanged(bool value)
+    {
+        // Handle the change (e.g., update a setting or call a service)
+        Logger.Information($"Onboard recording toggled to: {value}");
+
+        // Example: Update a configuration or notify another service
+        _yamlConfig[Majestic.RecordsEnabled] = value.ToString().ToLower(); // Save the value back to the config
     }
 
     partial void OnSelectedFpvNoiseLevelChanged(string value)
@@ -357,6 +369,16 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         if (_yamlConfig.TryGetValue(Majestic.ImageFlip, out var flip)) SelectedFlip = flip;
 
         if (_yamlConfig.TryGetValue(Majestic.ImageMirror, out var mirror)) SelectedMirror = mirror;
+        
+        if (_yamlConfig.TryGetValue(Majestic.RecordsEnabled, out var onboardRecValue) &&
+            bool.TryParse(onboardRecValue?.ToString(), out var isOnboardRec))
+        {
+            IsOnboardRecOn = isOnboardRec;
+        }
+        else
+        {
+            IsOnboardRecOn = false; // Default value if the config is missing or invalid
+        }
 
         if (_yamlConfig.TryGetValue(Majestic.FpvEnabled, out var fpvEnabled)) SelectedFpvEnabled = fpvEnabled;
 

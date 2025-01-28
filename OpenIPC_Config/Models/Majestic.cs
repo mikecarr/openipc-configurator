@@ -22,4 +22,6 @@ public static class Majestic
     public const string FpvIntraLine = "fpv.intraLine";
     public const string FpvIntraQp = "fpv.intraQp";
     public const string FpvRoiRect = "fpv.roiRect";
+
+    public const string RecordsEnabled = "records.enabled";
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace OpenIPC_Config.ViewModels;
 public partial class TelemetryTabViewModel : ViewModelBase
 {
     private readonly IMessageBoxService _messageBoxService;
-
+    
     #region Constructor
 
     public TelemetryTabViewModel(ILogger logger,
@@ -39,8 +40,6 @@ public partial class TelemetryTabViewModel : ViewModelBase
     #region Observable Properties
 
     [ObservableProperty] private bool _canConnect;
-    [ObservableProperty] private bool _isOnboardRecOff;
-    [ObservableProperty] private bool _isOnboardRecOn;
     [ObservableProperty] private string _selectedAggregate;
     [ObservableProperty] private string _selectedBaudRate;
     [ObservableProperty] private string _selectedMcsIndex;
@@ -95,7 +94,6 @@ public partial class TelemetryTabViewModel : ViewModelBase
     {
         EnableUART0Command = new RelayCommand(EnableUART0);
         DisableUART0Command = new RelayCommand(DisableUART0);
-        OnBoardRecCommand = new RelayCommand(OnBoardRec);
         AddMavlinkCommand = new RelayCommand(AddMavlink);
         UploadLatestVtxMenuCommand = new RelayCommand(UploadLatestVtxMenu);
         Enable40MhzCommand = new RelayCommand(Enable40Mhz);
@@ -108,6 +106,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
         EventSubscriptionService.Subscribe<TelemetryContentUpdatedEvent, TelemetryContentUpdatedMessage>(
             OnTelemetryContentUpdated);
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
+        
     }
 
     #endregion
@@ -129,6 +128,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
     {
         HandleTelemetryContentUpdated(message);
     }
+    
 
     #endregion
 
@@ -144,13 +144,6 @@ public partial class TelemetryTabViewModel : ViewModelBase
     {
         UpdateUIMessage("Disabling UART0...");
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.UART0OffCommand);
-    }
-
-    private async void OnBoardRec()
-    {
-        UpdateUIMessage("Enabling Onboard Recording...");
-        var command = IsOnboardRecOn ? "yaml-cli .records.enabled true" : "yaml-cli .records.enabled false";
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, command);
     }
 
     private async void AddMavlink()
@@ -274,6 +267,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
 
     private async void SaveAndRestartTelemetry()
     {
+        
         Log.Debug("Saving and restarting telemetry...");
         TelemetryContent = UpdateTelemetryContent(SelectedSerialPort, SelectedBaudRate, SelectedRouter,
             SelectedMcsIndex, SelectedAggregate, SelectedRcChannel);
@@ -285,14 +279,6 @@ public partial class TelemetryTabViewModel : ViewModelBase
     #endregion
 
     #region Helper Methods
-
-    private async Task UploadFonts(OpenIPC.FileType fileType)
-    {
-        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, OpenIPC.RemoteFontsFolder, fileType,
-            "font.png");
-        await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, OpenIPC.RemoteFontsFolder, fileType,
-            "font_hd.png");
-    }
 
     private void ParseTelemetryContent()
     {
