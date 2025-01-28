@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -380,9 +382,17 @@ public class SshClientService : ISshClientService
     }
 
     // This is used for sysupgrade commands
-    public async Task ExecuteCommandWithProgressAsync(DeviceConfig deviceConfig, string command,
-        Action<string> updateProgress, CancellationToken cancellationToken = default)
+    public async Task ExecuteCommandWithProgressAsync(
+        DeviceConfig deviceConfig,
+        string command,
+        Action<string> updateProgress,
+        CancellationToken cancellationToken = default,
+        TimeSpan? timeout = null,
+        Func<string, bool> isCommandComplete = null)
     {
+        timeout ??= TimeSpan.FromMinutes(2); // Default timeout
+        isCommandComplete ??= output => output.Contains("Unconditional reboot") || output.Contains("Arguments written");
+
         var connectionInfo = new ConnectionInfo(deviceConfig.IpAddress, deviceConfig.Port, deviceConfig.Username,
             new PasswordAuthenticationMethod(deviceConfig.Username, deviceConfig.Password));
 
@@ -399,13 +409,11 @@ public class SshClientService : ISshClientService
             using var shellStream = client.CreateShellStream("commands", 80, 24, 800, 600, 1024);
             shellStream.WriteLine(command);
 
-            var outputBuffer = new StringBuilder();
+            var startTime = DateTime.UtcNow;
+            var lastUpdateTime = DateTime.UtcNow;
             var commandCompleted = false;
 
-            // Set a timeout for the command execution (e.g., 2 minutes)
-            var timeout = TimeSpan.FromMinutes(1);
-            var startTime = DateTime.UtcNow;
-
+            // Read output continuously
             while (!cancellationToken.IsCancellationRequested && !commandCompleted)
             {
                 if (!client.IsConnected)
@@ -414,8 +422,6 @@ public class SshClientService : ISshClientService
                     break;
                 }
 
-                Log.Debug("*******************");
-                // Check for timeout
                 if (DateTime.UtcNow - startTime > timeout)
                 {
                     updateProgress("Command execution timed out.");
@@ -426,37 +432,30 @@ public class SshClientService : ISshClientService
                 while (shellStream.DataAvailable)
                 {
                     var output = shellStream.ReadLine();
-                    if (output != null)
+                    if (!string.IsNullOrWhiteSpace(output))
                     {
-                        outputBuffer.AppendLine(output);
+                        // Send progress updates directly
                         updateProgress(output);
 
-                        // Check for the end condition
-                        if (output.Contains("Unconditional reboot"))
+                        // Check if the command is complete
+                        if (isCommandComplete(output))
                         {
                             commandCompleted = true;
-                            updateProgress("Reboot detected. Command execution completed.");
+                            updateProgress("Command execution completed.");
                             break;
                         }
-
-                        if (output.Contains("Arguments written"))
-                        {
-                            commandCompleted = true;
-                            updateProgress("Reboot detected. Command execution completed.");
-                            break;
-                        }
-
-
-                        await Task.Delay(2); // Non-blocking pause
-                        //Log.Debug("Waiting for command to complete...");
                     }
                 }
 
-                // Wait a bit before checking again to avoid a tight loop
-                await Task.Delay(1, cancellationToken);
+                // Rate-limit updates to prevent tight loop (every 50ms)
+                await Task.Delay(50, cancellationToken);
             }
 
-            if (!commandCompleted) updateProgress("Command did not complete successfully.");
+            // Final status if the command did not complete successfully
+            if (!commandCompleted)
+            {
+                updateProgress("Command did not complete successfully.");
+            }
         }
         catch (OperationCanceledException)
         {
@@ -471,6 +470,7 @@ public class SshClientService : ISshClientService
             client.Disconnect();
         }
     }
+
 
     public void UploadDirectoryRecursively(ScpClient client, string localDirectory, string remoteDirectory)
     {

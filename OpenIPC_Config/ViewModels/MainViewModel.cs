@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -34,6 +35,8 @@ public partial class MainViewModel : ViewModelBase
         ToggleTabsCommand = new RelayCommand(() => IsTabsCollapsed = !IsTabsCollapsed);
 
         LoadSettings();
+        
+        EntryBoxBgColor = new SolidColorBrush(Colors.White);
 
         ConnectCommand = new RelayCommand(() => Connect());
 
@@ -70,7 +73,8 @@ public partial class MainViewModel : ViewModelBase
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
     public ObservableCollection<DeviceType> DeviceTypes { get; set; }
 
-
+    [ObservableProperty]
+    private SolidColorBrush _entryBoxBgColor;
     public int SelectedTabIndex { get; set; }
 
     public ICommand ConnectCommand { get; private set; }
@@ -190,7 +194,9 @@ public partial class MainViewModel : ViewModelBase
         // Publish the event
         EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { DeviceConfig = _deviceConfig });
 
-
+        // set the background to gray
+        EntryBoxBgColor = new SolidColorBrush(Colors.Gray);
+        
         appMessage.DeviceConfig = _deviceConfig;
 
         if (_deviceConfig != null)

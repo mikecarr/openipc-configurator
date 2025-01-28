@@ -10,7 +10,9 @@
              x:DataType="vm:LogViewerViewModel">
 
 
+    
     <Border BorderThickness="1" BorderBrush="Azure">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid>
             <Grid.RowDefinitions>
                 <!-- Label -->
@@ -51,6 +53,7 @@
             </ListBox>
 
         </Grid>
+        </ScrollViewer>
     </Border>
 
 </UserControl>

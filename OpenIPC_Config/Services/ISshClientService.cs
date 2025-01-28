@@ -12,6 +12,7 @@ public interface ISshClientService
     Task<SshCommand> ExecuteCommandWithResponse(DeviceConfig deviceConfig, string command,
         CancellationToken cancellationToken);
 
+    
     // Executes a command on the remote device asynchronously
     Task ExecuteCommandAsync(DeviceConfig deviceConfig, string command);
 
@@ -46,6 +47,14 @@ public interface ISshClientService
         string fileName);
 
     // Executes a command on the remote device asynchronously with progress updates
-    Task ExecuteCommandWithProgressAsync(DeviceConfig deviceConfig, string command,
-        Action<string> updateProgress, CancellationToken cancellationToken = default);
+    // Task ExecuteCommandWithProgressAsync(DeviceConfig deviceConfig, string command,
+    //     Action<string> updateProgress, CancellationToken cancellationToken = default);
+
+    Task ExecuteCommandWithProgressAsync(
+        DeviceConfig deviceConfig,
+        string command,
+        Action<string> updateProgress,
+        CancellationToken cancellationToken = default,
+        TimeSpan? timeout = null,
+        Func<string, bool> isCommandComplete = null);
 }
