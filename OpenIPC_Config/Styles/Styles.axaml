@@ -145,4 +145,13 @@
     <Style Selector="Button.CircularButton:pressed">
         <Setter Property="Background" Value="#0056B3" />
     </Style>
+    
+    
+    <!-- WFB -->
+    <Style Selector="ComboBox.WfbComboBox">
+        <Setter Property="MinWidth" Value="180" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        
+    </Style>
 </Styles>

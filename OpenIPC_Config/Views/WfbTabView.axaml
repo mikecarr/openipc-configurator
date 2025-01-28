@@ -55,47 +55,57 @@
                        ToolTip.Tip="{x:Static assets:Resources.SelectFecNToolTip}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="0"
+                          Classes="WfbComboBox"
                           ToolTip.Tip="{x:Static assets:Resources.Select58GHzFrequencyToolTip}"
                           ItemsSource="{Binding Frequencies58GHz}"
                           SelectedItem="{Binding SelectedFrequency58String, Mode=TwoWay}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="1"
+                          Classes="WfbComboBox"
                           ToolTip.Tip="{x:Static assets:Resources.Select58GHzPowerToolTip}"
                           ItemsSource="{Binding Power58GHz}"
                           SelectedItem="{Binding SelectedPower, Mode=TwoWay}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="2"
+                          Classes="WfbComboBox"
                           ToolTip.Tip="{x:Static assets:Resources.Select24GHzFrequencyToolTip}"
                           ItemsSource="{Binding Frequencies24GHz}"
                           SelectedItem="{Binding SelectedFrequency24String, Mode=TwoWay}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="3"
+                          Classes="WfbComboBox"
                           ToolTip.Tip="{x:Static assets:Resources.Select24GHzPowerToolTip}"
                           ItemsSource="{Binding Power24GHz}"
                           SelectedItem="{Binding SelectedPower24GHz, Mode=TwoWay}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="4" ToolTip.Tip="{x:Static assets:Resources.SelectBandwithToolTip}"
+                          Classes="WfbComboBox"
                           ItemsSource="{Binding Bandwidth}"
                           SelectedItem="{Binding SelectedBandwidth, Mode=TwoWay}" />
 
 
                 <ComboBox Grid.Column="1" Grid.Row="5" ToolTip.Tip="{x:Static assets:Resources.SelectMCSIndexToolTip}"
+                          Classes="WfbComboBox"
                           ItemsSource="{Binding McsIndex}"
                           SelectedItem="{Binding SelectedMcsIndex, Mode=TwoWay}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="6" ToolTip.Tip="{x:Static assets:Resources.SelectStbcToolTip}"
+                          Classes="WfbComboBox"
                           ItemsSource="{Binding Stbc}"
                           SelectedItem="{Binding SelectedStbc, Mode=TwoWay}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="7" ToolTip.Tip="{x:Static assets:Resources.SelectLdpcToolTip}"
+                          Classes="WfbComboBox"
                           ItemsSource="{Binding Ldpc}"
                           SelectedItem="{Binding SelectedLdpc, Mode=TwoWay}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="8" ToolTip.Tip="{x:Static assets:Resources.SelectFecKToolTip}"
+                          Classes="WfbComboBox"
                           ItemsSource="{Binding FecK}"
                           SelectedItem="{Binding SelectedFecK, Mode=TwoWay}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="9" ToolTip.Tip="{x:Static assets:Resources.SelectFecNToolTip}"
+                          Classes="WfbComboBox"
                           ItemsSource="{Binding FecN}"
                           SelectedItem="{Binding SelectedFecN, Mode=TwoWay}" />
 
