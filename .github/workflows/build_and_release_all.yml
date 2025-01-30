@@ -10,7 +10,7 @@ on:
       branch:
         description: 'Branch to build'
         required: false
-        default: ${{ github.head_ref || github.ref_name }}
+        default: ''
   push:
     tags:
       - 'release-v*'       # Trigger for tags that start with 'v', e.g., v1.0.0, v2.1.3
