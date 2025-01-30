@@ -40,7 +40,10 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/}
             VERSION=${VERSION#release-v} # Remove "release-v" prefix
           else
-            VERSION=$(git rev-parse --short HEAD)  # Use short commit hash for branch builds
+            # Use sanitized branch name or short commit hash for branch builds
+            BRANCH_NAME=${{ github.ref_name }}
+            SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | tr '/' '-' | tr -d '[:space:]') # Replace slashes with dashes
+            VERSION="$SANITIZED_BRANCH-$(git rev-parse --short HEAD)"  # Combine sanitized branch name with commit hash
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "v$VERSION" > OpenIPC_Config/VERSION
