@@ -36,8 +36,12 @@ jobs:
       - name: Read Version from VERSION File
         id: get_version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          VERSION=${VERSION#release-v} # Remove "release-v" prefix
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+            VERSION=${VERSION#release-v} # Remove "release-v" prefix
+          else
+            VERSION=$(git rev-parse --short HEAD)  # Use short commit hash for branch builds
+          fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "v$VERSION" > OpenIPC_Config/VERSION
         shell: bash
