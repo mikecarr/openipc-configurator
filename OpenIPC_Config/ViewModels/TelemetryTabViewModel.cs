@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -72,8 +73,11 @@ public partial class TelemetryTabViewModel : ViewModelBase
     // public ICommand UploadMSPOSDCommand { get; private set; }
     public ICommand UploadLatestVtxMenuCommand { get; private set; }
     public ICommand Enable40MhzCommand { get; private set; }
-    public ICommand MSPOSDExtraCommand { get; private set; }
-    public ICommand OnBoardRecCommand { get; private set; }
+    public ICommand MSPOSDExtraCameraCommand { get; private set; }
+    
+    public ICommand MSPOSDExtraGSCommand { get; private set; }
+    
+    public ICommand RemoveMSPOSDExtraCommand { get; private set; }
     public ICommand SaveAndRestartTelemetryCommand { get; private set; }
 
     #endregion
@@ -97,7 +101,10 @@ public partial class TelemetryTabViewModel : ViewModelBase
         AddMavlinkCommand = new RelayCommand(AddMavlink);
         UploadLatestVtxMenuCommand = new RelayCommand(UploadLatestVtxMenu);
         Enable40MhzCommand = new RelayCommand(Enable40Mhz);
-        MSPOSDExtraCommand = new RelayCommand(AddMSPOSDExtra);
+        MSPOSDExtraCameraCommand = new RelayCommand(AddMSPOSDCameraExtra);
+        MSPOSDExtraGSCommand = new RelayCommand(AddMSPOSDGSExtra);
+        
+        RemoveMSPOSDExtraCommand = new RelayCommand(RemoveMSPOSDExtra);
         SaveAndRestartTelemetryCommand = new RelayCommand(SaveAndRestartTelemetry);
     }
 
@@ -245,7 +252,33 @@ public partial class TelemetryTabViewModel : ViewModelBase
     //         Models.OpenIPC.FileType.iNavFonts, "font_hd.png");
     // }
 
-    private async void AddMSPOSDExtra()
+
+
+    private async void RemoveMSPOSDExtra()
+    {
+        // if "%1" == "mspextra" (
+        // 	plink -ssh root@%2 -pw %3 sed -i 's/echo \"Starting wifibroadcast service...\"/echo \"\&L70 \&F35 CPU:\&C \&B Temp:\&T\" ">"\/tmp\/MSPOSD.msg "\&"/' /etc/init.d/S98datalink
+        // 	plink -ssh root@%2 -pw %3 reboot	
+        // )
+        // 
+        Log.Debug("Remove MSPOSDExtra executed");
+
+
+        var remoteTelemetryFile = Path.Join(OpenIPC.RemoteBinariesFolder, "telemetry");
+
+
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
+            $"sed -i 's/sleep 5/#sleep 5/' {remoteTelemetryFile}");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
+
+        //TODO: do we need to restart the camera?
+        //await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
+
+        _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!");
+    }
+
+
+    private async void AddMSPOSDCameraExtra()
     {
         // if "%1" == "mspextra" (
         // 	plink -ssh root@%2 -pw %3 sed -i 's/echo \"Starting wifibroadcast service...\"/echo \"\&L70 \&F35 CPU:\&C \&B Temp:\&T\" ">"\/tmp\/MSPOSD.msg "\&"/' /etc/init.d/S98datalink
@@ -253,16 +286,35 @@ public partial class TelemetryTabViewModel : ViewModelBase
         // )
         // 
         Log.Debug("MSPOSDExtra executed");
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MSPOSDExtraCommand);
+
+        var telemetryFile = Path.Join(OpenIPC.GetBinariesPath(), "clean", "telemetry_msposd_extra");
+        var remoteTelemetryFile = Path.Join(OpenIPC.RemoteBinariesFolder, "telemetry");
+
+
+        await SshClientService.UploadFileAsync(DeviceConfig.Instance, telemetryFile, remoteTelemetryFile);
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
-
-        //TODO: do we need to restart the camera?
-        //await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
-
+        
         _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!");
-        // var MsgBox = MessageBoxManager
-        //     .GetMessageBoxStandard("Done!", "Please wait fir datalink to restart!", ButtonEnum.Ok);
-        // await MsgBox.ShowAsync();
+
+    }
+    private async void AddMSPOSDGSExtra()
+    {
+        // if "%1" == "mspextra" (
+        // 	plink -ssh root@%2 -pw %3 sed -i 's/echo \"Starting wifibroadcast service...\"/echo \"\&L70 \&F35 CPU:\&C \&B Temp:\&T\" ">"\/tmp\/MSPOSD.msg "\&"/' /etc/init.d/S98datalink
+        // 	plink -ssh root@%2 -pw %3 reboot	
+        // )
+        // 
+        Log.Debug("MSPOSDExtra executed");
+
+        var telemetryFile = Path.Join(OpenIPC.GetBinariesPath(), "clean", "telemetry_msposd_gs");
+        var remoteTelemetryFile = Path.Join(OpenIPC.RemoteBinariesFolder, "telemetry");
+
+
+        await SshClientService.UploadFileAsync(DeviceConfig.Instance, telemetryFile, remoteTelemetryFile);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
+        
+        _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!");
+
     }
 
     private async void SaveAndRestartTelemetry()
