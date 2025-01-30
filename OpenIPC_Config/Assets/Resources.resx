@@ -271,4 +271,16 @@ Adjust the transmission power for the 2.4GHz frequency. Lower power conserves en
 3) MSPOSD
         </value>                
     </data>
+    <data name="MSPOSDExtraCameraToolTip" xml:space="preserve">
+        <value>Enable MSPOSD on the camera
+Add OSD SOC Temperature</value>
+    </data>
+    <data name="MSPOSDExtraGSToolTip" xml:space="preserve">
+        <value>Enable MSPOSD on the Ground Station 
+Add OSD SOC Temperature</value>
+    </data>
+
+    <data name="MSPOSDExtraRemovalToolTip" xml:space="preserve">
+        <value>Remove OSD Temperature</value>
+    </data>
 </root>
