@@ -5,7 +5,12 @@ permissions:
   actions: read
       
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual triggering from any branch
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: false
+        default: ${{ github.ref_name }}
   push:
     tags:
       - 'release-v*'       # Trigger for tags that start with 'v', e.g., v1.0.0, v2.1.3
