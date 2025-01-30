@@ -68,17 +68,17 @@ jobs:
           zip -r OpenIPC-Config-android-${{ matrix.arch }}.zip OpenIPC-Config-android-${{ matrix.arch }}
         shell: bash
 
-      # - name: Upload Android Artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: OpenIPC-Config-android-${{ matrix.arch }}
-      #     path: OpenIPC-Config-android-${{ matrix.arch }}.zip
-
-
-      - name: Upload APK to GitHub Release
-        uses: softprops/action-gh-release@v1
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: |
-            OpenIPC-Config-android-${{ matrix.arch }}.zip
-          draft: false  # Set to `true` if you want the release to remain in draft
+          name: OpenIPC-Config-android-${{ matrix.arch }}
+          path: OpenIPC-Config-android-${{ matrix.arch }}.zip
+
+
+      # - name: Upload APK to GitHub Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: |
+      #       OpenIPC-Config-android-${{ matrix.arch }}.zip
+      #     draft: false  # Set to `true` if you want the release to remain in draft
     
