@@ -80,11 +80,12 @@ public partial class MainViewModel : ViewModelBase
         {
             // Need these spaces for some reason
             Tabs.Add(new TabItemViewModel("WFB         ", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg",
-                _serviceProvider.GetRequiredService<WfbTabViewModel>(), IsTabsCollapsed));
+                _serviceProvider.GetRequiredService<WfbGSTabViewModel>(), IsTabsCollapsed));
             Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg",
                 _serviceProvider.GetRequiredService<SetupTabViewModel>(), IsTabsCollapsed));
             
         }
+        
     }
     
     public bool IsTabsCollapsed
