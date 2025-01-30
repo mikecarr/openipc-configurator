@@ -62,6 +62,11 @@ public partial class MainViewModel : ViewModelBase
     {
         Tabs.Clear();
 
+        // if Mobile apps default to tabs collapsed
+        if(OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+        {
+            IsTabsCollapsed = true;
+        }
 
         if (deviceType == DeviceType.Camera)
         {
