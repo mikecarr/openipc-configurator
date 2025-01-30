@@ -37,16 +37,12 @@ jobs:
         id: get_version
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            if [[ "${{ inputs.branch }}" == refs/heads/* ]]; then
-              VERSION="0.0.1"
-            else
-              VERSION="${{ inputs.branch }}"
-            fi
+            echo "** workflow_dispatch"
+            VERSION="0.0.1"
           elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "** tag"
             VERSION=${GITHUB_REF#refs/tags/}
             VERSION=${VERSION#release-v}
-          else
-            VERSION="0.0.1"
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "v$VERSION" > OpenIPC_Config/VERSION
