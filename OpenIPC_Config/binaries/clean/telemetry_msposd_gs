@@ -43,7 +43,7 @@ case "$1" in
                 else
                         if [ "$router" -eq 2  ]; then
                                 msposd --channels "$channels" --master "$serial" --baudrate "$baud"  \
-                                        --out 127.0.0.1:$(($port_tx + 1)) -osd -r "$fps" --ahi "$ahi" > /dev/null &
+                                        --out 10.5.0.1:5000 -r "$fps" --ahi "$ahi" > /dev/null &
                                 sleep 5
                                 echo "&L70 &F35 CPU:&C &B Temp:&T" >/tmp/MSPOSD.msg &
                         else
