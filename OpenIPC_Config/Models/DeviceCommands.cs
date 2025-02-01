@@ -60,9 +60,9 @@ public static class DeviceCommands
         "[ -f /root/gs.key ] && mv /root/gs.key \"/root/gs.key_$(date +'%m%d%Y')\"";
 
 
-    public static string MSPOSDExtraCommand =
-        "sed -i 's/echo \\\"Starting wifibroadcast service...\\\"/echo \\\"Starting wifibroadcast service...\\\"\\n\\\t\\techo \"\\&L70 \\&F35 CPU:\\&C \\&B Temp:\\&T\\\" > \\/tmp\\/MSPOSD.msg /' /etc/init.d/S98datalink";
-    // "sed -i 's/echo \\\"Starting wifibroadcast service...\\\"/echo \\\"\\&L70 \\&F35 CPU:\\&C \\&B Temp:\\&T\\\" > \\/tmp\\/MSPOSD.msg /' /etc/init.d/S98datalink";
+    // public static string MSPOSDExtraCommand =
+    //     "sed -i 's/echo \\\"Starting wifibroadcast service...\\\"/echo \\\"Starting wifibroadcast service...\\\"\\n\\\t\\techo \"\\&L70 \\&F35 CPU:\\&C \\&B Temp:\\&T\\\" > \\/tmp\\/MSPOSD.msg /' /etc/init.d/S98datalink";
+    // // "sed -i 's/echo \\\"Starting wifibroadcast service...\\\"/echo \\\"\\&L70 \\&F35 CPU:\\&C \\&B Temp:\\&T\\\" > \\/tmp\\/MSPOSD.msg /' /etc/init.d/S98datalink";
 
     public static string DataLinkRestart = "/etc/init.d/S98datalink stop ;/etc/init.d/S98datalink start";
 }

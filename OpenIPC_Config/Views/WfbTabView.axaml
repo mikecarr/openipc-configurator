@@ -8,13 +8,43 @@
              x:Class="OpenIPC_Config.Views.WfbTabView"
              x:DataType="vm:WfbTabViewModel">
 
+    
     <Panel>
 
-        <Rectangle Height="300" Width="300" Fill="LightGray" />
+        <StackPanel Orientation="Vertical">
+            <!-- Other controls -->
+            <Border Background="#B0B0B0" CornerRadius="10" Padding="10" Margin="10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Path Data="M10,20 A10,10 0 1,1 10,0 A10,10 0 1,1 10,20 Z M10,7 A1.5,1.5 0 1,0 10,4 A1.5,1.5 0 1,0 10,7 Z M9,8 L11,8 L11,14 L9,14 Z"
+                          Fill="White"
+                          Width="20"
+                          Height="20"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center"
+                          Margin="5" />
+                    <TextBlock Grid.Column="1"
+                               Text="This tab contains various settings that influence the performance and reliability of the WFB link. If you are unsure how to set this up, use the PRESETS tab."
+                               Foreground="Black"
+                               FontSize="14"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0" />
+                </Grid>
+            </Border>
+            <!-- Other controls -->
+        
+
+        
+        <!-- <Rectangle Height="300" Width="300" Fill="LightGray" /> -->
 
         <Border Background="#F0F0F0" CornerRadius="8" Padding="16" Margin="8">
             <Grid>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -32,89 +62,120 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-
+                
                 <Label Grid.Column="0" Grid.Row="0" Content="5.8GHz Frequency"
                        ToolTip.Tip="{x:Static assets:Resources.Select58GHzFrequencyToolTip}" />
-                <Label Grid.Column="0" Grid.Row="1" Content="5.8GHz TX Power"
+                <Label Grid.Column="2" Grid.Row="0" Content="5.8G TX Power"
                        ToolTip.Tip="{x:Static assets:Resources.Select58GHzPowerToolTip}" />
-                <Label Grid.Column="0" Grid.Row="2" Content="2.4GHz Frequency"
+                <Label Grid.Column="0" Grid.Row="1" Content="2.4GHz Frequency"
                        ToolTip.Tip="{x:Static assets:Resources.Select24GHzFrequencyToolTip}" />
-                <Label Grid.Column="0" Grid.Row="3" Content="2.4GHz TX Power"
+                <Label Grid.Column="2" Grid.Row="1" Content="2.4G TX Power"
                        ToolTip.Tip="{x:Static assets:Resources.Select24GHzPowerToolTip}" />
-                <Label Grid.Column="0" Grid.Row="4" Content="Bandwidth"
-                       ToolTip.Tip="{x:Static assets:Resources.SelectBandwithToolTip}" />
-                <Label Grid.Column="0" Grid.Row="5" Content="MCS Index"
+                <Label Grid.Column="0" Grid.Row="2" Content="MCS"
                        ToolTip.Tip="{x:Static assets:Resources.SelectMCSIndexToolTip}" />
-                <Label Grid.Column="0" Grid.Row="6" Content="STBC"
-                       ToolTip.Tip="{x:Static assets:Resources.SelectStbcToolTip}" />
-                <Label Grid.Column="0" Grid.Row="7" Content="LDPC"
-                       ToolTip.Tip="{x:Static assets:Resources.SelectLdpcToolTip}" />
-                <Label Grid.Column="0" Grid.Row="8" Content="FEC K"
+                <Label Grid.Column="0" Grid.Row="3" Content="FEC K"
                        ToolTip.Tip="{x:Static assets:Resources.SelectFecKToolTip}" />
-                <Label Grid.Column="0" Grid.Row="9" Content="FEC N"
+                <Label Grid.Column="0" Grid.Row="4" Content="FEC N"
                        ToolTip.Tip="{x:Static assets:Resources.SelectFecNToolTip}" />
 
+                <Label Grid.Column="0" Grid.Row="5" Content="STBC"
+                       ToolTip.Tip="{x:Static assets:Resources.SelectStbcToolTip}" />
+                <Label Grid.Column="0" Grid.Row="6" Content="LDPC"
+                       ToolTip.Tip="{x:Static assets:Resources.SelectLdpcToolTip}" />
+                
+                <Label Grid.Column="0" Grid.Row="7" Content="Bandwidth"
+                       ToolTip.Tip="{x:Static assets:Resources.SelectBandwithToolTip}" />
+                
+                
                 <ComboBox Grid.Column="1" Grid.Row="0"
                           Classes="WfbComboBox"
                           ToolTip.Tip="{x:Static assets:Resources.Select58GHzFrequencyToolTip}"
                           ItemsSource="{Binding Frequencies58GHz}"
                           SelectedItem="{Binding SelectedFrequency58String, Mode=TwoWay}" />
-
+                <!-- <ComboBox Grid.Column="3" Grid.Row="0" -->
+                <!--           Classes="WfbComboBox" -->
+                <!--           ToolTip.Tip="{x:Static assets:Resources.Select58GHzPowerToolTip}" -->
+                <!--           ItemsSource="{Binding Power58GHz}" -->
+                <!--           SelectedItem="{Binding SelectedPower, Mode=TwoWay}" /> -->
+                <StackPanel Grid.Column="3" Grid.Row="0" Orientation="Horizontal" Spacing="5">
+                    <Label Content="{Binding SelectedPower}"/> 
+                    <Slider MinWidth="150"
+                            Maximum="35" Minimum="0"
+                            VerticalAlignment="Center"
+                            IsSnapToTickEnabled="True"
+                            TickPlacement="BottomRight"
+                            TickFrequency="5"
+                            Value="{Binding SelectedPower}" 
+                            ToolTip.Tip="{x:Static assets:Resources.Select58GHzPowerToolTip}" />
+                </StackPanel>
+                
                 <ComboBox Grid.Column="1" Grid.Row="1"
                           Classes="WfbComboBox"
-                          ToolTip.Tip="{x:Static assets:Resources.Select58GHzPowerToolTip}"
-                          ItemsSource="{Binding Power58GHz}"
-                          SelectedItem="{Binding SelectedPower, Mode=TwoWay}" />
-
-                <ComboBox Grid.Column="1" Grid.Row="2"
-                          Classes="WfbComboBox"
+                          VerticalAlignment="Center"
                           ToolTip.Tip="{x:Static assets:Resources.Select24GHzFrequencyToolTip}"
                           ItemsSource="{Binding Frequencies24GHz}"
                           SelectedItem="{Binding SelectedFrequency24String, Mode=TwoWay}" />
 
-                <ComboBox Grid.Column="1" Grid.Row="3"
-                          Classes="WfbComboBox"
-                          ToolTip.Tip="{x:Static assets:Resources.Select24GHzPowerToolTip}"
-                          ItemsSource="{Binding Power24GHz}"
-                          SelectedItem="{Binding SelectedPower24GHz, Mode=TwoWay}" />
-
-                <ComboBox Grid.Column="1" Grid.Row="4" ToolTip.Tip="{x:Static assets:Resources.SelectBandwithToolTip}"
-                          Classes="WfbComboBox"
-                          ItemsSource="{Binding Bandwidth}"
-                          SelectedItem="{Binding SelectedBandwidth, Mode=TwoWay}" />
-
-
-                <ComboBox Grid.Column="1" Grid.Row="5" ToolTip.Tip="{x:Static assets:Resources.SelectMCSIndexToolTip}"
+                <StackPanel Grid.Column="3" Grid.Row="1" Orientation="Horizontal" Spacing="5" >
+                    <Label Content="{Binding SelectedPower24GHz}"/> 
+                    <Slider MinWidth="150"
+                            Maximum="35" Minimum="0"
+                            IsSnapToTickEnabled="True"
+                            TickPlacement="BottomRight"
+                            TickFrequency="5"
+                            Value="{Binding SelectedPower24GHz}" 
+                            ToolTip.Tip="{x:Static assets:Resources.Select24GHzPowerToolTip}" />
+                </StackPanel>
+                
+                <ComboBox Grid.Column="1" Grid.Row="2" ToolTip.Tip="{x:Static assets:Resources.SelectMCSIndexToolTip}"
                           Classes="WfbComboBox"
                           ItemsSource="{Binding McsIndex}"
                           SelectedItem="{Binding SelectedMcsIndex, Mode=TwoWay}" />
 
-                <ComboBox Grid.Column="1" Grid.Row="6" ToolTip.Tip="{x:Static assets:Resources.SelectStbcToolTip}"
-                          Classes="WfbComboBox"
-                          ItemsSource="{Binding Stbc}"
-                          SelectedItem="{Binding SelectedStbc, Mode=TwoWay}" />
-
-                <ComboBox Grid.Column="1" Grid.Row="7" ToolTip.Tip="{x:Static assets:Resources.SelectLdpcToolTip}"
-                          Classes="WfbComboBox"
-                          ItemsSource="{Binding Ldpc}"
-                          SelectedItem="{Binding SelectedLdpc, Mode=TwoWay}" />
-
-                <ComboBox Grid.Column="1" Grid.Row="8" ToolTip.Tip="{x:Static assets:Resources.SelectFecKToolTip}"
+                <ComboBox Grid.Column="1" Grid.Row="3" ToolTip.Tip="{x:Static assets:Resources.SelectFecKToolTip}"
                           Classes="WfbComboBox"
                           ItemsSource="{Binding FecK}"
                           SelectedItem="{Binding SelectedFecK, Mode=TwoWay}" />
-
-                <ComboBox Grid.Column="1" Grid.Row="9" ToolTip.Tip="{x:Static assets:Resources.SelectFecNToolTip}"
+                
+                <ComboBox Grid.Column="1" Grid.Row="4" ToolTip.Tip="{x:Static assets:Resources.SelectFecNToolTip}"
                           Classes="WfbComboBox"
                           ItemsSource="{Binding FecN}"
                           SelectedItem="{Binding SelectedFecN, Mode=TwoWay}" />
 
+                
+                <!-- <ComboBox Grid.Column="1" Grid.Row="5" ToolTip.Tip="{x:Static assets:Resources.SelectStbcToolTip}" -->
+                <!--           Classes="WfbComboBox" -->
+                <!--           ItemsSource="{Binding Stbc}" -->
+                <!--           SelectedItem="{Binding SelectedStbc, Mode=TwoWay}" /> -->
+
+                <ToggleSwitch Grid.Column="1" Grid.Row="5"
+                              Margin="5,0,0,0"
+                              OnContent="1" OffContent="0"
+                              IsChecked="{Binding SelectedStbc, Mode=TwoWay}"
+                              ToolTip.Tip="{x:Static assets:Resources.SelectStbcToolTip}" />
+
+                <ToggleSwitch Grid.Column="1" Grid.Row="6"
+                              Margin="5,0,0,0"
+                              OnContent="1" OffContent="0"
+                              IsChecked="{Binding SelectedLdpc, Mode=TwoWay}"
+                              ToolTip.Tip="{x:Static assets:Resources.SelectLdpcToolTip}" />
+
+                <ComboBox Grid.Column="1" Grid.Row="7" ToolTip.Tip="{x:Static assets:Resources.SelectBandwithToolTip}"
+                          Classes="WfbComboBox"
+                          ItemsSource="{Binding Bandwidth}"
+                          SelectedItem="{Binding SelectedBandwidth, Mode=TwoWay}" />
+                
+
+                
                 <Button Grid.Column="0" HorizontalAlignment="Left" Grid.Row="10"
                         Content="{x:Static assets:Resources.btnSaveAndRestartWfbText}"
                         Command="{Binding RestartWfbCommand}"
                         IsEnabled="{Binding CanConnect}" />
             </Grid>
         </Border>
+            
+        </StackPanel>
+        
     </Panel>
 
 </UserControl>

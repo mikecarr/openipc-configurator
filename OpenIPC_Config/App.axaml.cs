@@ -300,8 +300,10 @@ public class App : Application
     {
         // Register ViewModels
         services.AddTransient<MainViewModel>();
-
+        
         // Register tab ViewModels as singletons
+        services.AddSingleton<GlobalViewModel>();
+
         services.AddSingleton<CameraSettingsTabViewModel>();
         services.AddSingleton<ConnectControlsViewModel>();
         services.AddSingleton<LogViewerViewModel>();
@@ -312,6 +314,12 @@ public class App : Application
         services.AddSingleton<WfbGSTabViewModel>();
         services.AddSingleton<WfbTabViewModel>();
         services.AddSingleton<FirmwareTabViewModel>();
+        services.AddSingleton<PresetsTabViewModel>();
+        
+        
+        
+        
+        
     }
 
     private static void RegisterViews(IServiceCollection services)
@@ -329,6 +337,8 @@ public class App : Application
         services.AddTransient<WfbGSTabView>();
         services.AddTransient<FirmwareTabView>();
         services.AddTransient<WfbTabView>();
+        services.AddTransient<PresetsTabView>();
+        
     }
 
     private JObject createDefaultAppSettings()

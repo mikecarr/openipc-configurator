@@ -292,6 +292,7 @@ public partial class TelemetryTabViewModel : ViewModelBase
 
 
         await SshClientService.UploadFileAsync(DeviceConfig.Instance, telemetryFile, remoteTelemetryFile);
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x " + remoteTelemetryFile);
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
         
         _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!");

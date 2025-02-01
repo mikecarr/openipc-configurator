@@ -21,7 +21,7 @@ public class SshClientService : ISshClientService
         _eventSubscriptionService = eventSubscriptionService;
     }
 
-    public async Task<SshCommand> ExecuteCommandWithResponse(DeviceConfig deviceConfig, string command,
+    public async Task<SshCommand> ExecuteCommandWithResponseAsync(DeviceConfig deviceConfig, string command,
         CancellationToken cancellationToken = default)
     {
         Log.Debug($"Executing command: '{command}' on {deviceConfig.IpAddress}.");

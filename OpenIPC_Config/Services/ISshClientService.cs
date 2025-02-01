@@ -9,7 +9,7 @@ namespace OpenIPC_Config.Services;
 public interface ISshClientService
 {
     // Executes a command on the remote device and returns its response
-    Task<SshCommand> ExecuteCommandWithResponse(DeviceConfig deviceConfig, string command,
+    Task<SshCommand> ExecuteCommandWithResponseAsync(DeviceConfig deviceConfig, string command,
         CancellationToken cancellationToken);
 
     

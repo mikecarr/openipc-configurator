@@ -33,7 +33,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Label Grid.Row="0" Grid.Column="0" Content="Select Serial Port" />
@@ -87,10 +87,10 @@
                 <Button Grid.Row="5" Grid.Column="3" Content="MSPOSD Camera Extra" Command="{Binding MSPOSDExtraCameraCommand}"
                         IsEnabled="{Binding CanConnect}"
                         ToolTip.Tip="{x:Static assets:Resources.MSPOSDExtraCameraToolTip}" />
-                <Button Grid.Row="5" Grid.Column="3" Content="MSPOSD GS Extra" Command="{Binding MSPOSDExtraGSCommand}"
+                <Button Grid.Row="6" Grid.Column="3" Content="MSPOSD GS Extra" Command="{Binding MSPOSDExtraGSCommand}"
                         IsEnabled="{Binding CanConnect}"
                         ToolTip.Tip="{x:Static assets:Resources.MSPOSDExtraGSToolTip}" />
-                <Button Grid.Row="6" Grid.Column="3" Content="Remove MSPOSD Extra" Command="{Binding RemoveMSPOSDExtraCommand}"
+                <Button Grid.Row="7" Grid.Column="3" Content="Remove MSPOSD Extra" Command="{Binding RemoveMSPOSDExtraCommand}"
                         IsEnabled="{Binding CanConnect}"
                         ToolTip.Tip="{x:Static assets:Resources.MSPOSDExtraRemovalToolTip}" />
 

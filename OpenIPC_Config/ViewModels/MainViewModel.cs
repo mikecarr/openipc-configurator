@@ -23,18 +23,22 @@ public partial class MainViewModel : ViewModelBase
     private bool _isTabsCollapsed;
     private DeviceType _selectedDeviceType;
 
-    private IServiceProvider _serviceProvider;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly GlobalViewModel _globalSettingsViewModel;
     
 
     public MainViewModel(ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        GlobalViewModel globalSettingsViewModel)
         : base(logger, sshClientService, eventSubscriptionService)
     {
         _serviceProvider = serviceProvider;
         _appVersionText = GetFormattedAppVersion();
         CanConnect = false;
+
+        _globalSettingsViewModel = globalSettingsViewModel;
         
         Tabs = new ObservableCollection<TabItemViewModel> { };
         // Subscribe to device type change events
@@ -78,6 +82,8 @@ public partial class MainViewModel : ViewModelBase
                 _serviceProvider.GetRequiredService<CameraSettingsTabViewModel>(), IsTabsCollapsed));
             Tabs.Add(new TabItemViewModel("Telemetry", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg",
                 _serviceProvider.GetRequiredService<TelemetryTabViewModel>(), IsTabsCollapsed));
+            Tabs.Add(new TabItemViewModel("Presets", "avares://OpenIPC_Config/Assets/Icons/iconoir_presets.svg",
+                _serviceProvider.GetRequiredService<PresetsTabViewModel>(), IsTabsCollapsed));
             Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg",
                 _serviceProvider.GetRequiredService<SetupTabViewModel>(), IsTabsCollapsed));
         }
@@ -274,7 +280,7 @@ public partial class MainViewModel : ViewModelBase
         var cancellationToken = cts.Token;
 
         var cmdResult =
-            await SshClientService.ExecuteCommandWithResponse(deviceConfig, DeviceCommands.GetHostname,
+            await SshClientService.ExecuteCommandWithResponseAsync(deviceConfig, DeviceCommands.GetHostname,
                 cancellationToken);
 
         // If the command execution takes longer than 10 seconds, the task will be cancelled
@@ -299,68 +305,81 @@ public partial class MainViewModel : ViewModelBase
 
     private async void processCameraFiles()
     {
-        // download file wfb.conf
-        var wfbConfContent = await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WfbConfFileLoc);
+        // read device to determine configurations
+        _globalSettingsViewModel.ReadDevice();
+        
 
-
-        if (wfbConfContent != null)
-            EventSubscriptionService.Publish<WfbConfContentUpdatedEvent,
-                WfbConfContentUpdatedMessage>(new WfbConfContentUpdatedMessage(wfbConfContent));
-
-        try
+        Logger.Debug($"IsWfbYamlEnabled = {_globalSettingsViewModel.IsWfbYamlEnabled}");
+        if (_globalSettingsViewModel.IsWfbYamlEnabled)
         {
-            var majesticContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.MajesticFileLoc);
-            // Publish a message to WfbSettingsTabViewModel
-            EventSubscriptionService.Publish<MajesticContentUpdatedEvent,
-                MajesticContentUpdatedMessage>(new MajesticContentUpdatedMessage(majesticContent));
+            Logger.Debug($"Reading wfb.yaml");
         }
-        catch (Exception e)
+        else 
         {
-            Log.Error(e.Message);
-        }
-
-        try
-        {
-            var telemetryContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.TelemetryConfFileLoc);
-            // Publish a message to WfbSettingsTabViewModel
-
-            EventSubscriptionService.Publish<TelemetryContentUpdatedEvent,
-                TelemetryContentUpdatedMessage>(new TelemetryContentUpdatedMessage(telemetryContent));
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-            throw;
-        }
-
-        try
-        {
-            // get /home/radxa/scripts/screen-mode
-            var droneKeyContent =
-                await SshClientService.DownloadFileBytesAsync(_deviceConfig, OpenIPC.RemoteDroneKeyPath);
+            Logger.Debug($"Reading legacy settings");
+            // download file wfb.conf
+            var wfbConfContent = await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WfbConfFileLoc);
 
 
-            if (droneKeyContent != null)
+            if (wfbConfContent != null)
+                EventSubscriptionService.Publish<WfbConfContentUpdatedEvent,
+                    WfbConfContentUpdatedMessage>(new WfbConfContentUpdatedMessage(wfbConfContent));
+
+            try
             {
-                //byte[] fileBytes = Encoding.UTF8.GetBytes(droneKeyContent);
-
-                var droneKey = Utilities.ComputeMd5Hash(droneKeyContent);
-
-                var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
-                _deviceConfig = DeviceConfig.Instance;
-                _deviceConfig.KeyChksum = droneKey;
-                deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
-
-                EventSubscriptionService.Publish<DeviceContentUpdateEvent,
-                    DeviceContentUpdatedMessage>(deviceContentUpdatedMessage);
+                var majesticContent =
+                    await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.MajesticFileLoc);
+                // Publish a message to WfbSettingsTabViewModel
+                EventSubscriptionService.Publish<MajesticContentUpdatedEvent,
+                    MajesticContentUpdatedMessage>(new MajesticContentUpdatedMessage(majesticContent));
             }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-            throw;
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+            }
+
+            try
+            {
+                var telemetryContent =
+                    await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.TelemetryConfFileLoc);
+                // Publish a message to WfbSettingsTabViewModel
+
+                EventSubscriptionService.Publish<TelemetryContentUpdatedEvent,
+                    TelemetryContentUpdatedMessage>(new TelemetryContentUpdatedMessage(telemetryContent));
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                throw;
+            }
+
+            try
+            {
+                // get /home/radxa/scripts/screen-mode
+                var droneKeyContent =
+                    await SshClientService.DownloadFileBytesAsync(_deviceConfig, OpenIPC.RemoteDroneKeyPath);
+
+
+                if (droneKeyContent != null)
+                {
+                    //byte[] fileBytes = Encoding.UTF8.GetBytes(droneKeyContent);
+
+                    var droneKey = Utilities.ComputeMd5Hash(droneKeyContent);
+
+                    var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
+                    _deviceConfig = DeviceConfig.Instance;
+                    _deviceConfig.KeyChksum = droneKey;
+                    deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
+
+                    EventSubscriptionService.Publish<DeviceContentUpdateEvent,
+                        DeviceContentUpdatedMessage>(deviceContentUpdatedMessage);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                throw;
+            }
         }
 
         EventSubscriptionService.Publish<AppMessageEvent,
