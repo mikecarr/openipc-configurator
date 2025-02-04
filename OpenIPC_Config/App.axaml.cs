@@ -316,10 +316,6 @@ public class App : Application
         services.AddSingleton<FirmwareTabViewModel>();
         services.AddSingleton<PresetsTabViewModel>();
         
-        
-        
-        
-        
     }
 
     private static void RegisterViews(IServiceCollection services)

@@ -98,7 +98,7 @@
                 <!--           ItemsSource="{Binding Power58GHz}" -->
                 <!--           SelectedItem="{Binding SelectedPower, Mode=TwoWay}" /> -->
                 <StackPanel Grid.Column="3" Grid.Row="0" Orientation="Horizontal" Spacing="5">
-                    <Label Content="{Binding SelectedPower}"/> 
+                     
                     <Slider MinWidth="150"
                             Maximum="35" Minimum="0"
                             VerticalAlignment="Center"
@@ -107,6 +107,9 @@
                             TickFrequency="5"
                             Value="{Binding SelectedPower}" 
                             ToolTip.Tip="{x:Static assets:Resources.Select58GHzPowerToolTip}" />
+                    <Border Height="20" Width="20" Classes="BoxShadow">
+                    <Label HorizontalContentAlignment="Center" Content="{Binding SelectedPower}"/>
+                    </Border>
                 </StackPanel>
                 
                 <ComboBox Grid.Column="1" Grid.Row="1"
@@ -117,7 +120,7 @@
                           SelectedItem="{Binding SelectedFrequency24String, Mode=TwoWay}" />
 
                 <StackPanel Grid.Column="3" Grid.Row="1" Orientation="Horizontal" Spacing="5" >
-                    <Label Content="{Binding SelectedPower24GHz}"/> 
+                     
                     <Slider MinWidth="150"
                             Maximum="35" Minimum="0"
                             IsSnapToTickEnabled="True"
@@ -125,6 +128,10 @@
                             TickFrequency="5"
                             Value="{Binding SelectedPower24GHz}" 
                             ToolTip.Tip="{x:Static assets:Resources.Select24GHzPowerToolTip}" />
+                    <Border Height="20" Width="20" Classes="BoxShadow">
+                    <Label HorizontalContentAlignment="Center" 
+                           Content="{Binding SelectedPower24GHz}"/>
+                    </Border>
                 </StackPanel>
                 
                 <ComboBox Grid.Column="1" Grid.Row="2" ToolTip.Tip="{x:Static assets:Resources.SelectMCSIndexToolTip}"

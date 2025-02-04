@@ -10,7 +10,7 @@
 
     <!-- Left Panel -->
     <!-- <Border BorderThickness="2" Background="Aqua"> -->
-    <Panel>
+    <Panel Margin="0">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -31,10 +31,13 @@
 
             <ComboBox x:Name="ScriptFilesActionComboBox" Grid.Row="0" Grid.Column="0"
                       PlaceholderText="Script File Actions"
+                      FontSize="12"
+                      Width="160"
                       ItemsSource="{Binding ScriptFileActionItems}"
                       SelectedItem="{Binding SelectedScriptFileAction}"
-                      HorizontalAlignment="Stretch"
-
+                      HorizontalContentAlignment="Left"
+                      HorizontalAlignment="Left"
+                      IsEnabled="{Binding CanConnect}"
                       ToolTip.Tip="{x:Static assets:Resources.ScriptFilesBackupToolTip}" />
 
 
@@ -47,18 +50,21 @@
                     HorizontalAlignment="Stretch" />
 
             <ComboBox x:Name="CameraKeyComboBox" Grid.Row="1" Grid.Column="0"
-                      PlaceholderText="Encryption Key Actions"
+                      PlaceholderText="Key Actions"
+                      FontSize="12"
+                      Width="160"
+                      HorizontalContentAlignment="Left"
                       ItemsSource="{Binding DroneKeyActionItems}"
                       SelectedItem="{Binding SelectedDroneKeyAction}"
-
-                      HorizontalAlignment="Stretch"
+                      HorizontalAlignment="Left"
+                      IsEnabled="{Binding CanConnect}"
                       ToolTip.Tip="{x:Static assets:Resources.DroneKeyActionsToolTip}" />
 
             <Button Grid.Row="1" Grid.Column="1" Content="Execute"
                     x:Name="CameraKeyActionButton"
                     Command="{Binding EncryptionKeyActionCommand}"
                     CommandParameter="CameraKeyComboBox"
-                    IsEnabled="False"
+                    IsEnabled="{Binding CanConnect}"
                     ToolTip.Tip="{x:Static assets:Resources.DeviceChkSumToolTip}"
                     HorizontalAlignment="Stretch" />
             <!-- </Border> -->
@@ -69,9 +75,10 @@
                       ItemsSource="{Binding LocalSensors}"
                       SelectedItem="{Binding SelectedSensor, Mode=TwoWay}"
                       IsEnabled="{Binding CanConnect}"
-
-                      HorizontalContentAlignment="Center"
-                      HorizontalAlignment="Stretch" />
+                      FontSize="12"
+                      Width="160"
+                      HorizontalContentAlignment="Left"
+                      HorizontalAlignment="Left" />
             <!-- </Border> -->
 
             <!-- <Border  Grid.Row="2" Grid.Column="1"  BorderBrush="SlateGray" BorderThickness="1"> -->
@@ -79,7 +86,7 @@
                     x:Name="SensorActionButton"
                     Command="{Binding SensorFilesUpdateCommand}"
                     CommandParameter="SensorComboBox"
-                    IsEnabled="False"
+                    IsEnabled="{Binding CanConnect}"
                     ToolTip.Tip="{x:Static assets:Resources.SensorBinUpdateToolTip}"
                     HorizontalAlignment="Stretch" />
             <!-- </Border> -->
@@ -89,11 +96,15 @@
 
             <Panel Grid.Row="4" Grid.Column="0" Height="20" />
 
-            <TextBlock Grid.Row="6" Text="Encryption Key Checksum" />
+            <TextBlock Grid.Column="0" Grid.Row="6" Margin="5,0,0,0" 
+                       FontSize="12"
+                       Text="Encryption Key Checksum" />
 
-            <TextBlock Grid.Row="7" Grid.ColumnSpan="2"
+            <TextBlock Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="2"
                        TextWrapping="Wrap"
                        MaxWidth="375"
+                       FontSize="12"
+                       Margin="5,0,0,0"
                        Foreground="{Binding ChkSumStatusColor}"
                        ToolTip.Tip="{x:Static assets:Resources.DeviceChkSumToolTip}"
                        Text="{Binding KeyChecksum} " />

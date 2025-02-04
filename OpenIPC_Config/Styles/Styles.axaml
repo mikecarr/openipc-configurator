@@ -190,4 +190,12 @@
         <Setter Property="VerticalAlignment" Value="Center" />
         
     </Style>
+    
+    
+    <Style Selector="Border.BoxShadow">
+        
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BoxShadow" Value="5 5 10 0 DarkGray" />
+       
+    </Style>
 </Styles>

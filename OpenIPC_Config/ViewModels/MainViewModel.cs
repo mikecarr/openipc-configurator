@@ -82,8 +82,8 @@ public partial class MainViewModel : ViewModelBase
                 _serviceProvider.GetRequiredService<CameraSettingsTabViewModel>(), IsTabsCollapsed));
             Tabs.Add(new TabItemViewModel("Telemetry", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg",
                 _serviceProvider.GetRequiredService<TelemetryTabViewModel>(), IsTabsCollapsed));
-            Tabs.Add(new TabItemViewModel("Presets", "avares://OpenIPC_Config/Assets/Icons/iconoir_presets.svg",
-                _serviceProvider.GetRequiredService<PresetsTabViewModel>(), IsTabsCollapsed));
+            // Tabs.Add(new TabItemViewModel("Presets", "avares://OpenIPC_Config/Assets/Icons/iconoir_presets.svg",
+            //     _serviceProvider.GetRequiredService<PresetsTabViewModel>(), IsTabsCollapsed));
             Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg",
                 _serviceProvider.GetRequiredService<SetupTabViewModel>(), IsTabsCollapsed));
         }
@@ -251,6 +251,7 @@ public partial class MainViewModel : ViewModelBase
         }
 
         UpdateUIMessage("Connected");
+        
     }
 
     private void SaveConfig()
@@ -383,7 +384,9 @@ public partial class MainViewModel : ViewModelBase
         }
 
         EventSubscriptionService.Publish<AppMessageEvent,
-            AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
+            AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
+        
+        Log.Information("Done reading files from device.");
     }
 
     private async void processRadxaFiles()
@@ -494,6 +497,10 @@ public partial class MainViewModel : ViewModelBase
 
         EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage
             { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
+        
+        Log.Information("Done reading files from device.");
+        
+        
     }
 
     private void LoadSettings()

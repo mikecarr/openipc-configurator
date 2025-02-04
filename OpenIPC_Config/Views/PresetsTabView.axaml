@@ -44,18 +44,31 @@
                 </TextBox.Styles>
             </TextBox>
 
-            <!-- Filter Button -->
-            <Button Width="40" Height="40"
-                    ToolTip.Tip="Filter Presets"
-                    Command="{Binding FilterCommand}">
-                <!-- <Image  Stretch="Uniform" /> -->
-                <Svg Width="40" Height="40" Path="/Assets/Icons/iconoir_github.svg" />
+            <!-- ~1~ Filter Button @1@ -->
+            <!-- <Button Width="40" Height="40" -->
+            <!--         ToolTip.Tip="Filter Presets" -->
+            <!--         Command="{Binding FilterCommand}"> -->
+            <!--     ~1~ <Image  Stretch="Uniform" /> @1@ -->
+            <!--     <Svg Width="40" Height="40" Path="/Assets/Icons/iconoir_github.svg" /> -->
+            <!-- </Button> -->
+            <!-- -->
+            <!-- -->
+            <!-- ~1~ Fetch Button @1@ -->
+            <!-- <Button Width="80" Height="40" -->
+            <!--         Content="Fetch" -->
+            <!--         Command="{Binding FetchPresetsCommand}" /> -->
+            
+            <Button Width="150" Height="30" Background="DodgerBlue" 
+                    VerticalAlignment="Center" CornerRadius="10" 
+                    Command="{Binding FetchPresetsCommand}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="5">
+                    <!-- SVG Icon -->
+                    <Svg Width="20" Height="20" Path="/Assets/Icons/iconoir_github.svg" /> 
+        
+                    <!-- Text -->
+                    <TextBlock Text="Fetch" FontSize="14" Foreground="White" VerticalAlignment="Center" />
+                </StackPanel>
             </Button>
-
-            <!-- Fetch Button -->
-            <Button Width="80" Height="40"
-                    Content="Fetch"
-                    Command="{Binding FetchPresetsCommand}" />
         </StackPanel>
         
         <!-- Filter Bar -->
