@@ -157,13 +157,13 @@
 
                 <ToggleSwitch Grid.Column="1" Grid.Row="5"
                               Margin="5,0,0,0"
-                              OnContent="1" OffContent="0"
+                              OnContent="" OffContent=""
                               IsChecked="{Binding SelectedStbc, Mode=TwoWay}"
                               ToolTip.Tip="{x:Static assets:Resources.SelectStbcToolTip}" />
 
                 <ToggleSwitch Grid.Column="1" Grid.Row="6"
                               Margin="5,0,0,0"
-                              OnContent="1" OffContent="0"
+                              OnContent="" OffContent=""
                               IsChecked="{Binding SelectedLdpc, Mode=TwoWay}"
                               ToolTip.Tip="{x:Static assets:Resources.SelectLdpcToolTip}" />
 
