@@ -20,6 +20,7 @@ namespace OpenIPC_Config.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    [ObservableProperty] private string _svgPath;
     private bool _isTabsCollapsed;
     private DeviceType _selectedDeviceType;
 
@@ -56,7 +57,8 @@ public partial class MainViewModel : ViewModelBase
 
         DeviceTypes = new ObservableCollection<DeviceType>(Enum.GetValues(typeof(DeviceType)).Cast<DeviceType>());
 
-        
+        // Initialize the path
+        UpdateSvgPath();
 
         
         IsVRXEnabled = false;
@@ -102,7 +104,13 @@ public partial class MainViewModel : ViewModelBase
     public bool IsTabsCollapsed
     {
         get => _isTabsCollapsed;
-        set => SetProperty(ref _isTabsCollapsed, value);
+        set
+        {
+            if (SetProperty(ref _isTabsCollapsed, value))
+            {
+                UpdateSvgPath();
+            }
+        }
     }
 
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
@@ -125,6 +133,13 @@ public partial class MainViewModel : ViewModelBase
     public LogViewerViewModel LogViewerViewModel { get; }
     public StatusBarViewModel StatusBarViewModel { get; }
 
+    private void UpdateSvgPath()
+    {
+        SvgPath = IsTabsCollapsed
+            ? "/Assets/Icons/drawer-open.svg"
+            : "/Assets/Icons/drawer-close.svg";
+    }
+    
     public DeviceType SelectedDeviceType
     {
         get => _selectedDeviceType;

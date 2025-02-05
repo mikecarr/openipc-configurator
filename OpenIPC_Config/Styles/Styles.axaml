@@ -106,12 +106,15 @@
         
         <Setter Property="Background" Value="DimGray" />
         <Setter Property="Foreground" Value="Black" />
-        <Setter Property="Padding" Value="15,10" />
+        <!-- Padding property enlarges the effective size of a child element by the specified Thickness value. -->
+        <Setter Property="Padding" Value="10,10,40,10" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
         <Setter Property="BorderBrush" Value="#CCCCCC" />
         <Setter Property="CornerRadius" Value="5" />
-        <Setter Property="Margin" Value="2" />
+        <!-- <Setter Property="Margin" Value="2,2,2,2" /> -->
+        <!-- The Margin property describes the distance between an element and its child or peers -->
+        <Setter Property="Margin" Value="0" />
     </Style>
 
     

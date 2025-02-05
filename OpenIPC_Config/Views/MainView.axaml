@@ -23,11 +23,12 @@
         <views:HeaderView DockPanel.Dock="Top" />
         <views:LogViewer DockPanel.Dock="Bottom" />
 
-        <ToggleSwitch DockPanel.Dock="Top"
-                      FontSize="12"
-                      OnContent="Expand" OffContent="Collapse"
-                      Margin="0"
-                      IsChecked="{Binding IsTabsCollapsed, Converter={StaticResource InvertedBooleanConverter}}" />
+        <!-- <ToggleSwitch DockPanel.Dock="Top" -->
+        <!--               FontSize="10" -->
+        <!--               OnContent="Expand" OffContent="Collapse" -->
+        <!--               Padding="0" -->
+        <!--               Margin="0" -->
+        <!--               IsChecked="{Binding IsTabsCollapsed, Converter={StaticResource InvertedBooleanConverter}}" /> -->
 
 
         <!-- Sidebar Tabs -->
@@ -37,12 +38,12 @@
                     SelectedIndex="{Binding SelectedTabIndex}"
                     SelectedItem="{Binding SelectedTab}"
                     Width="{Binding IsTabsCollapsed, 
-                    Converter={StaticResource BooleanToWidthConverter}, 
+                    Converter={StaticResource BooleanToWidthConverter},
                     ConverterParameter='80,180'}">
 
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Height="40" VerticalAlignment="Center">
+                    <Grid Height="40" VerticalAlignment="Center" Margin="0,0,0,0">
                         <!-- Define two columns: one for the icon and one for the text -->
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="30" /> <!-- Fixed width for the icon -->
@@ -57,6 +58,7 @@
 
                         <!-- Text aligned to the far right -->
                         <TextBlock Grid.Column="1" Text="{Binding TabName}"
+                                   Padding="0"
                                    VerticalAlignment="Center"
                                    HorizontalAlignment="Left"
                                    FontSize="18"
@@ -70,9 +72,26 @@
             
 
         </TabControl>
+        
+        <Panel Background="Transparent" Margin="0" >
+            <StackPanel Orientation="Horizontal">
+                <Button Background="Transparent" BorderThickness="0" 
+                        Padding="0"
+                        Command="{Binding ToggleTabsCommand}">
+                    
+                <Svg VerticalAlignment="Center" Path="/Assets/Icons/drawer-handle.svg" />
+                
+                </Button>
+                
+                <Button Width="10" Background="Transparent" BorderThickness="0" Margin="0" Padding="0"
+                        Command="{Binding ToggleTabsCommand}">
+                    <Svg Width="10" VerticalAlignment="Stretch"  Path="{Binding SvgPath}" />
+                </Button>
+            </StackPanel>
+        </Panel>
 
         <!-- Main Content -->
         <ContentControl Content="{Binding SelectedTab.Content}"
-                        Margin="5" Background="#E0E0E0" />
+                        Margin="0" Padding="0" Background="Transparent" />
     </DockPanel>
 </UserControl>
