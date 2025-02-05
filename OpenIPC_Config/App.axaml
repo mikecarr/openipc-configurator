@@ -13,6 +13,6 @@
         <FluentTheme />
         <StyleInclude Source="avares://OpenIPC_Config/Styles/Styles.axaml" />
     </Application.Styles>
-    
-    
+
+
 </Application>

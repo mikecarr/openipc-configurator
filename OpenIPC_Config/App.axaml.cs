@@ -1,12 +1,8 @@
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -18,6 +14,7 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using Newtonsoft.Json.Linq;
 using OpenIPC_Config.Logging;
+using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
 using OpenIPC_Config.ViewModels;
 using OpenIPC_Config.Views;
@@ -29,31 +26,25 @@ namespace OpenIPC_Config;
 public class App : Application
 {
     public static IServiceProvider ServiceProvider { get; private set; }
-    
+
     public static string OSType { get; private set; }
 
     private void DetectOsType()
     {
         // Detect OS Type
         if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
-        {
             OSType = "Mobile";
-        }
         else if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-        {
             OSType = "Desktop";
-        }
         else
-        {
             OSType = "Unknown";
-        }
     }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        
-        DetectOsType();
 
+        DetectOsType();
     }
 
     private IConfigurationRoot LoadConfiguration()
@@ -70,13 +61,13 @@ public class App : Application
 
         // Build configuration
         var configuration = new ConfigurationBuilder()
-            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile(configPath, false, true)
+            .AddJsonFile("appsettings.json", true, true)
             .Build();
 
         return configuration;
     }
-    
+
     // private void InitializeBasicLogger()
     // {
     //     Log.Logger = new LoggerConfiguration()
@@ -85,7 +76,7 @@ public class App : Application
     //
     //     Log.Information("Basic logger initialized for early startup.");
     // }
-    
+
     private void ReconfigureLogger(IConfiguration configuration)
     {
         var eventAggregator = ServiceProvider.GetRequiredService<IEventAggregator>();
@@ -102,7 +93,7 @@ public class App : Application
         Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
         Log.Information("Logger initialized successfully.");
     }
-    
+
     public override void OnFrameworkInitializationCompleted()
     {
         // Step 1: Initialize basic logger 
@@ -111,15 +102,15 @@ public class App : Application
 
         // Step 2: Load configuration
         var configuration = LoadConfiguration();
-        
+
         // Configure DI container
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection, configuration);
         ServiceProvider = serviceCollection.BuildServiceProvider();
-        
+
         // Step 4: Reconfigure logger with DI services
         ReconfigureLogger(configuration);
-        
+
         // check for updates
         CheckForUpdatesAsync();
 
@@ -147,7 +138,8 @@ public class App : Application
 
         if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS() || OperatingSystem.IsMacOS())
         {
-            var configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName);
+            var configDirectory =
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName);
             if (!Directory.Exists(configDirectory))
                 Directory.CreateDirectory(configDirectory);
 
@@ -155,7 +147,8 @@ public class App : Application
         }
         else if (OperatingSystem.IsWindows())
         {
-            var configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName);
+            var configDirectory =
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), appName);
             if (!Directory.Exists(configDirectory))
                 Directory.CreateDirectory(configDirectory);
 
@@ -172,7 +165,7 @@ public class App : Application
 
         return configPath;
     }
-    
+
     // private void CreateAppSettings()
     // {
     //     var configPath = GetConfigPath();
@@ -204,26 +197,21 @@ public class App : Application
     //     Log.Information($"Starting up log for OpenIPC Configurator v{VersionHelper.GetAppVersion()}");
     //     Log.Information($"Using appsettings.json from {configPath}");
     // }
-    
+
     public virtual async Task ShowUpdateDialogAsync(string releaseNotes, string downloadUrl, string newVersion)
     {
         var msgBox = MessageBoxManager.GetMessageBoxStandard("Update Available",
-            $"New version available: {newVersion}\n\n{releaseNotes}\n\nDo you want to download the update?", ButtonEnum.YesNo);
+            $"New version available: {newVersion}\n\n{releaseNotes}\n\nDo you want to download the update?",
+            ButtonEnum.YesNo);
 
         var result = await msgBox.ShowAsync();
 
-        if (result == ButtonResult.Yes)
-        {
-            OpenBrowser(downloadUrl);
-        }
+        if (result == ButtonResult.Yes) OpenBrowser(downloadUrl);
     }
 
     private void OpenBrowser(string url)
     {
-        if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-        {
-            url = "https://" + url;
-        }
+        if (!url.StartsWith("http://") && !url.StartsWith("https://")) url = "https://" + url;
 
         Process.Start(new ProcessStartInfo
         {
@@ -242,7 +230,7 @@ public class App : Application
 
         // Create an IConfiguration instance
         var configuration = new ConfigurationBuilder()
-            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
+            .AddJsonFile(configPath, false, true)
             .Build();
 
         // Pass the dependencies to the constructor
@@ -253,15 +241,11 @@ public class App : Application
             string currentVersion;
 #if DEBUG
             // In debug mode, read the version from VERSION.txt
-            string versionFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "VERSION");
+            var versionFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "VERSION");
             if (File.Exists(versionFilePath))
-            {
                 currentVersion = File.ReadAllText(versionFilePath).Trim();
-            }
             else
-            {
                 currentVersion = "0.0.0.0"; // Default version for debugging
-            }
 #else
             currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
@@ -291,7 +275,7 @@ public class App : Application
         services.AddSingleton<IEventSubscriptionService, EventSubscriptionService>();
         services.AddSingleton<ISshClientService, SshClientService>();
         services.AddSingleton<IMessageBoxService, MessageBoxService>();
-        
+
         services.AddSingleton<IYamlConfigService, YamlConfigService>();
         services.AddSingleton<ILogger>(sp => Log.Logger);
 
@@ -301,41 +285,45 @@ public class App : Application
         // Register IConfiguration
         services.AddSingleton<IConfiguration>(configuration);
         services.AddTransient<DeviceConfigValidator>();
-        
+
         // Register IConfiguration
         services.AddTransient<DeviceConfigValidator>();
-        
+
         // Register ViewModels
         RegisterViewModels(services);
-        
+
         // Register Views
         RegisterViews(services);
-        
-
     }
 
     private static void RegisterViewModels(IServiceCollection services)
     {
         // Register ViewModels
         services.AddTransient<MainViewModel>();
+        
+        // Register tab ViewModels as singletons
+        services.AddSingleton<GlobalViewModel>();
 
-        services.AddTransient<CameraSettingsTabViewModel>();
-        services.AddTransient<ConnectControlsViewModel>();
-        services.AddTransient<LogViewerViewModel>();
-        services.AddTransient<SetupTabViewModel>();
-        services.AddTransient<StatusBarViewModel>();
-        services.AddTransient<TelemetryTabViewModel>();
-        services.AddTransient<VRXTabViewModel>();
-        services.AddTransient<WfbGSTabViewModel>();
-        services.AddTransient<WfbTabViewModel>();
+        services.AddSingleton<CameraSettingsTabViewModel>();
+        services.AddSingleton<ConnectControlsViewModel>();
+        services.AddSingleton<LogViewerViewModel>();
+        services.AddSingleton<SetupTabViewModel>();
+        services.AddSingleton<StatusBarViewModel>();
+        services.AddSingleton<TelemetryTabViewModel>();
+        services.AddSingleton<VRXTabViewModel>();
+        services.AddSingleton<WfbGSTabViewModel>();
+        services.AddSingleton<WfbTabViewModel>();
+        services.AddSingleton<FirmwareTabViewModel>();
+        services.AddSingleton<PresetsTabViewModel>();
+        
     }
-    
+
     private static void RegisterViews(IServiceCollection services)
     {
         // Register Views
         services.AddTransient<MainWindow>();
         services.AddTransient<MainView>();
-        services.AddTransient<CameraSettingsView>();
+        services.AddTransient<CameraSettingsTabView>();
         services.AddTransient<ConnectControlsView>();
         services.AddTransient<LogViewer>();
         services.AddTransient<SetupTabView>();
@@ -343,16 +331,20 @@ public class App : Application
         services.AddTransient<TelemetryTabView>();
         services.AddTransient<VRXTabView>();
         services.AddTransient<WfbGSTabView>();
+        services.AddTransient<FirmwareTabView>();
         services.AddTransient<WfbTabView>();
+        services.AddTransient<PresetsTabView>();
+        
     }
-    
+
     private JObject createDefaultAppSettings()
     {
         // Create default settings
         var defaultSettings = new JObject(
             new JProperty("UpdateChecker",
                 new JObject(
-                    new JProperty("LatestJsonUrl", "https://github.com/OpenIPC/openipc-configurator/releases/latest/download/latest.json")
+                    new JProperty("LatestJsonUrl",
+                        "https://github.com/OpenIPC/openipc-configurator/releases/latest/download/latest.json")
                 )
             ),
             new JProperty("Serilog",
@@ -369,7 +361,7 @@ public class App : Application
                                 new JProperty("Args",
                                     new JObject(
                                         new JProperty("pathFormat",
-                                            $"{Models.OpenIPC.AppDataConfigDirectory}/Logs/configurator-{{Date}}.log")
+                                            $"{OpenIPC.AppDataConfigDirectory}/Logs/configurator-{{Date}}.log")
                                     )
                                 )
                             )
@@ -384,7 +376,7 @@ public class App : Application
             ),
             new JProperty("DeviceHostnameMapping",
                 new JObject(
-                    new JProperty("Camera", new JArray("openipc-ssc338q","openipc-ssc30kq")),
+                    new JProperty("Camera", new JArray("openipc-ssc338q", "openipc-ssc30kq")),
                     new JProperty("Radxa", new JArray("radxa", "raspberrypi")),
                     new JProperty("NVR", new JArray("openipc-hi3536dv100"))
                 )

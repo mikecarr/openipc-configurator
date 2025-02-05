@@ -11,11 +11,6 @@ public class TestEvent : PubSubEvent<string>
 [TestFixture]
 public class EventSubscriptionServiceTests
 {
-    private Mock<IEventAggregator> _mockEventAggregator;
-    private Mock<ILogger> _mockLogger;
-    private EventSubscriptionService _eventSubscriptionService;
-    private TestEvent _testEvent;
-
     [SetUp]
     public void SetUp()
     {
@@ -30,6 +25,11 @@ public class EventSubscriptionServiceTests
         _eventSubscriptionService = new EventSubscriptionService(_mockEventAggregator.Object, _mockLogger.Object);
     }
 
+    private Mock<IEventAggregator> _mockEventAggregator;
+    private Mock<ILogger> _mockLogger;
+    private EventSubscriptionService _eventSubscriptionService;
+    private TestEvent _testEvent;
+
     [Test]
     public void Subscribe_InvokesActionWhenEventIsPublished()
     {
@@ -42,7 +42,8 @@ public class EventSubscriptionServiceTests
 
         // Assert
         Assert.AreEqual("Test Payload", receivedPayload);
-        _mockLogger.Verify(logger => logger.Verbose(It.Is<string>(msg => msg.Contains("Subscribed to event TestEvent"))),
+        _mockLogger.Verify(
+            logger => logger.Verbose(It.Is<string>(msg => msg.Contains("Subscribed to event TestEvent"))),
             Times.Once);
     }
 

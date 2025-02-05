@@ -4,84 +4,94 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
              xmlns:views="clr-namespace:OpenIPC_Config.Views"
-             mc:Ignorable="d" 
+             xmlns:converters="clr-namespace:OpenIPC_Config.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OpenIPC_Config.Views.MainView"
-             x:DataType="vm:MainViewModel">
+             x:DataType="vm:MainViewModel"
+             x:Name="MainViewControl">
 
-    
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" /> <!-- TabControl -->
-            <RowDefinition Height="127*" /> <!-- Connection Details -->
-            <RowDefinition Height="160" />    <!-- Log Viewer -->
-            <RowDefinition Height="36" />   <!-- Footer -->
-        </Grid.RowDefinitions>
+    <UserControl.Resources>
+        <!-- Converters -->
+        <converters:BooleanToWidthConverter x:Key="BooleanToWidthConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+        <converters:InvertedBooleanConverter x:Key="InvertedBooleanConverter" />
+    </UserControl.Resources>
 
-        <!-- <Border Grid.Row="0" Background="GreenYellow"> -->
-        <!-- Tab Control -->
-        <TabControl x:Name="MainTabControl" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Padding="2">
-            <TabItem Header="WFB" IsVisible="{Binding !IsVRXEnabled}">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <views:WfbTabView />
-                </ScrollViewer>
-            </TabItem>
+    <DockPanel Background="Gray">
+        <!-- Header -->
+        <views:HeaderView DockPanel.Dock="Top" />
+        <views:LogViewer DockPanel.Dock="Bottom" />
 
-            <TabItem Header="WFB-GS" IsVisible="{Binding IsVRXEnabled}">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <views:WfbGSTabView />
-                </ScrollViewer>
-            </TabItem>
+        <!-- <ToggleSwitch DockPanel.Dock="Top" -->
+        <!--               FontSize="10" -->
+        <!--               OnContent="Expand" OffContent="Collapse" -->
+        <!--               Padding="0" -->
+        <!--               Margin="0" -->
+        <!--               IsChecked="{Binding IsTabsCollapsed, Converter={StaticResource InvertedBooleanConverter}}" /> -->
 
-            <TabItem Header="Telemetry" IsVisible="{Binding !IsVRXEnabled}">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <views:TelemetryTabView />
-                </ScrollViewer>
-            </TabItem>
 
-            <TabItem Header="Camera" IsVisible="{Binding !IsVRXEnabled}">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <views:CameraSettingsView />
-                </ScrollViewer>
-            </TabItem>
+        <!-- Sidebar Tabs -->
+        <TabControl x:Name="MainTabControl"
+                    DockPanel.Dock="Left"
+                    ItemsSource="{Binding Tabs}"
+                    SelectedIndex="{Binding SelectedTabIndex}"
+                    SelectedItem="{Binding SelectedTab}"
+                    Width="{Binding IsTabsCollapsed, 
+                    Converter={StaticResource BooleanToWidthConverter},
+                    ConverterParameter='80,180'}">
 
-            <TabItem Header="VRX" IsVisible="{Binding IsVRXEnabled}">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <views:VRXTabView />
-                </ScrollViewer>
-            </TabItem>
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Height="40" VerticalAlignment="Center" Margin="0,0,0,0">
+                        <!-- Define two columns: one for the icon and one for the text -->
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30" /> <!-- Fixed width for the icon -->
+                            <ColumnDefinition Width="*" /> <!-- Remaining space for the text -->
+                        </Grid.ColumnDefinitions>
 
-            <TabItem Header="Setup">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <views:SetupTabView />
-                </ScrollViewer>
-            </TabItem>
+                        <!-- Icon aligned to the far left -->
+                        <Svg Grid.Column="0" Path="{Binding Icon}"
+
+                             VerticalAlignment="Center"
+                             HorizontalAlignment="Center" />
+
+                        <!-- Text aligned to the far right -->
+                        <TextBlock Grid.Column="1" Text="{Binding TabName}"
+                                   Padding="0"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Left"
+                                   FontSize="18"
+                                   Margin="10,0,10,0"
+                                   IsVisible="{Binding IsTabsCollapsed, 
+                                        Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </Grid>
+                </DataTemplate>
+
+            </TabControl.ItemTemplate>
             
-            
+
         </TabControl>
-    <!-- </Border> -->
+        
+        <Panel Background="Transparent" Margin="0" >
+            <StackPanel Orientation="Horizontal">
+                <Button Background="Transparent" BorderThickness="0" 
+                        Padding="0"
+                        Command="{Binding ToggleTabsCommand}">
+                    
+                <Svg VerticalAlignment="Center" Path="/Assets/Icons/drawer-handle.svg" />
+                
+                </Button>
+                
+                <Button Width="10" Background="Transparent" BorderThickness="0" Margin="0" Padding="0"
+                        Command="{Binding ToggleTabsCommand}">
+                    <Svg Width="10" VerticalAlignment="Stretch"  Path="{Binding SvgPath}" />
+                </Button>
+            </StackPanel>
+        </Panel>
 
-        <!-- <Border Grid.Row="1"  Background="MistyRose"> -->
-        <!-- Connect Controls -->
-        <views:ConnectControlsView Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" />
-        <!-- </Border> -->
-        
-        <!-- <Border Grid.Row="2" Background="MediumPurple"> -->
-        <!-- Log Viewer -->
-        <views:LogViewer Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5" />
-        <!-- </Border> -->
-        
-        
-        <!-- Footer (Status Bar) -->
-        <Border Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="5"  BorderThickness="1" >
-            <views:StatusBarView />
-        </Border>
-        
-    </Grid>
-        </ScrollViewer>
+        <!-- Main Content -->
+        <ContentControl Content="{Binding SelectedTab.Content}"
+                        Margin="0" Padding="0" Background="Transparent" />
+    </DockPanel>
 </UserControl>

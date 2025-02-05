@@ -1,14 +1,10 @@
 using System;
-using System.IO;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Layout;
-using Avalonia.Logging;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -19,7 +15,6 @@ using MsBox.Avalonia.Enums;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
-using Prism.Events;
 using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
@@ -27,16 +22,18 @@ namespace OpenIPC_Config.ViewModels;
 public partial class ConnectControlsViewModel : ViewModelBase
 {
     private readonly CancellationTokenSource? _cancellationTokenSourc;
-    
-    private readonly IEventSubscriptionService _eventSubscriptionService;
 
     private readonly DispatcherTimer _dispatcherTimer;
+
+    private readonly IEventSubscriptionService _eventSubscriptionService;
 
     private readonly SolidColorBrush _offlineColorBrush = new(Colors.Red);
     private readonly SolidColorBrush _onlineColorBrush = new(Colors.Green);
     private readonly Ping _ping = new();
-    private DispatcherTimer _pingTimer;
 
+    private readonly TimeSpan _pingInterval = TimeSpan.FromSeconds(1);
+    private readonly TimeSpan _pingTimeout = TimeSpan.FromMilliseconds(500);
+    
     private bool _canConnect;
 
     private DeviceConfig _deviceConfig;
@@ -45,30 +42,29 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
     [ObservableProperty] private string _password;
 
+    private SolidColorBrush _pingStatusColor = new(Colors.Red);
+    private DispatcherTimer _pingTimer;
+
     [ObservableProperty] private int _port = 22;
 
-    private SolidColorBrush _pingStatusColor = new(Colors.Red);
-    
     private DeviceType _selectedDeviceType;
-
-    private readonly TimeSpan _pingInterval = TimeSpan.FromSeconds(1);
-    private readonly TimeSpan _pingTimeout = TimeSpan.FromMilliseconds(500);
 
     public ConnectControlsViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventSubscriptionService eventSubscriptionService)
+        IEventSubscriptionService eventSubscriptionService,
+        GlobalViewModel globalSettingsViewModel)
         : base(logger, sshClientService, eventSubscriptionService)
     {
-        
         SetDefaults();
         LoadSettings();
 
-        ConnectCommand = new RelayCommand(() => Connect());
+        // moved to MainViewModel
+        //ConnectCommand = new RelayCommand(() => Connect());
 
         _eventSubscriptionService = eventSubscriptionService ??
                                     throw new ArgumentNullException(nameof(eventSubscriptionService));
-
         
+
         UpdateUIMessage("Ready");
     }
 
@@ -83,6 +79,45 @@ public partial class ConnectControlsViewModel : ViewModelBase
                 RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 return Orientation.Horizontal;
             return Orientation.Vertical;
+        }
+    }
+
+
+    public bool CanConnect
+    {
+        get => _canConnect;
+        set => SetProperty(ref _canConnect, value);
+    }
+
+    public SolidColorBrush PingStatusColor
+    {
+        get => _pingStatusColor;
+        set
+        {
+            _pingStatusColor = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public DeviceType SelectedDeviceType
+    {
+        get => _selectedDeviceType;
+        set
+        {
+            // Ignore setting to None if it's due to a binding update
+            //if (value == DeviceType.None) return;
+
+            if (_selectedDeviceType != value)
+            {
+                _selectedDeviceType = value;
+
+                // Now only send the message with the selected device type
+                SendDeviceTypeMessage(_selectedDeviceType);
+
+                // Trigger any other actions, like OnPropertyChanged if needed
+                OnPropertyChanged();
+                CheckIfCanConnect();
+            }
         }
     }
 
@@ -110,45 +145,6 @@ public partial class ConnectControlsViewModel : ViewModelBase
         }
     }
 
-
-    public bool CanConnect
-    {
-        get => _canConnect;
-        set => SetProperty(ref _canConnect, value);
-    }
-
-    public SolidColorBrush PingStatusColor
-    {
-        get => _pingStatusColor;
-        set
-        {
-            _pingStatusColor = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public DeviceType SelectedDeviceType
-    {
-        get => _selectedDeviceType;
-        set
-        {
-            // Ignore setting to None if it's due to a binding update
-            if (value == DeviceType.None) return;
-
-            if (_selectedDeviceType != value)
-            {
-                _selectedDeviceType = value;
-
-                // Now only send the message with the selected device type
-                SendDeviceTypeMessage(_selectedDeviceType);
-
-                // Trigger any other actions, like OnPropertyChanged if needed
-                OnPropertyChanged();
-                CheckIfCanConnect();
-            }
-        }
-    }
-
     private void LoadSettings()
     {
         var settings = SettingsManager.LoadSettings();
@@ -156,9 +152,8 @@ public partial class ConnectControlsViewModel : ViewModelBase
         IpAddress = settings.IpAddress;
         Password = settings.Password;
         SelectedDeviceType = settings.DeviceType;
-        
+
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(SelectedDeviceType);
-        
     }
 
 
@@ -174,7 +169,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         // For example, use an event aggregator, messenger, or direct call
         Log.Debug($"Device type selected: {deviceType}");
         //Console.WriteLine($"Device type selected: {deviceType}");
-        
+
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(deviceType);
     }
 
@@ -199,6 +194,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
             };
             _pingTimer.Tick += PingTimer_Tick;
         }
+
         _pingTimer.Start();
     }
 
@@ -220,279 +216,268 @@ public partial class ConnectControlsViewModel : ViewModelBase
             PingStatusColor = _offlineColorBrush;
         }
     }
-    
-    private async void Connect()
-    {
-        var appMessage = new AppMessage();
-        //DeviceConfig deviceConfig = new DeviceConfig();
-        _deviceConfig.Username = "root";
-        _deviceConfig.IpAddress = IpAddress;
-        _deviceConfig.Password = Password;
-        _deviceConfig.Port = Port;
-        _deviceConfig.DeviceType = SelectedDeviceType;
 
-        UpdateUIMessage("Getting hostname");
+    // moved to MainViewModel
+    // private async void Connect()
+    // {
+    //     var appMessage = new AppMessage();
+    //     //DeviceConfig deviceConfig = new DeviceConfig();
+    //     _deviceConfig.Username = "root";
+    //     _deviceConfig.IpAddress = IpAddress;
+    //     _deviceConfig.Password = Password;
+    //     _deviceConfig.Port = Port;
+    //     _deviceConfig.DeviceType = SelectedDeviceType;
+    //
+    //     UpdateUIMessage("Getting hostname");
+    //
+    //     await getHostname(_deviceConfig);
+    //     if (_deviceConfig.Hostname == string.Empty)
+    //     {
+    //         Log.Error("Failed to get hostname, stopping");
+    //         return;
+    //     }
+    //
+    //     var validator = App.ServiceProvider.GetRequiredService<DeviceConfigValidator>();
+    //     if (!validator.IsDeviceConfigValid(_deviceConfig))
+    //     {
+    //         UpdateUIMessage("Hostname Error!");
+    //         var msBox = MessageBoxManager.GetMessageBoxStandard("Hostname Error!",
+    //             $"Hostname does not match device type! \nHostname: {_deviceConfig.Hostname} Device Type: {_selectedDeviceType}.\nPlease check device..\nOk to continue anyway\nCancel to quit",
+    //             ButtonEnum.OkCancel);
+    //
+    //         var result = await msBox.ShowAsync();
+    //         if (result == ButtonResult.Cancel)
+    //         {
+    //             Log.Debug("Device selection and hostname mismatch, stopping");
+    //             return;
+    //         }
+    //     }
+    //
+    //     // if ((_deviceConfig.Hostname.Contains("radxa") && _deviceConfig.DeviceType != DeviceType.Radxa) ||
+    //     //     (_deviceConfig.Hostname.Contains("openipc") && _deviceConfig.DeviceType != DeviceType.Camera))
+    //     // {
+    //     //     UpdateUIMessage("Hostname Error!");
+    //     //     var msBox = MessageBoxManager.GetMessageBoxStandard("Hostname Error!",
+    //     //         $"Hostname does not match device type! \nHostname: {_deviceConfig.Hostname} Device Type: {_selectedDeviceType}.\nPlease check device..\nOk to continue anyway\nCancel to quit",
+    //     //         ButtonEnum.OkCancel);
+    //     //
+    //     //     var result = await msBox.ShowAsync();
+    //     //     if (result == ButtonResult.Cancel)
+    //     //     {
+    //     //         Log.Debug("Device selection and hostname mismatch, stopping");
+    //     //         return;
+    //     //     }
+    //     // }
+    //
+    //     // Save the config to app settings
+    //     SaveConfig();
+    //
+    //     // Publish the event
+    //     EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { DeviceConfig = _deviceConfig });
+    //
+    //
+    //     appMessage.DeviceConfig = _deviceConfig;
+    //
+    //     if (_deviceConfig != null)
+    //     {
+    //         if (_deviceConfig.DeviceType == DeviceType.Camera)
+    //         {
+    //             UpdateUIMessage("Processing Camera...");
+    //             processCameraFiles();
+    //             UpdateUIMessage("Processing Camera...done");
+    //         }
+    //         else if (_deviceConfig.DeviceType == DeviceType.Radxa)
+    //         {
+    //             UpdateUIMessage("Processing Radxa...");
+    //             processRadxaFiles();
+    //             UpdateUIMessage("Processing Radxa...done");
+    //         }
+    //     }
+    //
+    //     UpdateUIMessage("Connected");
+    // }
 
-        await getHostname(_deviceConfig);
-        if (_deviceConfig.Hostname == string.Empty)
-        {
-            Log.Error("Failed to get hostname, stopping");
-            return;
-        }
+    // moved to MainViewModel
+    // private async void processRadxaFiles()
+    // {
+    //     try
+    //     {
+    //         UpdateUIMessage("Downloading wifibroadcast.cfg");
+    //
+    //         // get /etc/wifibroadcast.cfg
+    //         var wifibroadcastContent =
+    //             await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WifiBroadcastFileLoc);
+    //
+    //         if (!string.IsNullOrEmpty(wifibroadcastContent))
+    //         {
+    //             var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
+    //             radxaContentUpdatedMessage.WifiBroadcastContent = wifibroadcastContent;
+    //
+    //             EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
+    //                 RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage
+    //                 { WifiBroadcastContent = wifibroadcastContent });
+    //         }
+    //         else
+    //         {
+    //             await MessageBoxManager.GetMessageBoxStandard("Error", "Failed to download /etc/wifibroadcast.cfg")
+    //                 .ShowAsync();
+    //         }
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Log.Error(e.Message);
+    //         throw;
+    //     }
+    //
+    //
+    //     try
+    //     {
+    //         UpdateUIMessage("Downloading modprod.d/wfb.conf");
+    //         // get /etc/modprobe.d/wfb.conf
+    //         var wfbModProbeContent =
+    //             await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WifiBroadcastModProbeFileLoc);
+    //
+    //         if (wfbModProbeContent != null)
+    //         {
+    //             var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
+    //             radxaContentUpdatedMessage.WfbConfContent = wfbModProbeContent;
+    //
+    //             EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
+    //                 RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { WfbConfContent = wfbModProbeContent });
+    //         }
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Log.Error(e.Message);
+    //         throw;
+    //     }
+    //
+    //
+    //     try
+    //     {
+    //         UpdateUIMessage("Downloading screen-mode");
+    //         // get /home/radxa/scripts/screen-mode
+    //         var screenModeContent =
+    //             await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.ScreenModeFileLoc);
+    //
+    //         if (screenModeContent != null)
+    //         {
+    //             var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
+    //             radxaContentUpdatedMessage.ScreenModeContent = screenModeContent;
+    //
+    //             EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
+    //                 RadxaContentUpdatedMessage>(
+    //                 new RadxaContentUpdatedMessage { ScreenModeContent = screenModeContent });
+    //         }
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Log.Error(e.Message);
+    //         throw;
+    //     }
+    //
+    //     try
+    //     {
+    //         UpdateUIMessage("Downloading gskey");
+    //
+    //         var gsKeyContent =
+    //             await SshClientService.DownloadFileBytesAsync(_deviceConfig, OpenIPC.RemoteGsKeyPath);
+    //
+    //         if (gsKeyContent != null)
+    //         {
+    //             var droneKey = Utilities.ComputeMd5Hash(gsKeyContent);
+    //             if (droneKey != OpenIPC.KeyMD5Sum)
+    //                 Log.Warning("GS key MD5 checksum mismatch");
+    //             else
+    //                 Log.Information("GS key MD5 checksum matched default key");
+    //
+    //             EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent,
+    //                 RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { DroneKeyContent = droneKey });
+    //
+    //
+    //             UpdateUIMessage("Downloading gskey...done");
+    //         }
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Log.Error(e.Message);
+    //         throw;
+    //     }
+    //
+    //     EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage
+    //         { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
+    // }
 
-        var validator = App.ServiceProvider.GetRequiredService<DeviceConfigValidator>();
-        if (!validator.IsDeviceConfigValid(_deviceConfig))
-        {
-            UpdateUIMessage("Hostname Error!");
-            var msBox = MessageBoxManager.GetMessageBoxStandard("Hostname Error!",
-                $"Hostname does not match device type! \nHostname: {_deviceConfig.Hostname} Device Type: {_selectedDeviceType}.\nPlease check device..\nOk to continue anyway\nCancel to quit",
-                ButtonEnum.OkCancel);
-
-            var result = await msBox.ShowAsync();
-            if (result == ButtonResult.Cancel)
-            {
-                Log.Debug("Device selection and hostname mismatch, stopping");
-                return;
-            }
-        }
-        
-        // if ((_deviceConfig.Hostname.Contains("radxa") && _deviceConfig.DeviceType != DeviceType.Radxa) ||
-        //     (_deviceConfig.Hostname.Contains("openipc") && _deviceConfig.DeviceType != DeviceType.Camera))
-        // {
-        //     UpdateUIMessage("Hostname Error!");
-        //     var msBox = MessageBoxManager.GetMessageBoxStandard("Hostname Error!",
-        //         $"Hostname does not match device type! \nHostname: {_deviceConfig.Hostname} Device Type: {_selectedDeviceType}.\nPlease check device..\nOk to continue anyway\nCancel to quit",
-        //         ButtonEnum.OkCancel);
-        //
-        //     var result = await msBox.ShowAsync();
-        //     if (result == ButtonResult.Cancel)
-        //     {
-        //         Log.Debug("Device selection and hostname mismatch, stopping");
-        //         return;
-        //     }
-        // }
-
-        // Save the config to app settings
-        SaveConfig();
-        
-        // Publish the event
-        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { DeviceConfig = _deviceConfig});
-            
-
-        appMessage.DeviceConfig = _deviceConfig;
-
-        if (_deviceConfig != null)
-        {
-            if (_deviceConfig.DeviceType == DeviceType.Camera)
-            {
-                UpdateUIMessage("Processing Camera..." );
-                processCameraFiles();
-                UpdateUIMessage("Processing Camera...done");
-            }
-            else if (_deviceConfig.DeviceType == DeviceType.Radxa)
-            {
-                UpdateUIMessage("Processing Radxa...");
-                processRadxaFiles();
-                UpdateUIMessage("Processing Radxa...done");
-            }
-        }
-
-        UpdateUIMessage("Connected");
-    }
-
-    private async void processRadxaFiles()
-    {
-        try
-        {
-            UpdateUIMessage("Downloading wifibroadcast.cfg" );
-
-            // get /etc/wifibroadcast.cfg
-            var wifibroadcastContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WifiBroadcastFileLoc);
-
-            if (!string.IsNullOrEmpty(wifibroadcastContent))
-            {
-                var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
-                radxaContentUpdatedMessage.WifiBroadcastContent = wifibroadcastContent;
-
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
-                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { WifiBroadcastContent = wifibroadcastContent });
-                
-            }
-            else
-            {
-                await MessageBoxManager.GetMessageBoxStandard("Error", "Failed to download /etc/wifibroadcast.cfg")
-                    .ShowAsync();
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-            throw;
-        }
-
-
-        try
-        {
-            UpdateUIMessage("Downloading modprod.d/wfb.conf" );
-            // get /etc/modprobe.d/wfb.conf
-            var wfbModProbeContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WifiBroadcastModProbeFileLoc);
-
-            if (wfbModProbeContent != null)
-            {
-                var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
-                radxaContentUpdatedMessage.WfbConfContent = wfbModProbeContent;
-
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
-                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { WfbConfContent = wfbModProbeContent });
-
-                
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-            throw;
-        }
-
-
-        try
-        {
-            UpdateUIMessage("Downloading screen-mode");
-            // get /home/radxa/scripts/screen-mode
-            var screenModeContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.ScreenModeFileLoc);
-
-            if (screenModeContent != null)
-            {
-                var radxaContentUpdatedMessage = new RadxaContentUpdatedMessage();
-                radxaContentUpdatedMessage.ScreenModeContent = screenModeContent;
-
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
-                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { ScreenModeContent = screenModeContent });
-                
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-            throw;
-        }
-
-        try
-        {
-            UpdateUIMessage("Downloading gskey" );
-
-            var gsKeyContent =
-                await SshClientService.DownloadFileBytesAsync(_deviceConfig, Models.OpenIPC.RemoteGsKeyPath);
-
-            if (gsKeyContent != null)
-            {
-                var droneKey = Utilities.ComputeMd5Hash(gsKeyContent);
-                if (droneKey != OpenIPC.KeyMD5Sum)
-                {
-                    Log.Warning("GS key MD5 checksum mismatch");
-                }
-                else
-                {
-                    Log.Information("GS key MD5 checksum matched default key");
-                }
-
-                EventSubscriptionService.Publish<RadxaContentUpdateChangeEvent, 
-                    RadxaContentUpdatedMessage>(new RadxaContentUpdatedMessage { DroneKeyContent = droneKey });
-                
-
-                UpdateUIMessage("Downloading gskey...done" );
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-            throw;
-        }
-
-        EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
-        
-
-    }
-
-    private async void processCameraFiles()
-    {
-        // download file wfb.conf
-        var wfbConfContent = await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.WfbConfFileLoc);
-
-        
-
-        if (wfbConfContent != null)
-            EventSubscriptionService.Publish<WfbConfContentUpdatedEvent, 
-                WfbConfContentUpdatedMessage>(new WfbConfContentUpdatedMessage(wfbConfContent));
-
-        try
-        {
-            var majesticContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.MajesticFileLoc);
-            // Publish a message to WfbSettingsTabViewModel
-            EventSubscriptionService.Publish<MajesticContentUpdatedEvent, 
-                MajesticContentUpdatedMessage>(new MajesticContentUpdatedMessage(majesticContent));
-            
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-        }
-
-        try
-        {
-            var telemetryContent =
-                await SshClientService.DownloadFileAsync(_deviceConfig, Models.OpenIPC.TelemetryConfFileLoc);
-            // Publish a message to WfbSettingsTabViewModel
-            
-            EventSubscriptionService.Publish<TelemetryContentUpdatedEvent, 
-                TelemetryContentUpdatedMessage>(new TelemetryContentUpdatedMessage(telemetryContent));
-
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-            throw;
-        }
-
-        try
-        {
-            // get /home/radxa/scripts/screen-mode
-            var droneKeyContent =
-                await SshClientService.DownloadFileBytesAsync(_deviceConfig, Models.OpenIPC.RemoteDroneKeyPath);
-
-            
-            
-            if (droneKeyContent != null)
-            {
-                //byte[] fileBytes = Encoding.UTF8.GetBytes(droneKeyContent);
-                
-                var droneKey = Utilities.ComputeMd5Hash(droneKeyContent);
-
-                var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
-                _deviceConfig = DeviceConfig.Instance;
-                _deviceConfig.KeyChksum = droneKey;
-                deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
-
-                EventSubscriptionService.Publish<DeviceContentUpdateEvent, 
-                    DeviceContentUpdatedMessage>(deviceContentUpdatedMessage);
-                
-            }
-        }
-        catch (Exception e)
-        {
-            Log.Error(e.Message);
-            throw;
-        }
-
-        EventSubscriptionService.Publish<AppMessageEvent, 
-            AppMessage>(new AppMessage() { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
-
-        
-    }
+    // moved to MainViewModel
+    // private async void processCameraFiles()
+    // {
+    //     // download file wfb.conf
+    //     var wfbConfContent = await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WfbConfFileLoc);
+    //
+    //
+    //     if (wfbConfContent != null)
+    //         EventSubscriptionService.Publish<WfbConfContentUpdatedEvent,
+    //             WfbConfContentUpdatedMessage>(new WfbConfContentUpdatedMessage(wfbConfContent));
+    //
+    //     try
+    //     {
+    //         var majesticContent =
+    //             await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.MajesticFileLoc);
+    //         // Publish a message to WfbSettingsTabViewModel
+    //         EventSubscriptionService.Publish<MajesticContentUpdatedEvent,
+    //             MajesticContentUpdatedMessage>(new MajesticContentUpdatedMessage(majesticContent));
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Log.Error(e.Message);
+    //     }
+    //
+    //     try
+    //     {
+    //         var telemetryContent =
+    //             await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.TelemetryConfFileLoc);
+    //         // Publish a message to WfbSettingsTabViewModel
+    //
+    //         EventSubscriptionService.Publish<TelemetryContentUpdatedEvent,
+    //             TelemetryContentUpdatedMessage>(new TelemetryContentUpdatedMessage(telemetryContent));
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Log.Error(e.Message);
+    //         throw;
+    //     }
+    //
+    //     try
+    //     {
+    //         // get /home/radxa/scripts/screen-mode
+    //         var droneKeyContent =
+    //             await SshClientService.DownloadFileBytesAsync(_deviceConfig, OpenIPC.RemoteDroneKeyPath);
+    //
+    //
+    //         if (droneKeyContent != null)
+    //         {
+    //             //byte[] fileBytes = Encoding.UTF8.GetBytes(droneKeyContent);
+    //
+    //             var droneKey = Utilities.ComputeMd5Hash(droneKeyContent);
+    //
+    //             var deviceContentUpdatedMessage = new DeviceContentUpdatedMessage();
+    //             _deviceConfig = DeviceConfig.Instance;
+    //             _deviceConfig.KeyChksum = droneKey;
+    //             deviceContentUpdatedMessage.DeviceConfig = _deviceConfig;
+    //
+    //             EventSubscriptionService.Publish<DeviceContentUpdateEvent,
+    //                 DeviceContentUpdatedMessage>(deviceContentUpdatedMessage);
+    //         }
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Log.Error(e.Message);
+    //         throw;
+    //     }
+    //     
+    //     EventSubscriptionService.Publish<AppMessageEvent,
+    //         AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
+    // }
 
     /// <summary>
     ///     Retrieves the hostname of the device asynchronously using SSH.
@@ -510,7 +495,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         var cancellationToken = cts.Token;
 
         var cmdResult =
-            await SshClientService.ExecuteCommandWithResponse(deviceConfig, DeviceCommands.GetHostname,
+            await SshClientService.ExecuteCommandWithResponseAsync(deviceConfig, DeviceCommands.GetHostname,
                 cancellationToken);
 
         // If the command execution takes longer than 10 seconds, the task will be cancelled

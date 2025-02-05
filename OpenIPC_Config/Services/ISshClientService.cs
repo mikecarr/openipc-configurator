@@ -9,9 +9,10 @@ namespace OpenIPC_Config.Services;
 public interface ISshClientService
 {
     // Executes a command on the remote device and returns its response
-    Task<SshCommand> ExecuteCommandWithResponse(DeviceConfig deviceConfig, string command,
+    Task<SshCommand> ExecuteCommandWithResponseAsync(DeviceConfig deviceConfig, string command,
         CancellationToken cancellationToken);
 
+    
     // Executes a command on the remote device asynchronously
     Task ExecuteCommandAsync(DeviceConfig deviceConfig, string command);
 
@@ -26,7 +27,7 @@ public interface ISshClientService
 
     // Downloads a file from the remote device and returns its content as a string
     Task<byte[]> DownloadFileBytesAsync(DeviceConfig deviceConfig, string remotePath);
-    
+
     Task<string> DownloadFileAsync(DeviceConfig deviceConfig, string remotePath);
 
     // Downloads a file from the remote path to the local path asynchronously using SCP
@@ -42,10 +43,18 @@ public interface ISshClientService
     Task UploadBinaryAsync(DeviceConfig deviceConfig, string remoteDirectory, string fileName);
 
     // Uploads a specific binary file by file type and name using SCP
-    Task UploadBinaryAsync(DeviceConfig deviceConfig, string remoteDirectory, Models.OpenIPC.FileType fileType,
+    Task UploadBinaryAsync(DeviceConfig deviceConfig, string remoteDirectory, OpenIPC.FileType fileType,
         string fileName);
 
     // Executes a command on the remote device asynchronously with progress updates
-    Task ExecuteCommandWithProgressAsync(DeviceConfig deviceConfig, string command,
-        Action<string> updateProgress, CancellationToken cancellationToken = default);
+    // Task ExecuteCommandWithProgressAsync(DeviceConfig deviceConfig, string command,
+    //     Action<string> updateProgress, CancellationToken cancellationToken = default);
+
+    Task ExecuteCommandWithProgressAsync(
+        DeviceConfig deviceConfig,
+        string command,
+        Action<string> updateProgress,
+        CancellationToken cancellationToken = default,
+        TimeSpan? timeout = null,
+        Func<string, bool> isCommandComplete = null);
 }

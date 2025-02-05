@@ -3,16 +3,12 @@ using Newtonsoft.Json;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
 using Serilog;
-using Serilog.Events;
 
 namespace OpenIPC_Config.Tests.Services;
 
 [TestFixture]
 public class SettingsManagerTests
 {
-    private Mock<IEventAggregator> _mockEventAggregator;
-    private string _testSettingsFilePath;
-    
     [SetUp]
     public void SetUp()
     {
@@ -28,11 +24,11 @@ public class SettingsManagerTests
     public void TearDown()
     {
         // Clean up the test file if it exists
-        if (File.Exists(_testSettingsFilePath))
-        {
-            File.Delete(_testSettingsFilePath);
-        }
+        if (File.Exists(_testSettingsFilePath)) File.Delete(_testSettingsFilePath);
     }
+
+    private Mock<IEventAggregator> _mockEventAggregator;
+    private string _testSettingsFilePath;
 
     [Test]
     public void LoadSettings_FileExists_ReturnsCorrectDeviceConfig()
@@ -81,7 +77,7 @@ public class SettingsManagerTests
             IpAddress = "192.168.1.100",
             Username = "user",
             Password = "pass",
-            DeviceType = DeviceType.NVR
+            DeviceType = DeviceType.Camera
         };
 
         // Act
@@ -106,7 +102,7 @@ public class SettingsManagerTests
         // Mock the logger
         var mockLogger = new Mock<ILogger>();
         Log.Logger = mockLogger.Object;
-        
+
         // Act
         var result = SettingsManager.LoadSettings();
 
@@ -124,6 +120,4 @@ public class SettingsManagerTests
         Assert.AreEqual("", result.Password);
         Assert.AreEqual(DeviceType.Camera, result.DeviceType);
     }
-
-
 }

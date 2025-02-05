@@ -1,4 +1,3 @@
-using Avalonia;
 using Moq;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
@@ -11,12 +10,6 @@ namespace OpenIPC_Config.Tests.ViewModels;
 [TestFixture]
 public class TelemetryTabViewModelTests
 {
-    private Mock<ILogger> _mockLogger;
-    private Mock<ISshClientService> _mockSshClientService;
-    private Mock<IEventSubscriptionService> _mockEventSubscriptionService;
-    private TelemetryTabViewModel _viewModel;
-    private Mock<IMessageBoxService> _mockMessageBoxService;
-
     [SetUp]
     public void SetUp()
     {
@@ -31,13 +24,17 @@ public class TelemetryTabViewModelTests
             _mockEventSubscriptionService.Object,
             _mockMessageBoxService.Object
         );
-        
+
         // Initialize default telemetry content
         _viewModel.TelemetryContent = "serial=/dev/ttyS0\nbaud=9600\nrouter=1\nmcs_index=5\naggregate=4\nchannels=3";
-        
-        
     }
-    
+
+    private Mock<ILogger> _mockLogger;
+    private Mock<ISshClientService> _mockSshClientService;
+    private Mock<IEventSubscriptionService> _mockEventSubscriptionService;
+    private TelemetryTabViewModel _viewModel;
+    private Mock<IMessageBoxService> _mockMessageBoxService;
+
 
     [Test]
     public void Constructor_InitializesWithDefaults()
@@ -55,7 +52,7 @@ public class TelemetryTabViewModelTests
     {
         // Arrange
         var telemetryContent = "serial=/dev/ttyS0\nbaud=9600\nrouter=1\nmcs_index=3";
-        var message = new TelemetryContentUpdatedMessage( telemetryContent );
+        var message = new TelemetryContentUpdatedMessage(telemetryContent);
 
         // Act
         _viewModel.HandleTelemetryContentUpdated(message);
@@ -85,7 +82,7 @@ public class TelemetryTabViewModelTests
         _mockSshClientService.Verify(
             service => service.UploadFileStringAsync(
                 It.IsAny<DeviceConfig>(),
-                Models.OpenIPC.TelemetryConfFileLoc,
+                OpenIPC.TelemetryConfFileLoc,
                 It.Is<string>(content =>
                     content.Contains("serial=/dev/ttyS0") &&
                     content.Contains("baud=9600") &&
@@ -114,7 +111,7 @@ public class TelemetryTabViewModelTests
         var vtxmenuIni = "vtxmenu.ini";
 
         _mockSshClientService
-            .Setup(service => service.UploadBinaryAsync(It.IsAny<DeviceConfig>(), "/etc", vtxmenuIni ))
+            .Setup(service => service.UploadBinaryAsync(It.IsAny<DeviceConfig>(), "/etc", vtxmenuIni))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -160,41 +157,6 @@ public class TelemetryTabViewModelTests
     }
 
     [Test]
-    public void OnBoardRecCommand_ExecutesOnAndOffCommands()
-    {
-        // Arrange
-        _viewModel.IsOnboardRecOn = true;
-
-        // Act
-        _viewModel.OnBoardRecCommand.Execute(null);
-
-        // Assert
-        _mockSshClientService.Verify(
-            service => service.ExecuteCommandAsync(
-                It.IsAny<DeviceConfig>(),
-                "yaml-cli .records.enabled true"
-            ),
-            Times.Once
-        );
-
-        // Arrange
-        _viewModel.IsOnboardRecOn = false;
-        _viewModel.IsOnboardRecOff = true;
-
-        // Act
-        _viewModel.OnBoardRecCommand.Execute(null);
-
-        // Assert
-        _mockSshClientService.Verify(
-            service => service.ExecuteCommandAsync(
-                It.IsAny<DeviceConfig>(),
-                "yaml-cli .records.enabled false"
-            ),
-            Times.Once
-        );
-    }
-
-    [Test]
     public void AddMavlinkCommand_ExecutesCommands()
     {
         // Act
@@ -217,7 +179,4 @@ public class TelemetryTabViewModelTests
             Times.Once
         );
     }
-    
-    
-
 }

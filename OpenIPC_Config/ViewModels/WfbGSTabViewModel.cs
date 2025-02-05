@@ -8,7 +8,6 @@ using MsBox.Avalonia;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
-using Prism.Events;
 using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
@@ -61,6 +60,9 @@ public partial class WfbGSTabViewModel : ViewModelBase
         { 177, "5885 MHz [177]" }
     };
 
+    private readonly WfbGsConfigParser _wfbGsConfigParser;
+    private readonly WifiConfigParser _wifiConfigParser;
+
 
     [ObservableProperty] private bool _canConnect;
 
@@ -71,9 +73,6 @@ public partial class WfbGSTabViewModel : ViewModelBase
 
     [ObservableProperty] private string _selectedFrequencyString;
     [ObservableProperty] private int _selectedPower;
-
-    private readonly WfbGsConfigParser _wfbGsConfigParser;
-    private readonly WifiConfigParser _wifiConfigParser;
 
     [ObservableProperty] private string _wifiRegion;
 
@@ -86,10 +85,10 @@ public partial class WfbGSTabViewModel : ViewModelBase
         _wifiConfigParser = new WifiConfigParser();
 
         InitializeCollections();
-        
-        EventSubscriptionService.Subscribe<RadxaContentUpdateChangeEvent, RadxaContentUpdatedMessage>(OnRadxaContentUpdateChange);
+
+        EventSubscriptionService.Subscribe<RadxaContentUpdateChangeEvent, RadxaContentUpdatedMessage>(
+            OnRadxaContentUpdateChange);
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
-        
     }
 
 
@@ -144,7 +143,7 @@ public partial class WfbGSTabViewModel : ViewModelBase
             }
 
             // Upload the updated configuration file
-            SshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastModProbeFileLoc,
+            SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.WifiBroadcastModProbeFileLoc,
                 updatedConfigString);
             Log.Information("Configuration file updated and uploaded successfully.");
         }
@@ -178,7 +177,7 @@ public partial class WfbGSTabViewModel : ViewModelBase
             }
 
             // Upload the updated configuration file
-            SshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.WifiBroadcastFileLoc,
+            SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.WifiBroadcastFileLoc,
                 updatedConfigContent);
             Log.Information("Configuration file updated and uploaded successfully.");
         }

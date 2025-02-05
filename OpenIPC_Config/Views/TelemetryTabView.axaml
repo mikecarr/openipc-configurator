@@ -9,93 +9,110 @@
              x:DataType="vm:TelemetryTabViewModel">
 
 
-    <!-- Labels for the left side -->
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+    <Panel>
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+        <Rectangle Height="300" Width="300" Fill="LightGray" />
 
-        </Grid.RowDefinitions>
+        <Border Background="#F0F0F0" CornerRadius="8" Padding="16" Margin="8">
+            <!-- Labels for the left side -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <Label Grid.Row="0" Grid.Column="0" Content="Select Serial Port" />
-        <Label Grid.Row="1" Grid.Column="0" Content="Select Baud Rate" />
-        <Label Grid.Row="2" Grid.Column="0" Content="Select MAVFWD(0)/MAV-ROUTER(1)/MSPOSD(2)" />
-        <Label Grid.Row="3" Grid.Column="0" Content="Select MCS INDEX" />
-        <Label Grid.Row="4" Grid.Column="0" Content="Select Aggregate" />
-        <Label Grid.Row="5" Grid.Column="0" Content="Select RC Channel" />
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-
-        <!-- ComboBoxes in the center column -->
-
-        <ComboBox Grid.Row="0" Grid.Column="1" ToolTip.Tip="Serial Port" ItemsSource="{Binding SerialPorts}"
-                  SelectedItem="{Binding SelectedSerialPort, Mode=TwoWay}" Margin="0,0,5,0" />
-
-        <ComboBox Grid.Row="1" Grid.Column="1" ToolTip.Tip="Baud Rate" ItemsSource="{Binding BaudRates}"
-                  SelectedItem="{Binding SelectedBaudRate, Mode=TwoWay}" Margin="0,0,5,0" />
-
-        <ComboBox Grid.Row="2" Grid.Column="1" ToolTip.Tip="MAVFWD(0)/MAV-ROUTER(1)/MSPOSD(2)"
-                  ItemsSource="{Binding Router}"
-                  SelectedItem="{Binding SelectedRouter, Mode=TwoWay}" WrapSelection="True" Margin="0,0,5,0" />
-
-        <ComboBox Grid.Row="3" Grid.Column="1" ToolTip.Tip="MCS INDEX" ItemsSource="{Binding McsIndex}"
-                  SelectedItem="{Binding SelectedMcsIndex, Mode=TwoWay}" Margin="0,0,5,0" />
-
-        <ComboBox Grid.Row="4" Grid.Column="1" ToolTip.Tip="Aggregate" ItemsSource="{Binding Aggregate}"
-                  SelectedItem="{Binding SelectedAggregate, Mode=TwoWay}" Margin="0,0,5,0" />
-
-        <ComboBox Grid.Row="5" Grid.Column="1" ToolTip.Tip="RC Channel" ItemsSource="{Binding RC_Channel}"
-                  SelectedItem="{Binding SelectedRcChannel, Mode=TwoWay}" Margin="0,0,5,0" />
+                <Label Grid.Row="0" Grid.Column="0" Content="Select Serial Port" />
+                <Label Grid.Row="1" Grid.Column="0" Content="Select Baud Rate" />
+                <Label Grid.Row="2" Grid.Column="0" Content="Select Router" />
+                <Label Grid.Row="3" Grid.Column="0" Content="Select MCS INDEX" />
+                <Label Grid.Row="4" Grid.Column="0" Content="Select Aggregate" />
+                <Label Grid.Row="5" Grid.Column="0" Content="Select RC Channel" />
 
 
-        <!-- Buttons and Toggles on the right side -->
+                <!-- ComboBoxes in the center column -->
 
-        <Button Grid.Row="0" Grid.Column="3" Content="Enable UART0" Command="{Binding EnableUART0Command}"
-                IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.EnableUART0ToolTip}" />
-        <Button Grid.Row="1" Grid.Column="3" Content="Disable UART0" Command="{Binding DisableUART0Command}"
-                IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.DisableUART0ToolTip}" />
-        <Button Grid.Row="2" Grid.Column="3" Content="Add MAVLINK" Command="{Binding AddMavlinkCommand}"
-                IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.AddMavlinkExtraToolTip}" />
-        <Button Grid.Row="3" Grid.Column="3" Content="Latest VTXMenu" Command="{Binding UploadLatestVtxMenuCommand}"
-                IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.UploadLatestVtxMenuToolTip}" />
-        <Button Grid.Row="4" Grid.Column="3" Content="Enable 40Mhz" Command="{Binding Enable40MhzCommand}"
-                IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.Enable40MhzToolTip}" />
-        <Button Grid.Row="5" Grid.Column="3" Content="MSPOSD Extra" Command="{Binding MSPOSDExtraCommand}"
-                IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.UploadINavFontsToolTip}" />
-        <Button Grid.Row="6" Grid.Column="3" Content="Onboard REC" Command="{Binding OnBoardRecCommand}"
-                IsEnabled="{Binding CanConnect}"
-                ToolTip.Tip="{x:Static assets:Resources.OnBoardRecToolTip}" />
+                <ComboBox Grid.Row="0" Grid.Column="1" ToolTip.Tip="Serial Port" ItemsSource="{Binding SerialPorts}"
+                          SelectedItem="{Binding SelectedSerialPort, Mode=TwoWay}" Margin="0,0,5,0" />
+
+                <ComboBox Grid.Row="1" Grid.Column="1" ToolTip.Tip="Baud Rate" ItemsSource="{Binding BaudRates}"
+                          SelectedItem="{Binding SelectedBaudRate, Mode=TwoWay}" Margin="0,0,5,0" />
+
+                <ComboBox Grid.Row="2" Grid.Column="1" ToolTip.Tip="{x:Static assets:Resources.TelemetryRouterToolTip}"
+                          ItemsSource="{Binding Router}"
+                          SelectedItem="{Binding SelectedRouter, Mode=TwoWay}" WrapSelection="True" Margin="0,0,5,0" />
+
+                <ComboBox Grid.Row="3" Grid.Column="1" ToolTip.Tip="MCS INDEX" ItemsSource="{Binding McsIndex}"
+                          SelectedItem="{Binding SelectedMcsIndex, Mode=TwoWay}" Margin="0,0,5,0" />
+
+                <ComboBox Grid.Row="4" Grid.Column="1" ToolTip.Tip="Aggregate" ItemsSource="{Binding Aggregate}"
+                          SelectedItem="{Binding SelectedAggregate, Mode=TwoWay}" Margin="0,0,5,0" />
+
+                <ComboBox Grid.Row="5" Grid.Column="1" ToolTip.Tip="RC Channel" ItemsSource="{Binding RC_Channel}"
+                          SelectedItem="{Binding SelectedRcChannel, Mode=TwoWay}" Margin="0,0,5,0" />
 
 
-        <!-- Onboard REC Toggle with RadioButtons -->
-        <RadioButton Grid.Row="6" Grid.Column="4" Content="ON" IsChecked="{Binding IsOnboardRecOn}"
-                     ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" Padding="3" />
-        <RadioButton Grid.Row="6" Grid.Column="5" Content="OFF" IsChecked="{Binding IsOnboardRecOff}"
-                     ToolTip.Tip="{x:Static assets:Resources.RecOffToolTip}" Padding="3" />
+                <!-- Buttons and Toggles on the right side -->
+
+                <Button Grid.Row="0" Grid.Column="3" Content="Enable UART0" Command="{Binding EnableUART0Command}"
+                        IsEnabled="{Binding CanConnect}"
+                        ToolTip.Tip="{x:Static assets:Resources.EnableUART0ToolTip}" />
+                <Button Grid.Row="1" Grid.Column="3" Content="Disable UART0" Command="{Binding DisableUART0Command}"
+                        IsEnabled="{Binding CanConnect}"
+                        ToolTip.Tip="{x:Static assets:Resources.DisableUART0ToolTip}" />
+                <Button Grid.Row="2" Grid.Column="3" Content="Add MAVLINK" Command="{Binding AddMavlinkCommand}"
+                        IsEnabled="{Binding CanConnect}"
+                        ToolTip.Tip="{x:Static assets:Resources.AddMavlinkExtraToolTip}" />
+                <Button Grid.Row="3" Grid.Column="3" Content="Latest VTXMenu"
+                        Command="{Binding UploadLatestVtxMenuCommand}"
+                        IsEnabled="{Binding CanConnect}"
+                        ToolTip.Tip="{x:Static assets:Resources.UploadLatestVtxMenuToolTip}" />
+                <Button Grid.Row="4" Grid.Column="3" Content="Enable 40Mhz" Command="{Binding Enable40MhzCommand}"
+                        IsEnabled="{Binding CanConnect}"
+                        ToolTip.Tip="{x:Static assets:Resources.Enable40MhzToolTip}" />
+                <Button Grid.Row="5" Grid.Column="3" Content="MSPOSD Camera Extra" Command="{Binding MSPOSDExtraCameraCommand}"
+                        IsEnabled="{Binding CanConnect}"
+                        ToolTip.Tip="{x:Static assets:Resources.MSPOSDExtraCameraToolTip}" />
+                <Button Grid.Row="6" Grid.Column="3" Content="MSPOSD GS Extra" Command="{Binding MSPOSDExtraGSCommand}"
+                        IsEnabled="{Binding CanConnect}"
+                        ToolTip.Tip="{x:Static assets:Resources.MSPOSDExtraGSToolTip}" />
+                <Button Grid.Row="7" Grid.Column="3" Content="Remove MSPOSD Extra" Command="{Binding RemoveMSPOSDExtraCommand}"
+                        IsEnabled="{Binding CanConnect}"
+                        ToolTip.Tip="{x:Static assets:Resources.MSPOSDExtraRemovalToolTip}" />
 
 
-        <!-- Save and Restart Button at the bottom left -->
-        <Button Grid.Row="6" Grid.Column="0" Content="Save &amp; Restart" HorizontalAlignment="Left"
-                Command="{Binding SaveAndRestartTelemetryCommand}"
-                IsEnabled="{Binding CanConnect}" />
-    </Grid>
+                <!-- ~1~ Onboard REC Toggle with RadioButtons @1@ -->
+                <!-- <ToggleSwitch Grid.Row="6" Grid.Column="4"  -->
+                <!--               OnContent="ON" OffContent="OFF" -->
+                <!--               IsChecked="{Binding IsOnboardRecOn}" -->
+                <!--               ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" /> -->
+                    
+                <!-- <RadioButton Grid.Row="6" Grid.Column="4" Content="ON" IsChecked="{Binding IsOnboardRecOn}" -->
+                <!--              ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" Padding="3" /> -->
+                <!-- <RadioButton Grid.Row="6" Grid.Column="5" Content="OFF" IsChecked="{Binding IsOnboardRecOff}" -->
+                <!--              ToolTip.Tip="{x:Static assets:Resources.RecOffToolTip}" Padding="3" /> -->
+
+
+                <!-- Save and Restart Button at the bottom left -->
+                <Button Grid.Row="6" Grid.Column="0" Content="Save &amp; Restart" HorizontalAlignment="Left"
+                        Command="{Binding SaveAndRestartTelemetryCommand}"
+                        IsEnabled="{Binding CanConnect}" />
+            </Grid>
+
+        </Border>
+    </Panel>
 </UserControl>

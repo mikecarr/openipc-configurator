@@ -1,0 +1,96 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="80"
+             x:Class="OpenIPC_Config.Views.HeaderView"
+             x:DataType="vm:MainViewModel"
+             Height="80">
+
+    <Grid Background="#555555" Height="80">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Logo and Title -->
+        <StackPanel Orientation="Vertical" Grid.Column="0">
+            <!-- <Image Source="/Assets/Icons/OpenIPC.png" Width="40" Height="40" Margin="0,0,10,0" /> -->
+            <Svg Width="150" Margin="10,5,0,0" Path="/Assets/Icons/openipc-logo.svg" />
+
+            <TextBlock FontSize="14" Foreground="White" Margin="10,5,0,5">
+                <Run Text="CONFIGURATOR" />
+                <Run Text="{Binding AppVersionText}" />
+            </TextBlock>
+
+
+        </StackPanel>
+        
+        <StackPanel Orientation="Vertical" Grid.Column="1" HorizontalAlignment="Left"
+                    VerticalAlignment="Center" Spacing="3" >
+
+            <Button Name="TelegramButton" Margin="0" Padding="20,0,5,5" Click="TelegramButton_OnClick" Background="Transparent" BorderThickness="0">
+                <Svg Width="16"  Path="/Assets/Icons/ic-telegram.svg" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            
+            <Button Name="GithubButton" Margin="0" Padding="20,0,5,5" Click="GithubButton_OnClick" 
+                    Background="Transparent" BorderThickness="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+                <Svg Width="16"  Path="/Assets/Icons/mdi-github.svg" />
+            </Button>
+            
+            <Button Name="DiscordButton" Margin="0" Padding="20,0,5,5" Click="DiscordButton_OnClick" Background="Transparent" BorderThickness="0">
+            <Svg Width="16"  Path="/Assets/Icons/ic-discord.svg" />
+            </Button>
+        </StackPanel>
+
+        <!-- Connection Fields -->
+        <Grid Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            
+            <!-- IP Address -->
+            <TextBox Width="200" Height="30" Watermark="IP Address"
+                     Text="{Binding IpAddress, Mode=TwoWay}"
+                     Background="{Binding EntryBoxBgColor}"
+                     HorizontalAlignment="Left"
+                     Classes="InputBox" Grid.Row="0" Margin="0,5,0,0" />
+            <StackPanel Orientation="Horizontal" Spacing="10" Grid.Row="1">
+                
+                <!-- Device Type -->
+                <ComboBox Width="120" Height="30" ToolTip.Tip="Device Type"
+                          Background="{Binding EntryBoxBgColor}"
+                          Margin="0,5,0,5"
+                          ItemsSource="{Binding DeviceTypes}"
+                          SelectedItem="{Binding SelectedDeviceType, Mode=TwoWay}" />
+
+                <!-- Port -->
+                <TextBox Width="50" Height="30" Watermark="Port"
+                         Background="{Binding EntryBoxBgColor}"
+                         Margin="0,5,0,5"
+                         Text="{Binding Port, Mode=TwoWay}" Classes="InputBox" />
+
+                <!-- Password -->
+                <TextBox Width="100" Height="30" Watermark="Password"
+                         Background="{Binding EntryBoxBgColor}"
+                         PasswordChar="*"
+                         Margin="0,5,0,5"
+                         Text="{Binding Password, Mode=TwoWay}" Classes="InputBox" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Circular Connect Button -->
+        <StackPanel Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,10,0">
+            <Button Width="60" Height="60" Command="{Binding ConnectCommand}"
+                    IsEnabled="{Binding CanConnect}"
+                    Classes="CircularButton" />
+
+            <TextBlock Text="Connect" Foreground="White" FontSize="12" HorizontalAlignment="Center" />
+        </StackPanel>
+    </Grid>
+
+</UserControl>

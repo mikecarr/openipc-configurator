@@ -13,7 +13,7 @@ public static class Majestic
     public const string ImageLuminance = "image.luminance";
     public const string ImageFlip = "image.flip";
     public const string ImageMirror = "image.mirror";
-    
+
     public const string FpvEnabled = "fpv.enabled";
     public const string FpvNoiseLevel = "fpv.noiseLevel";
     public const string FpvRoiQp = "fpv.roiQp";
@@ -22,5 +22,6 @@ public static class Majestic
     public const string FpvIntraLine = "fpv.intraLine";
     public const string FpvIntraQp = "fpv.intraQp";
     public const string FpvRoiRect = "fpv.roiRect";
-    
+
+    public const string RecordsEnabled = "records.enabled";
 }

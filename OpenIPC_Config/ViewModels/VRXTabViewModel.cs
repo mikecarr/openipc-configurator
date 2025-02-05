@@ -1,14 +1,11 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MsBox.Avalonia;
 using OpenIPC_Config.Events;
 using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
-using Prism.Events;
 using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
@@ -27,6 +24,9 @@ public partial class VRXTabViewModel : ViewModelBase
     [ObservableProperty] private string _droneKeyChecksum;
 
     [ObservableProperty] private ObservableCollection<string> _fps;
+    [ObservableProperty] private bool _isExtendedMavLinkOSD;
+
+    [ObservableProperty] private bool _isSimpleMavLinkOSD;
 
     [ObservableProperty] private ObservableCollection<string> _resolution;
 
@@ -36,9 +36,6 @@ public partial class VRXTabViewModel : ViewModelBase
 
     [ObservableProperty] private string _wfbConfContent;
 
-    [ObservableProperty] private bool _isSimpleMavLinkOSD;
-    [ObservableProperty] private bool _isExtendedMavLinkOSD;
-
     public VRXTabViewModel(ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService)
@@ -46,12 +43,12 @@ public partial class VRXTabViewModel : ViewModelBase
     {
         EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(onDeviceTypeChangeEvent);
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
-        EventSubscriptionService.Subscribe<RadxaContentUpdateChangeEvent, RadxaContentUpdatedMessage>(OnRadxaContentUpdateChange);
-        
+        EventSubscriptionService.Subscribe<RadxaContentUpdateChangeEvent, RadxaContentUpdatedMessage>(
+            OnRadxaContentUpdateChange);
+
         InitializeCollections();
     }
 
-    
 
     private void OnAppMessage(AppMessage appMessage)
     {
@@ -122,13 +119,13 @@ public partial class VRXTabViewModel : ViewModelBase
     {
         var resolution = SelectedResolution;
         var fps = SelectedFps;
-        
+
         //format 1920x1080@60
         var screenMode = $"{resolution}@{fps}\n";
-        
+
         UpdateUIMessage("Uploading screen mode");
-        await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, Models.OpenIPC.ScreenModeFileLoc, screenMode);
-        
+        await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.ScreenModeFileLoc, screenMode);
+
         // update the files here
         // VRX
         // Resolution /config/scripts/screen-mode
@@ -140,9 +137,7 @@ public partial class VRXTabViewModel : ViewModelBase
     [RelayCommand]
     private async Task EnableVrxMajestic()
     {
-        
-        if(IsSimpleMavLinkOSD)
-        {
+        if (IsSimpleMavLinkOSD)
             try
             {
                 //basic
@@ -157,10 +152,7 @@ public partial class VRXTabViewModel : ViewModelBase
                 Log.Error(e.Message);
                 throw;
             }
-            
-        }
         else
-        {
             //extended
             try
             {
@@ -176,8 +168,6 @@ public partial class VRXTabViewModel : ViewModelBase
                 throw;
             }
 
-        }
-        
         //rBtnMode1 = Extended,mavgs
         //rBtnMode2 = Simple, mavgs2
         //if "%1" == "mavgs" (
@@ -205,7 +195,5 @@ public partial class VRXTabViewModel : ViewModelBase
         //plink -ssh root@%2 -pw %3 sed -i '/pixelpilot --osd --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4/c\pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE --dvr-framerate $REC_FPS --dvr-fmp4 --dvr record_${current_date}.mp4 "&"' /config/scripts/stream.sh
         //plink -ssh root@%2 -pw %3 sed -i '/pixelpilot --osd --screen-mode $SCREEN_MODE/c\pixelpilot --osd --osd-elements video,wfbng --screen-mode $SCREEN_MODE "&"' /config/scripts/stream.sh
         //plink -ssh root@%2 -pw %3 reboot
-
-
     }
 }

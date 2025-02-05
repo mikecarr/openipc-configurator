@@ -300,6 +300,26 @@ namespace OpenIPC_Config.Assets {
         {
             get { return ResourceManager.GetString("PingStatusToolTip", resourceCulture); }
         }
+        
+        public static string TelemetryRouterToolTip
+        {
+            get { return ResourceManager.GetString("TelemetryRouterToolTip", resourceCulture); }
+        }
+        
+        public static string MSPOSDExtraCameraToolTip
+        {
+            get { return ResourceManager.GetString("MSPOSDExtraCameraToolTip", resourceCulture); }
+        }
+        public static string MSPOSDExtraGSToolTip
+        {
+            get { return ResourceManager.GetString("MSPOSDExtraGSToolTip", resourceCulture); }
+        }
+        
+        public static string MSPOSDExtraRemovalToolTip
+        {
+            get { return ResourceManager.GetString("MSPOSDExtraRemovalToolTip", resourceCulture); }
+            
+        }
 
     }
 }

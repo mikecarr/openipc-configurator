@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
 using Serilog;
 
 namespace OpenIPC_Config.Services;
@@ -13,8 +12,15 @@ public interface IFileSystem
 
 public class FileSystem : IFileSystem
 {
-    public bool Exists(string path) => File.Exists(path);
-    public string ReadAllText(string path) => File.ReadAllText(path);
+    public bool Exists(string path)
+    {
+        return File.Exists(path);
+    }
+
+    public string ReadAllText(string path)
+    {
+        return File.ReadAllText(path);
+    }
 }
 
 public static class VersionHelper
@@ -26,24 +32,19 @@ public static class VersionHelper
         _fileSystem = fileSystem;
     }
 
-    
+
     public static string GetAppVersion()
     {
         try
         {
             var versionFilePath = Path.Combine(AppContext.BaseDirectory, "VERSION");
-            if (_fileSystem.Exists(versionFilePath))
-            {
-                return _fileSystem.ReadAllText(versionFilePath).Trim();
-            }
+            if (_fileSystem.Exists(versionFilePath)) return _fileSystem.ReadAllText(versionFilePath).Trim();
             return "v0.0.1";
 
 
             // return Assembly.GetExecutingAssembly()
             //     .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
             //     .InformationalVersion ?? "Unknown Version";
-
-
         }
         catch (Exception ex)
         {

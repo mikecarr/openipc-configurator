@@ -1,8 +1,6 @@
 using Avalonia.Controls;
-using Avalonia.Input;
-using OpenIPC_Config.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using OpenIPC_Config.ViewModels;
 
 namespace OpenIPC_Config.Views;
 
@@ -11,11 +9,8 @@ public partial class SetupCameraButtonsView : UserControl
     public SetupCameraButtonsView()
     {
         InitializeComponent();
-        if (!Design.IsDesignMode)
-        {
-            DataContext = App.ServiceProvider.GetService<SetupTabViewModel>();
-        }
-        
+        if (!Design.IsDesignMode) DataContext = App.ServiceProvider.GetService<SetupTabViewModel>();
+
         ScriptFilesActionButton.IsEnabled = false;
         CameraKeyActionButton.IsEnabled = false;
     }
@@ -49,7 +44,4 @@ public partial class SetupCameraButtonsView : UserControl
     //         }
     //     }
     // }
-
-
-    
 }

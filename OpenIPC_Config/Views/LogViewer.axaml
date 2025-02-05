@@ -3,49 +3,57 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
-             mc:Ignorable="d" 
-             d:DesignWidth="600" d:DesignHeight="450"
+             mc:Ignorable="d"
+             d:DesignHeight="80"
+             Height="80"
              x:Class="OpenIPC_Config.Views.LogViewer"
              x:DataType="vm:LogViewerViewModel">
 
+
     
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" /> <!-- Label -->
-            <RowDefinition Height="*" />   <!-- ListBox -->
-        </Grid.RowDefinitions>
+    <Border BorderThickness="1" BorderBrush="Azure">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid>
+            <Grid.RowDefinitions>
+                <!-- Label -->
+                <!-- <RowDefinition Height="Auto" />  -->
+                <!-- ListBox -->
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" /> <!-- Single column for simplicity -->
-        </Grid.ColumnDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" /> <!-- Single column for simplicity -->
+            </Grid.ColumnDefinitions>
 
-        <!-- Label for log file information -->
-        <Label Grid.Row="0" 
-               FontStyle="Italic" 
-               FontSize="14"
-               Margin="5,5,5,10"
-               Content="Log File is also available in the System Application Folder" />
+            <!-- Label for log file information -->
+            <!-- <Label Grid.Row="0"  -->
+            <!--        FontStyle="Italic"  -->
+            <!--        FontSize="14" -->
+            <!--        Margin="5,5,5,10" -->
+            <!--        Content="Log File is also available in the System Application Folder" /> -->
 
-        <!-- Log viewer ListBox -->
-        <ListBox Grid.Row="1"
-                 BorderBrush="Black"
-                 BorderThickness="1"
-                 ItemsSource="{Binding LogMessages}"
-                 ScrollViewer.VerticalScrollBarVisibility="Visible"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 HorizontalAlignment="Stretch">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Grid HorizontalAlignment="Stretch">
-                        <TextBlock Text="{Binding}"
-                                   TextWrapping="Wrap"
-                                   FontSize="12"
-                                   Margin="0,0" />
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            <!-- Log viewer ListBox -->
+            <ListBox Grid.Row="0"
+                     BorderBrush="Black"
+                     BorderThickness="1"
+                     ItemsSource="{Binding LogMessages}"
+                     ScrollViewer.VerticalScrollBarVisibility="Visible"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     HorizontalAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid HorizontalAlignment="Stretch">
+                            <TextBlock Text="{Binding}"
+                                       TextWrapping="Wrap"
+                                       FontSize="12"
+                                       Margin="0,0" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
-    </Grid>
+        </Grid>
+        </ScrollViewer>
+    </Border>
 
 </UserControl>

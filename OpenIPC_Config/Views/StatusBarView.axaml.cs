@@ -1,6 +1,6 @@
 using Avalonia.Controls;
-using OpenIPC_Config.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using OpenIPC_Config.ViewModels;
 
 namespace OpenIPC_Config.Views;
 

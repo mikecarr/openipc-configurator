@@ -1,13 +1,9 @@
-using System;
 using System.Linq;
 using Avalonia.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIPC_Config.Events;
-using OpenIPC_Config.Models;
 using OpenIPC_Config.Services;
 using OpenIPC_Config.ViewModels;
-using Prism.Events;
-using Serilog;
 
 namespace OpenIPC_Config.Views;
 
@@ -24,29 +20,20 @@ public partial class MainView : UserControl
 
             // Subscribe to TabSelectionChangeEvent
             var _eventSubscriptionService = App.ServiceProvider.GetRequiredService<IEventSubscriptionService>();
-            
+
             _eventSubscriptionService.Subscribe<TabSelectionChangeEvent, string>(OnTabSelectionChanged);
-        }
-        else
-        {
-            // Provide a default DataContext for design-time
-            DataContext = App.ServiceProvider.GetRequiredService<MainViewModel>(); 
         }
     }
 
     private void OnTabSelectionChanged(string selectedTab)
     {
-        // Find the TabControl
         var tabControl = this.FindControl<TabControl>("MainTabControl");
+        if (tabControl?.Items == null) return;
 
-        // Find the target TabItem by its Header
         var targetTab = tabControl.Items
-            .OfType<TabItem>()
-            .FirstOrDefault(tab => tab.Header?.ToString() == selectedTab);
+            .OfType<TabItemViewModel>()
+            .FirstOrDefault(tab => tab.TabName == selectedTab);
 
-        if (targetTab != null)
-        {
-            targetTab.IsSelected = true;
-        }
+        if (targetTab != null) tabControl.SelectedItem = targetTab;
     }
 }

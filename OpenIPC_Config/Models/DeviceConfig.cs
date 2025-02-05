@@ -23,10 +23,6 @@ public class DeviceConfig : INotifyPropertyChanged
     public IEventAggregator EventAggregator { get; set; }
     public static DeviceConfig Instance => _instance ??= new DeviceConfig();
 
-    public static void SetInstance(DeviceConfig instance)
-    {
-        _instance = instance;
-    }
     public string Username
     {
         get => _username;
@@ -96,6 +92,11 @@ public class DeviceConfig : INotifyPropertyChanged
         !string.IsNullOrEmpty(Password);
 
     public event PropertyChangedEventHandler PropertyChanged;
+
+    public static void SetInstance(DeviceConfig instance)
+    {
+        _instance = instance;
+    }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {

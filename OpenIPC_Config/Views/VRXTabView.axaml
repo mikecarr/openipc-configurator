@@ -37,7 +37,7 @@
         <ComboBox Grid.Row="1" Grid.Column="1" Width="250" ItemsSource="{Binding Fps}"
                   SelectedItem="{Binding SelectedFps, 
                   Mode=TwoWay}" />
-        
+
         <TextBlock Grid.Row="2" Grid.Column="1" FontSize="12"
                    Text="{Binding DroneKeyChecksum}" />
 
@@ -54,20 +54,19 @@
                 Command="{Binding EnableVrxMajesticCommand}"
                 IsEnabled="{Binding CanConnect}"
                 ToolTip.Tip="{x:Static assets:Resources.btnVRXMajestic}" />
-        
-        <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Vertical" >
-        <RadioButton Content="Simple"  FontSize="12" GroupName="MavLinkOSD" Margin="0"
-                IsEnabled="{Binding CanConnect}"
-                IsChecked="{Binding IsSimpleMavLinkOSD, Mode=TwoWay}"
-                ToolTip.Tip="{x:Static assets:Resources.btnVRXMajestic}" />
-        <!-- Enable MSPOSD on ttyS0") -->
-        <RadioButton Content="Extended" FontSize="12"  GroupName="MavLinkOSD" Margin="0"
-                     IsEnabled="{Binding CanConnect}"
-                     IsChecked="{Binding IsExtendedMavLinkOSD, Mode=TwoWay}"
-                     ToolTip.Tip="{x:Static assets:Resources.btnVRXMajestic}" />
-        <!-- Enable MSPOSD on ttyS2") -->
+
+        <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Vertical">
+            <RadioButton Content="Simple" FontSize="12" GroupName="MavLinkOSD" Margin="0"
+                         IsEnabled="{Binding CanConnect}"
+                         IsChecked="{Binding IsSimpleMavLinkOSD, Mode=TwoWay}"
+                         ToolTip.Tip="{x:Static assets:Resources.btnVRXMajestic}" />
+            <!-- Enable MSPOSD on ttyS0") -->
+            <RadioButton Content="Extended" FontSize="12" GroupName="MavLinkOSD" Margin="0"
+                         IsEnabled="{Binding CanConnect}"
+                         IsChecked="{Binding IsExtendedMavLinkOSD, Mode=TwoWay}"
+                         ToolTip.Tip="{x:Static assets:Resources.btnVRXMajestic}" />
+            <!-- Enable MSPOSD on ttyS2") -->
         </StackPanel>
-        
 
 
     </Grid>

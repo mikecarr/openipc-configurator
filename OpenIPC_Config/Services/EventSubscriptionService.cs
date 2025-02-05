@@ -7,7 +7,7 @@ namespace OpenIPC_Config.Services;
 public interface IEventSubscriptionService
 {
     void Subscribe<TEvent, TPayload>(Action<TPayload> action) where TEvent : PubSubEvent<TPayload>, new();
-    
+
     void Publish<TEvent, TPayload>(TPayload payload) where TEvent : PubSubEvent<TPayload>, new();
 }
 
@@ -21,13 +21,13 @@ public class EventSubscriptionService : IEventSubscriptionService
         _eventAggregator = eventAggregator ?? throw new ArgumentNullException(nameof(eventAggregator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
-    
+
     public void Subscribe<TEvent, TPayload>(Action<TPayload> action) where TEvent : PubSubEvent<TPayload>, new()
     {
         _eventAggregator.GetEvent<TEvent>().Subscribe(action);
         _logger.Verbose($"Subscribed to event {typeof(TEvent).Name}");
     }
-    
+
     public void Publish<TEvent, TPayload>(TPayload payload) where TEvent : PubSubEvent<TPayload>, new()
     {
         _eventAggregator.GetEvent<TEvent>().Publish(payload);
