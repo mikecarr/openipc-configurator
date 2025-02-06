@@ -11,14 +11,11 @@
 
     <Panel>
 
-        <Rectangle Height="300" Width="310" Fill="LightGray" />
-
         <Border Background="#F0F0F0" CornerRadius="8" Padding="16" Margin="8">
-
-            <StackPanel Orientation="Vertical" Spacing="5">
 
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -63,7 +60,8 @@
                               SelectedItem="{Binding SelectedFps, Mode=TwoWay}" />
                     <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Codec}"
                               SelectedItem="{Binding SelectedCodec, Mode=TwoWay}" />
-                    <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Bitrate}"
+                    <ComboBox Grid.Row="3" Grid.Column="1" 
+                              ItemsSource="{Binding Bitrate}"
                               SelectedItem="{Binding SelectedBitrate, Mode=TwoWay}" />
                     <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Exposure}"
                               SelectedItem="{Binding SelectedExposure, Mode=TwoWay}" />
@@ -75,22 +73,43 @@
                               SelectedItem="{Binding SelectedSaturation, Mode=TwoWay}" />
                     <ComboBox Grid.Row="8" Grid.Column="1" ItemsSource="{Binding Luminance}"
                               SelectedItem="{Binding SelectedLuminance, Mode=TwoWay}" />
-                    <ComboBox Grid.Row="9" Grid.Column="1" ItemsSource="{Binding Flip}"
-                              SelectedItem="{Binding SelectedFlip, Mode=TwoWay}" />
-                    <ComboBox Grid.Row="10" Grid.Column="1" ItemsSource="{Binding Mirror}"
-                              SelectedItem="{Binding SelectedMirror, Mode=TwoWay}" />
+                    
+                    <ToggleSwitch Grid.Row="9" Grid.Column="1" 
+                                  OnContent="ON" OffContent="OFF"
+                                  Padding="5,5,0,0"
+                                  Margin="5,0,0,0"
+                                  IsChecked="{Binding SelectedFlip}"
+                                   />
+                    <ToggleSwitch Grid.Row="10" Grid.Column="1" 
+                                  OnContent="ON" OffContent="OFF"
+                                  Padding="5,5,0,0"
+                                  Margin="5,0,0,0"
+                                  IsChecked="{Binding SelectedMirror}"
+                    />
+
+                    
+                    <!-- <ComboBox Grid.Row="9" Grid.Column="1" ItemsSource="{Binding Flip}" -->
+                    <!--           SelectedItem="{Binding SelectedFlip, Mode=TwoWay}" /> -->
+                    <!-- <ComboBox Grid.Row="10" Grid.Column="1" ItemsSource="{Binding Mirror}" -->
+                    <!--           SelectedItem="{Binding SelectedMirror, Mode=TwoWay}" /> -->
 
                     <!-- Onboard REC Toggle with RadioButtons -->
                     <ToggleSwitch Grid.Row="11" Grid.Column="1" 
                                   OnContent="ON" OffContent="OFF"
                                   Padding="0,5,0,0"
+                                  Margin="5,0,0,0"
                                   IsChecked="{Binding IsOnboardRecOn}"
                                   ToolTip.Tip="{x:Static assets:Resources.RecOnToolTip}" />
                     
-                    <Label Grid.Row="0" Grid.Column="2" Margin="5,0,0,0" Content="FPV Enabled"
+                    
+                    <Label Grid.Row="0" Grid.Column="2" Margin="5,0,0,0"
+                           VerticalContentAlignment="Center"
+                           Content="FPV Enabled"
                            ToolTip.Tip="{x:Static assets:Resources.FpvEnabledToolTip}" />
 
-                    <Label Grid.Row="1" Grid.Column="2" Margin="5,0,0,0" Content="FPV Noise Level"
+                    <Label Grid.Row="1" Grid.Column="2" Margin="5,0,0,0" 
+                           Content="FPV Noise Level"
+                           VerticalAlignment="Center"
                            ToolTip.Tip="{x:Static assets:Resources.FpvNoiseLevelToolTip}" />
 
                     <Label Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" Content="FPV roiQp"
@@ -112,9 +131,18 @@
                            ToolTip.Tip="{x:Static assets:Resources.FpvRoiRectToolTip}" />
 
 
-                    <ComboBox Grid.Row="0" Grid.Column="3"
-                              ItemsSource="{Binding FpvEnabled}"
-                              SelectedItem="{Binding SelectedFpvEnabled, Mode=TwoWay}" />
+                    <!-- <ComboBox Grid.Row="0" Grid.Column="3" -->
+                    <!--           ItemsSource="{Binding FpvEnabled}" -->
+                    <!--           SelectedItem="{Binding SelectedFpvEnabled, Mode=TwoWay}" /> -->
+                    <!-- -->
+                    <ToggleSwitch Grid.Row="0" Grid.Column="3" 
+                                  OnContent="ON" OffContent="OFF"
+                                  Padding="5,5,0,0"
+                                  Margin="5,0,0,0"
+                                  IsChecked="{Binding SelectedFpvEnabled}"
+                                  ToolTip.Tip="{x:Static assets:Resources.FpvEnabledToolTip}" />
+
+                    
                     <ComboBox Grid.Row="1" Grid.Column="3"
                               ItemsSource="{Binding FpvNoiseLevel}"
                               SelectedItem="{Binding SelectedFpvNoiseLevel, Mode=TwoWay}" />
@@ -148,18 +176,19 @@
                         <TextBox Watermark="Width"
                                  Text="{Binding FpvRoiRectWidth[0], Mode=TwoWay}" />
                     </StackPanel>
-                </Grid>
+                
 
                 <!-- Restart Majestic Button -->
-                <Button Content="Save &amp; Restart Majestic" HorizontalAlignment="Left" Margin="10"
+                <Button Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" Content="Save &amp; Restart Majestic" 
+                        HorizontalAlignment="Left" Margin="0,5,0,0"
                         Command="{Binding RestartMajesticCommand}"
                         IsEnabled="{Binding CanConnect}"
                         ToolTip.Tip="{x:Static assets:Resources.RestartMajesticToolTip}" />
 
                 <!-- ~1~ Warning Label @1@ -->
                 <!-- <TextBlock Text="Be careful what you enter here" HorizontalAlignment="Right" FontSize="12" /> -->
-
-            </StackPanel>
+                </Grid>
+            
         </Border>
     </Panel>
 </UserControl>

@@ -79,14 +79,14 @@
                            Text="Firmware Upgrade Progress" FontWeight="Medium"  />
                 <ProgressBar Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" 
                              Minimum="0" Maximum="100" Value="{Binding ProgressValue}" Height="20" />
-                <TextBox Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3"
-                         BorderBrush="Transparent"
-                         Background="Transparent"
-                         Margin="0,10,0,0"
-                         Text="" 
-                         AcceptsReturn="True" 
-                         IsReadOnly="True" 
-                         Height="100" />
+                <!-- <TextBox Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3" -->
+                <!--          BorderBrush="Transparent" -->
+                <!--          Background="Transparent" -->
+                <!--          Margin="0,10,0,0" -->
+                <!--          Text=""  -->
+                <!--          AcceptsReturn="True"  -->
+                <!--          IsReadOnly="True"  -->
+                <!--          Height="100" /> -->
 
             </Grid>
         </Border>
