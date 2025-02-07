@@ -47,7 +47,7 @@ Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator
 ## Technical Details
 
 * **Built using Avalonia UI**, a cross-platform XAML-based UI framework
-* `.NET Core 3.1 or later`
+* `.NET 8.0
 * **Supports multiple camera models and configurations**
 * **Includes logging and error handling** for troubleshooting and debugging
 
@@ -64,11 +64,11 @@ Based off of MarioFPV's [OpenIPC Config](https://github.com/OpenIPC/configurator
 
 https://github.com/serilog/serilog/wiki/Configuration-Basics
 
-## App Logs
-* Android: /data/user/0/org.openipc.OpenIPC/files/.config/openipc-configurator.log
-* Mac: "$HOME/Library/Application Support/OpenIPC_Config/Logs"
-* Windows: %APPDATA%\Local\OpenIPC_Config\Logs
-* Linux: ~/.config/openipc-configurator.log
+### App Logs
+  * Android: /data/user/0/org.openipc.OpenIPC/files/.config/openipc-configurator.log
+  * Mac: "$HOME/Library/Application Support/OpenIPC_Config/Logs"
+  * Windows: %APPDATA%\Local\OpenIPC_Config\Logs
+  * Linux: ~/.config/openipc-configurator.log
 
 
 Based on your folder structure, here’s an explanation of each project and what it likely targets:
