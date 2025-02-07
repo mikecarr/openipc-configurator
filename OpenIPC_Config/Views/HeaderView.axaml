@@ -8,6 +8,7 @@
              x:DataType="vm:MainViewModel"
              Height="80">
 
+    <ScrollViewer>
     <Grid Background="#555555" Height="80">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -92,5 +93,5 @@
             <TextBlock Text="Connect" Foreground="White" FontSize="12" HorizontalAlignment="Center" />
         </StackPanel>
     </Grid>
-
+    </ScrollViewer>
 </UserControl>

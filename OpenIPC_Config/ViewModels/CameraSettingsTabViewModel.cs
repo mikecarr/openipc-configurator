@@ -317,9 +317,14 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         Luminance = new ObservableCollection<string>(Enumerable.Range(1, 100).Select(i => (i * 5).ToString()));
 
         Flip = new ObservableCollection<string> { "true", "false" };
+        SelectedFlip = "false";
+        
         Mirror = new ObservableCollection<string> { "true", "false" };
-
+        SelectedMirror = "false";
+        
         FpvEnabled = new ObservableCollection<string> { "true", "false" };
+        SelectedFpvEnabled = "false";
+        
         FpvNoiseLevel = new ObservableCollection<string> { "", "0", "1", "2" };
 
 

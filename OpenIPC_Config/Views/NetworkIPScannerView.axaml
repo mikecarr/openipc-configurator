@@ -45,17 +45,35 @@ Do not touch anything until finished</TextBlock>
                     ToolTip.Tip="{x:Static assets:Resources.ScanIpToolTip}" />
 
 
-            <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" BorderThickness="0"
-                     Background="Transparent"
-                     Text="{Binding ScanMessages}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+                       Background="Transparent"
+                       FontWeight="Bold"
+                       FontSize="12"
+                       Height="40"
+                       Focusable="False"
+                       Padding="5,10,0,0"
+                       VerticalAlignment="Center"
+                       MaxLines="1"
+                       Text="{Binding ScanMessages}" />
 
-            <TextBox Grid.Row="4" Grid.Column="0"
-                     FontSize="12" BorderThickness="0"
+            <TextBlock Grid.Row="4" Grid.Column="0"
+                     FontSize="12" 
+                     Focusable="False"
+                     Padding="5,10,0,0"
+                     Background="Transparent"
                      Text="Available IP Addresses on your network:" />
+            <!-- <TextBox Grid.Row="4" Grid.Column="0" -->
+            <!--          FontSize="12" BorderThickness="0" -->
+            <!--          IsReadOnly="True" -->
+            <!--          Focusable="False" -->
+            <!--          Background="Transparent" -->
+            <!--          Text="Available IP Addresses on your network:" /> -->
 
             <ScrollViewer Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" VerticalScrollBarVisibility="Auto">
                 <TextBox AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto"
                          Height="125"
+                         IsReadOnly="True"
+                         Focusable="False"
                          Text="{Binding ScanIPResultTextBox}" />
             </ScrollViewer>
 

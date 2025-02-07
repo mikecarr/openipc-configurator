@@ -11,7 +11,7 @@
     <!-- Default Window Style -->
     <Style Selector="Window">
         <Setter Property="Width" Value="900" />
-        <Setter Property="Height" Value="815" />
+        <Setter Property="Height" Value="715" />
         <!-- <Setter Property="RequestedThemeVariant" Value="Dark" /> -->
         <Setter Property="RequestedThemeVariant" Value="Light" />
     </Style>

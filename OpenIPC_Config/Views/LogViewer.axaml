@@ -11,7 +11,7 @@
 
 
     
-    <Border BorderThickness="1" BorderBrush="Azure">
+    <Border Background="#F0F0F0" CornerRadius="8" Padding="0,3,0,5" Margin="0">
         <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid>
             <Grid.RowDefinitions>
@@ -34,8 +34,11 @@
 
             <!-- Log viewer ListBox -->
             <ListBox Grid.Row="0"
+                     Padding="0"
+                     Margin="0"
+                     CornerRadius="8"
                      BorderBrush="Black"
-                     BorderThickness="1"
+                     BorderThickness="0"
                      ItemsSource="{Binding LogMessages}"
                      ScrollViewer.VerticalScrollBarVisibility="Visible"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"

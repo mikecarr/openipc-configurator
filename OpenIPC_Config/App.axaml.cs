@@ -52,12 +52,13 @@ public class App : Application
         var configPath = GetConfigPath();
 
         // Create default settings if not present
-        if (!File.Exists(configPath))
-        {
+        //if (!File.Exists(configPath))
+        //{
+            // create the file
             var defaultSettings = createDefaultAppSettings();
             File.WriteAllText(configPath, defaultSettings.ToString());
             Log.Information($"Default appsettings.json created at {configPath}");
-        }
+        //}
 
         // Build configuration
         var configuration = new ConfigurationBuilder()
@@ -349,7 +350,7 @@ public class App : Application
             ),
             new JProperty("Serilog",
                 new JObject(
-                    new JProperty("Using", new JArray("Serilog.Sinks.Console", "Serilog.Sinks.RollingFile")),
+                    new JProperty("Using", new JArray("Serilog.Sinks.Console", "Serilog.Sinks.File")),
                     new JProperty("MinimumLevel", "Verbose"),
                     new JProperty("WriteTo",
                         new JArray(
@@ -357,11 +358,15 @@ public class App : Application
                                 new JProperty("Name", "Console")
                             ),
                             new JObject(
-                                new JProperty("Name", "RollingFile"),
+                                new JProperty("Name", "File"),
                                 new JProperty("Args",
                                     new JObject(
-                                        new JProperty("pathFormat",
-                                            $"{OpenIPC.AppDataConfigDirectory}/Logs/configurator-{{Date}}.log")
+                                        new JProperty("path",
+                                            $"{OpenIPC.AppDataConfigDirectory}/Logs/configurator.log"),
+                                        new JProperty("rollingInterval",
+                                            "Day"),
+                                        new JProperty("retainedFileCountLimit",
+                                            "5")
                                     )
                                 )
                             )
