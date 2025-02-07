@@ -22,6 +22,8 @@ public partial class MainViewModel : ViewModelBase
 {
     [ObservableProperty] private string _svgPath;
     private bool _isTabsCollapsed;
+    
+    [ObservableProperty] private bool _isMobile;
     private DeviceType _selectedDeviceType;
 
     private readonly IServiceProvider _serviceProvider;
@@ -35,6 +37,7 @@ public partial class MainViewModel : ViewModelBase
         GlobalViewModel globalSettingsViewModel)
         : base(logger, sshClientService, eventSubscriptionService)
     {
+        IsMobile = false;
         _serviceProvider = serviceProvider;
         _appVersionText = GetFormattedAppVersion();
         CanConnect = false;
@@ -71,30 +74,31 @@ public partial class MainViewModel : ViewModelBase
         // if Mobile apps default to tabs collapsed
         if(OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
         {
+            IsMobile = true;
             IsTabsCollapsed = true;
         }
 
         if (deviceType == DeviceType.Camera)
         {
-            Tabs.Add(new TabItemViewModel("Firmware", "avares://OpenIPC_Config/Assets/Icons/iconoir_cube.svg",
+            Tabs.Add(new TabItemViewModel("Firmware", "avares://OpenIPC_Config/Assets/Icons/iconair_firmware_dark.svg",
                 _serviceProvider.GetRequiredService<FirmwareTabViewModel>(), IsTabsCollapsed));
-            Tabs.Add(new TabItemViewModel("WFB", "avares://OpenIPC_Config/Assets/Icons/iconoir_wifi.svg",
+            Tabs.Add(new TabItemViewModel("WFB", "avares://OpenIPC_Config/Assets/Icons/iconoir_wifi_dark.svg",
                 _serviceProvider.GetRequiredService<WfbTabViewModel>(), IsTabsCollapsed));
-            Tabs.Add(new TabItemViewModel("Camera", "avares://OpenIPC_Config/Assets/Icons/iconoir_camera.svg",
+            Tabs.Add(new TabItemViewModel("Camera", "avares://OpenIPC_Config/Assets/Icons/iconoir_camera_dark.svg",
                 _serviceProvider.GetRequiredService<CameraSettingsTabViewModel>(), IsTabsCollapsed));
-            Tabs.Add(new TabItemViewModel("Telemetry", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg",
+            Tabs.Add(new TabItemViewModel("Telemetry", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag_dark.svg",
                 _serviceProvider.GetRequiredService<TelemetryTabViewModel>(), IsTabsCollapsed));
             // Tabs.Add(new TabItemViewModel("Presets", "avares://OpenIPC_Config/Assets/Icons/iconoir_presets.svg",
             //     _serviceProvider.GetRequiredService<PresetsTabViewModel>(), IsTabsCollapsed));
-            Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg",
+            Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings_dark.svg",
                 _serviceProvider.GetRequiredService<SetupTabViewModel>(), IsTabsCollapsed));
         }
         else if (deviceType == DeviceType.Radxa)
         {
             // Need these spaces for some reason
-            Tabs.Add(new TabItemViewModel("WFB         ", "avares://OpenIPC_Config/Assets/Icons/iconoir_drag.svg",
+            Tabs.Add(new TabItemViewModel("WFB         ", "avares://OpenIPC_Config/Assets/Icons/iconoir_wifi_dark.svg",
                 _serviceProvider.GetRequiredService<WfbGSTabViewModel>(), IsTabsCollapsed));
-            Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings.svg",
+            Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings_dark.svg",
                 _serviceProvider.GetRequiredService<SetupTabViewModel>(), IsTabsCollapsed));
             
         }
