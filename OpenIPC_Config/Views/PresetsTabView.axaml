@@ -6,7 +6,8 @@
              x:DataType="vm:PresetsTabViewModel">
         
         
-        <Grid RowDefinitions="Auto, Auto, Auto, *" ColumnDefinitions="*" Margin="10">
+        <Grid RowDefinitions="Auto, Auto, Auto, *" 
+              ColumnDefinitions="*" Margin="10">
         <!-- Header with Information -->
         <Border Background="#B0B0B0" CornerRadius="10" Padding="10" Margin="10">
             <Grid>
@@ -93,9 +94,9 @@
                       SelectedItem="{Binding SelectedStatus}"
                       PlaceholderText="Select Status" />
         </StackPanel>
-
+        
         <!-- Presets List -->
-        <ScrollViewer Grid.Row="3">
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Spacing="10">
                 <ItemsControl ItemsSource="{Binding Presets}">
                     <ItemsControl.ItemTemplate>
@@ -118,6 +119,7 @@
                 </ItemsControl>
             </StackPanel>
         </ScrollViewer>
+
     </Grid>
 </UserControl>
 

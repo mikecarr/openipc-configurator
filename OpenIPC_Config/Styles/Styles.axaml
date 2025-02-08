@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Design.PreviewWith>
-        <Border Padding="20">
+        <Border Padding="10">
             <!-- Add Controls for Previewer Here -->
         </Border>
     </Design.PreviewWith>
@@ -140,17 +140,7 @@
         <Setter Property="Foreground" Value="White" />
         </Style>
 
-    
-    <!-- <Style Selector="TabItem:pointerover /template/ Border#PART_LayoutRoot"> -->
-    <!--     <Setter Property="Background" Value="LightGray" /> -->
-    <!-- </Style> -->
-    <!-- -->
-    <!-- <Style Selector="TabItem:pressed /template/ Border#PART_LayoutRoot"> -->
-    <!--     <Setter Property="Background" Value="#4C61D8" /> -->
-    <!-- </Style> -->
-    <!-- <Style Selector="TabItem:pressed /template/ ContentPresenter#PART_ContentPresenter"> -->
-    <!--     <Setter Property="Foreground" Value="White" /> -->
-    <!-- </Style> -->
+
     
     <!-- -->
     <Style Selector="TabItem:selected">
@@ -200,5 +190,20 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="BoxShadow" Value="5 5 10 0 DarkGray" />
        
+    </Style>
+    
+    <Style Selector="Button.DrawerButton">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0,0" />
+        <Setter Property="Background" Value="Transparent"></Setter>
+    </Style>
+    
+    <Style Selector="StackPanel:pointerover.DrawerStackPanel">
+        <Setter Property="Background" Value="White"></Setter>
+    </Style>
+    
+    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" /> <!-- General hover style -->
     </Style>
 </Styles>

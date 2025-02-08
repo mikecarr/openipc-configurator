@@ -52,7 +52,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
     public ConnectControlsViewModel(ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService,
-        GlobalViewModel globalSettingsViewModel)
+        GlobalSettingsViewModel globalSettingsSettingsViewModel)
         : base(logger, sshClientService, eventSubscriptionService)
     {
         SetDefaults();

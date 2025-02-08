@@ -303,7 +303,7 @@ public class App : Application
         services.AddTransient<MainViewModel>();
         
         // Register tab ViewModels as singletons
-        services.AddSingleton<GlobalViewModel>();
+        services.AddSingleton<GlobalSettingsViewModel>();
 
         services.AddSingleton<CameraSettingsTabViewModel>();
         services.AddSingleton<ConnectControlsViewModel>();

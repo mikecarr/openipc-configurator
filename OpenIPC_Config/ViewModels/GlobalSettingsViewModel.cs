@@ -9,13 +9,13 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
-public partial class GlobalViewModel : ViewModelBase
+public partial class GlobalSettingsViewModel : ViewModelBase
 {
     [ObservableProperty]
     private bool _isWfbYamlEnabled = false;
     
     
-    public GlobalViewModel(ILogger logger,
+    public GlobalSettingsViewModel(ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService)
         : base(logger, sshClientService, eventSubscriptionService)

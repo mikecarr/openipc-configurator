@@ -27,14 +27,14 @@ public partial class MainViewModel : ViewModelBase
     private DeviceType _selectedDeviceType;
 
     private readonly IServiceProvider _serviceProvider;
-    private readonly GlobalViewModel _globalSettingsViewModel;
+    private readonly GlobalSettingsViewModel _globalSettingsSettingsViewModel;
     
 
     public MainViewModel(ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService,
         IServiceProvider serviceProvider,
-        GlobalViewModel globalSettingsViewModel)
+        GlobalSettingsViewModel globalSettingsSettingsViewModel)
         : base(logger, sshClientService, eventSubscriptionService)
     {
         IsMobile = false;
@@ -42,7 +42,7 @@ public partial class MainViewModel : ViewModelBase
         _appVersionText = GetFormattedAppVersion();
         CanConnect = false;
 
-        _globalSettingsViewModel = globalSettingsViewModel;
+        _globalSettingsSettingsViewModel = globalSettingsSettingsViewModel;
         
         Tabs = new ObservableCollection<TabItemViewModel> { };
         // Subscribe to device type change events
@@ -326,11 +326,11 @@ public partial class MainViewModel : ViewModelBase
     private async void processCameraFiles()
     {
         // read device to determine configurations
-        _globalSettingsViewModel.ReadDevice();
+        _globalSettingsSettingsViewModel.ReadDevice();
         
 
-        Logger.Debug($"IsWfbYamlEnabled = {_globalSettingsViewModel.IsWfbYamlEnabled}");
-        if (_globalSettingsViewModel.IsWfbYamlEnabled)
+        Logger.Debug($"IsWfbYamlEnabled = {_globalSettingsSettingsViewModel.IsWfbYamlEnabled}");
+        if (_globalSettingsSettingsViewModel.IsWfbYamlEnabled)
         {
             Logger.Debug($"Reading wfb.yaml");
         }
