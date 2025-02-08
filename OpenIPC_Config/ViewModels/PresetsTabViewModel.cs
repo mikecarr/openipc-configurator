@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using OpenIPC_Config.Models;
+using OpenIPC_Config.Models.Presets;
 using OpenIPC_Config.Services;
 using Serilog;
 

@@ -5,6 +5,8 @@ using System.Linq;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
+namespace OpenIPC_Config.Models.Presets;
+
 public class Preset
 {
     /* Name of preset */
@@ -74,8 +76,4 @@ public class Preset
     }
 }
 
-public class FileModification
-{
-    public string FileName { get; set; }
-    public ObservableCollection<KeyValuePair<string, string>> Changes { get; set; }
-}
+

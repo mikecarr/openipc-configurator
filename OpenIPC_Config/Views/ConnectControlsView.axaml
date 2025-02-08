@@ -2,13 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:OpenIPC_Config.ViewModels"
              xmlns:models="clr-namespace:OpenIPC_Config.Models"
-             xmlns:services="clr-namespace:OpenIPC_Config.Services"
              xmlns:assets="clr-namespace:OpenIPC_Config.Assets"
+             xmlns:converters="clr-namespace:Avalonia.Controls.Converters;assembly=Avalonia.Controls"
              x:Class="OpenIPC_Config.Views.ConnectControlsView"
              x:DataType="vm:ConnectControlsViewModel">
 
     <UserControl.Resources>
-        <services:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+        <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
     </UserControl.Resources>
 
     <!-- Root Grid -->

@@ -1,6 +1,6 @@
 using System;
 
-namespace OpenIPC_Config.ViewModels;
+namespace OpenIPC_Config.Models.Presets;
 
 public class GitHubFile
 {

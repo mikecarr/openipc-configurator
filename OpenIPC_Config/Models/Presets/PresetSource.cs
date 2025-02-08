@@ -1,4 +1,4 @@
-namespace OpenIPC_Config.Models;
+namespace OpenIPC_Config.Models.Presets;
 
 public class PresetSource
 {
