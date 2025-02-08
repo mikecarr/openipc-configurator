@@ -203,7 +203,7 @@
         <Setter Property="Background" Value="White"></Setter>
     </Style>
     
-    <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Style Selector="Button:pointerover.DrawerButton /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="Transparent" /> <!-- General hover style -->
     </Style>
 </Styles>

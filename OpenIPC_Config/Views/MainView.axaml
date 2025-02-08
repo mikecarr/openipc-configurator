@@ -77,7 +77,7 @@
 
                 <StackPanel Orientation="Horizontal" 
                             Background="Transparent"
-                            Classes="DrawerStackPanel" Spacing="0">
+                             Spacing="0">
                     <!-- <TextBlock Text="{Binding IsTabsCollapsed,  -->
                     <!-- Converter={StaticResource InvertedBooleanConverter},  -->
                     <!-- ConverterParameter='Show Tabs, Hide Tabs'}" /> -->
