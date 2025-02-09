@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -152,39 +153,11 @@ public class PresetsTabViewModel : ViewModelBase
         //     return;
 
         // Simulate fetching presets
-        await Task.Delay(500);
-
-        Presets.Clear();
-        Presets.Add(new Preset
-        {
-            Name = "IMX415_Long Range_v2",
-            Category = "Long Range",
-            Tags = new ObservableCollection<string> { "Tag1", "Tag2" },
-            Author = "John Doe",
-            Status = "Community",
-            Description = "Preset for long-range IMX415 settings.",
-            FileModifications = new ObservableCollection<FileModification>
-            {
-                new()
-                {
-                    FileName = "wfb.yaml",
-                    Changes = new ObservableCollection<KeyValuePair<string, string>>
-                    {
-                        new("wireless.txpower", "1"),
-                        new("wireless.channel", "161")
-                    }
-                },
-                new()
-                {
-                    FileName = "Majestic.yaml",
-                    Changes = new ObservableCollection<KeyValuePair<string, string>>
-                    {
-                        new("fpv.enabled", "false"),
-                        new("system.LogLevel", "debug")
-                    }
-                }
-            }
-        });
+        //await Task.Delay(500);
+        
+        //TODO: Fetch presets
+        GenerateRandomPresets(10);
+        
 
         // Update dropdown values
         LoadDropdownValues();
@@ -225,4 +198,56 @@ public class PresetsTabViewModel : ViewModelBase
     {
         LogMessage = $"Filtered presets by tag: {tag}.";
     }
+    
+    // For testing only
+    public void GenerateRandomPresets(int count)
+    {
+        var random = new Random();
+        var categories = new[] { "Long Range", "Freestyle", "Racing", "Cinematic" };
+        var authors = new[] { "John Doe", "Jane Smith", "Alex Johnson", "Emily Davis" };
+        var statuses = new[] { "Community", "Official", "Experimental" };
+        var tagsList = new[] { "Tag1", "Tag2", "Tag3", "Tag4", "Tag5" };
+
+        for (int i = 0; i < count; i++)
+        {
+            var preset = new Preset
+            {
+                Name = $"Preset_{random.Next(1000, 9999)}",
+                Category = categories[random.Next(categories.Length)],
+                Tags = new ObservableCollection<string>
+                {
+                    tagsList[random.Next(tagsList.Length)],
+                    tagsList[random.Next(tagsList.Length)]
+                },
+                Author = authors[random.Next(authors.Length)],
+                Status = statuses[random.Next(statuses.Length)],
+                Description = $"Generated preset {i + 1} for testing.",
+
+                FileModifications = new ObservableCollection<FileModification>
+                {
+                    new()
+                    {
+                        FileName = "wfb.yaml",
+                        Changes = new ObservableCollection<KeyValuePair<string, string>>
+                        {
+                            new("wireless.txpower", random.Next(1, 30).ToString()),
+                            new("wireless.channel", random.Next(36, 165).ToString())
+                        }
+                    },
+                    new()
+                    {
+                        FileName = "Majestic.yaml",
+                        Changes = new ObservableCollection<KeyValuePair<string, string>>
+                        {
+                            new("fpv.enabled", random.Next(2) == 0 ? "true" : "false"),
+                            new("system.LogLevel", random.Next(2) == 0 ? "debug" : "info")
+                        }
+                    }
+                }
+            };
+
+            Presets.Add(preset);
+        }
+    }
+
 }
