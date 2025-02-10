@@ -18,6 +18,7 @@ public class OpenIPC
 
     public const string MajesticFileLoc = "/etc/majestic.yaml";
     public const string WfbConfFileLoc = "/etc/wfb.conf";
+    public const string WfbYamlFileLoc = "/etc/wfb.yaml";
     public const string TelemetryConfFileLoc = "/etc/telemetry.conf";
 
     // Radxa files

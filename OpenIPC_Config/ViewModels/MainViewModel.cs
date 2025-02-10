@@ -326,13 +326,45 @@ public partial class MainViewModel : ViewModelBase
     private async void processCameraFiles()
     {
         // read device to determine configurations
-        _globalSettingsSettingsViewModel.ReadDevice();
+        await _globalSettingsSettingsViewModel.ReadDevice();
         
-
         Logger.Debug($"IsWfbYamlEnabled = {_globalSettingsSettingsViewModel.IsWfbYamlEnabled}");
+        
+        // process wfb.yaml
         if (_globalSettingsSettingsViewModel.IsWfbYamlEnabled)
         {
             Logger.Debug($"Reading wfb.yaml");
+
+            try
+            {
+                var wfbYamlContent = 
+                    await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WfbYamlFileLoc);
+                
+                if (wfbYamlContent != null)
+                    EventSubscriptionService.Publish<WfbYamlContentUpdatedEvent,
+                        WfbYamlContentUpdatedMessage>(new WfbYamlContentUpdatedMessage(wfbYamlContent));
+            }
+            catch (Exception e)
+            {
+                Log.Error("Error processing wfb.yaml: " + e.Message);
+            }
+            
+            
+            
+            try
+            {
+                var majesticContent =
+                    await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.MajesticFileLoc);
+                // Publish a message to WfbSettingsTabViewModel
+                EventSubscriptionService.Publish<MajesticContentUpdatedEvent,
+                    MajesticContentUpdatedMessage>(new MajesticContentUpdatedMessage(majesticContent));
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+            }
+            
+            
         }
         else 
         {

@@ -51,7 +51,8 @@ public class WfbTabViewModelTest : ViewModelTestBase
         var viewModel = new WfbTabViewModel(
             LoggerMock.Object,
             SshClientServiceMock.Object,
-            EventSubscriptionServiceMock.Object
+            EventSubscriptionServiceMock.Object,
+            YamlConfigServiceMock.Object
         );
 
         var propertyChangedRaised = false;
@@ -80,7 +81,8 @@ public class WfbTabViewModelTest : ViewModelTestBase
         var viewModel = new WfbTabViewModel(
             LoggerMock.Object,
             SshClientServiceMock.Object,
-            EventSubscriptionServiceMock.Object
+            EventSubscriptionServiceMock.Object,
+            YamlConfigServiceMock.Object
         );
 
 
@@ -109,7 +111,8 @@ public class WfbTabViewModelTest : ViewModelTestBase
         var viewModel = new WfbTabViewModel(
             LoggerMock.Object,
             SshClientServiceMock.Object,
-            EventSubscriptionServiceMock.Object
+            EventSubscriptionServiceMock.Object,
+            YamlConfigServiceMock.Object
         );
 
         // Act

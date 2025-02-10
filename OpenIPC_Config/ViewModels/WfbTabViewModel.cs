@@ -20,12 +20,19 @@ public partial class WfbTabViewModel : ViewModelBase
     private readonly Dictionary<int, string> _24FrequencyMapping = FrequencyMappings.Frequency24GHz;
     private readonly Dictionary<int, string> _58FrequencyMapping = FrequencyMappings.Frequency58GHz;
     private bool _isDisposed;
+    
+    private readonly IYamlConfigService _yamlConfigService;
+    private readonly Dictionary<string, string> _wfbYamlConfig = new();
+    
+    private bool _isWfbYamlEnabled = false;
 
     public WfbTabViewModel(ILogger logger,
         ISshClientService sshClientService,
-        IEventSubscriptionService eventSubscriptionService)
+        IEventSubscriptionService eventSubscriptionService,
+        IYamlConfigService yamlConfigService)
         : base(logger, sshClientService, eventSubscriptionService)
     {
+        _yamlConfigService = yamlConfigService;
         InitializeCollections();
 
         RestartWfbCommand = new RelayCommand(RestartWfb);
@@ -109,6 +116,9 @@ public partial class WfbTabViewModel : ViewModelBase
     {
         EventSubscriptionService.Subscribe<WfbConfContentUpdatedEvent, WfbConfContentUpdatedMessage>(
             OnWfbConfContentUpdated);
+        EventSubscriptionService.Subscribe<WfbYamlContentUpdatedEvent, WfbYamlContentUpdatedMessage>(
+            OnWfbYamlContentUpdated);
+        
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
     }
 
@@ -116,20 +126,38 @@ public partial class WfbTabViewModel : ViewModelBase
 
     #region Methods
 
-    // public void Dispose()
-    // {
-    //     if (_isDisposed) return;
-    //
-    //     EventAggregator.GetEvent<WfbConfContentUpdatedEvent>().Unsubscribe(OnWfbConfContentUpdated);
-    //     EventAggregator.GetEvent<AppMessageEvent>().Unsubscribe(OnAppMessage);
-    //
-    //     _isDisposed = true;
-    // }
-
     private void OnWfbConfContentUpdated(WfbConfContentUpdatedMessage message)
     {
         WfbConfContent = message.Content;
         ParseWfbConfContent();
+    }
+    
+    private void OnWfbYamlContentUpdated(WfbYamlContentUpdatedMessage message)
+    {
+         
+        WfbConfContent = message.Content;
+        if(!string.IsNullOrEmpty(message.Content))
+            _isWfbYamlEnabled = true;
+        
+        // parse file
+        _yamlConfigService.ParseYaml(message.Content, _wfbYamlConfig);
+
+        // update ui
+        UpdateViewModelPropertiesFromYaml();
+    }
+    
+    private void UpdateViewModelPropertiesFromYaml()
+    {
+        if (_wfbYamlConfig.TryGetValue("wireless.txpower", out var txPower)) SelectedPower = TryParseInt(txPower, SelectedPower);
+        if (_wfbYamlConfig.TryGetValue("wireless.channel", out var txChannel))
+        {
+            SelectedChannel = TryParseInt(txChannel, SelectedChannel);
+            HandleFrequencyKey(txChannel);
+            
+        }
+        if (_wfbYamlConfig.TryGetValue("broadcast.fec_k", out var broadcastFecK)) SelectedFecK = TryParseInt(broadcastFecK, SelectedFecK);
+        if (_wfbYamlConfig.TryGetValue("broadcast.fec_n", out var broadcastFecN)) SelectedFecN = TryParseInt(broadcastFecN, SelectedFecN);
+
     }
 
     private void OnAppMessage(AppMessage message)
