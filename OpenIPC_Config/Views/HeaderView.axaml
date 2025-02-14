@@ -59,7 +59,8 @@
                      Text="{Binding IpAddress, Mode=TwoWay}"
                      Background="{Binding EntryBoxBgColor}"
                      HorizontalAlignment="Left"
-                     Classes="InputBox" Grid.Row="0" Margin="0,5,0,0" />
+                     Classes="InputBox" Grid.Row="0" Margin="0,5,0,0" 
+                     ToolTip.Tip="Device IP Address"/>
             <StackPanel Orientation="Horizontal" Spacing="10" Grid.Row="1">
                 
                 <!-- Device Type -->
@@ -73,14 +74,16 @@
                 <TextBox Width="50" Height="30" Watermark="Port"
                          Background="{Binding EntryBoxBgColor}"
                          Margin="0,5,0,5"
-                         Text="{Binding Port, Mode=TwoWay}" Classes="InputBox" />
+                         Text="{Binding Port, Mode=TwoWay}" Classes="InputBox" 
+                         ToolTip.Tip="Port"/>
 
                 <!-- Password -->
                 <TextBox Width="100" Height="30" Watermark="Password"
                          Background="{Binding EntryBoxBgColor}"
                          PasswordChar="*"
                          Margin="0,5,0,5"
-                         Text="{Binding Password, Mode=TwoWay}" Classes="InputBox" />
+                         Text="{Binding Password, Mode=TwoWay}" Classes="InputBox"
+                         ToolTip.Tip="Password"/>
             </StackPanel>
         </Grid>
 

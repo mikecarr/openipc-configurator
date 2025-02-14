@@ -41,7 +41,6 @@ public partial class MainViewModel : ViewModelBase
         _serviceProvider = serviceProvider;
         _appVersionText = GetFormattedAppVersion();
         CanConnect = false;
-
         _globalSettingsSettingsViewModel = globalSettingsSettingsViewModel;
         
         Tabs = new ObservableCollection<TabItemViewModel> { };
@@ -529,7 +528,7 @@ public partial class MainViewModel : ViewModelBase
         _deviceConfig = DeviceConfig.Instance;
         IpAddress = settings.IpAddress;
         Password = settings.Password;
-        Port = settings.Port;
+        Port = settings.Port == 0 ? 22 : settings.Port;
         SelectedDeviceType = settings.DeviceType;
 
         // Publish the initial device type

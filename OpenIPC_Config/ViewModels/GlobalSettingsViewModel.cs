@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,18 +24,36 @@ public partial class GlobalSettingsViewModel : ViewModelBase
         ReadDevice();
     }
 
-    public async void ReadDevice()
+    public async Task ReadDevice()
     {
-        var cts = new CancellationTokenSource(10000); // 10 seconds
+        var cts = new CancellationTokenSource(30000); // 10 seconds
+
         var cancellationToken = cts.Token;
         
         if(DeviceConfig.Instance.DeviceType != DeviceType.None)
         {
-            // check if wfb.yaml exists
-            var cmdResult = await GetIsWfbYamlSupported(cancellationToken);
+            try
+            {
+                // check if wfb.yaml exists
+                var cmdResult = await GetIsWfbYamlSupported(cts.Token);
 
-            IsWfbYamlEnabled = cmdResult.Result.ToString().Trim() == "true";
-            Debug.WriteLine($"IsWfbYamlEnabled: {IsWfbYamlEnabled}");
+                //TODO: check if wfb.yaml exists when all parameters are supported
+                // https://github.com/svpcom/wfb-ng/wiki/Drone-auto-provisioning
+
+                //IsWfbYamlEnabled = cmdResult.Result.ToString().Trim() == "true";
+                IsWfbYamlEnabled = false;
+                Debug.WriteLine($"IsWfbYamlEnabled: {IsWfbYamlEnabled}");
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Error checking if wfb.yaml exists: " + e.Message);
+
+            }
+            finally
+            {
+                cts.Cancel();
+            }
+            
             
         }
         
