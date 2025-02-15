@@ -19,6 +19,7 @@ public partial class WfbTabViewModel : ViewModelBase
 {
     private readonly Dictionary<int, string> _24FrequencyMapping = FrequencyMappings.Frequency24GHz;
     private readonly Dictionary<int, string> _58FrequencyMapping = FrequencyMappings.Frequency58GHz;
+    
     private bool _isDisposed;
 
     public WfbTabViewModel(ILogger logger,
@@ -86,6 +87,11 @@ public partial class WfbTabViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<int> _fecK;
 
     [ObservableProperty] private ObservableCollection<int> _fecN;
+    
+    [ObservableProperty] private int _maxPower58GHz = 50;
+    
+    [ObservableProperty] private int _maxPower24GHz = 50;
+
 
     #endregion
 
@@ -95,8 +101,10 @@ public partial class WfbTabViewModel : ViewModelBase
     {
         Frequencies58GHz = new ObservableCollectionExtended<string>(_58FrequencyMapping.Values);
         Frequencies24GHz = new ObservableCollectionExtended<string>(_24FrequencyMapping.Values);
-        Power58GHz = new ObservableCollectionExtended<int> { 1, 5, 10, 15, 20, 25, 30 };
-        Power24GHz = new ObservableCollectionExtended<int> { 1, 20, 25, 30, 35, 40 };
+
+        Power58GHz = new ObservableCollection<int>(Enumerable.Range(1, MaxPower58GHz).Select(i => (i * 5)));
+        Power24GHz = new ObservableCollection<int>(Enumerable.Range(1, MaxPower24GHz).Select(i => (i * 5)));
+        
         Bandwidth = new ObservableCollectionExtended<int> { 20, 40 };
         McsIndex = new ObservableCollectionExtended<int>(Enumerable.Range(1, 31));
         Stbc = new ObservableCollectionExtended<int> { 0, 1 };

@@ -102,7 +102,7 @@
                             IsEnabled="{Binding CanConnect}">
                      
                     <Slider MinWidth="150"
-                            Maximum="35" Minimum="0"
+                            Maximum="{Binding MaxPower58GHz}" Minimum="0"
                             VerticalAlignment="Center"
                             IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight"
@@ -126,7 +126,7 @@
                             IsEnabled="{Binding CanConnect}">
                      
                     <Slider MinWidth="150"
-                            Maximum="35" Minimum="0"
+                            Maximum="{Binding MaxPower58GHz}" Minimum="0"
                             IsSnapToTickEnabled="True"
                             TickPlacement="BottomRight"
                             TickFrequency="5"
