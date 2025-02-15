@@ -1,4 +1,4 @@
-name: Build and Release OpenIPC Config App for Android
+name: Android App Build
 
 permissions:
   contents: write

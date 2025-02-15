@@ -1,4 +1,4 @@
-name: Build and Release OpenIPC Config App
+name: App Build and Release
 
 permissions:
   contents: write

@@ -88,6 +88,7 @@
                 
                 
                 <ComboBox Grid.Column="1" Grid.Row="0"
+                          IsEnabled="{Binding CanConnect}"
                           Classes="WfbComboBox"
                           ToolTip.Tip="{x:Static assets:Resources.Select58GHzFrequencyToolTip}"
                           ItemsSource="{Binding Frequencies58GHz}"
@@ -97,7 +98,8 @@
                 <!--           ToolTip.Tip="{x:Static assets:Resources.Select58GHzPowerToolTip}" -->
                 <!--           ItemsSource="{Binding Power58GHz}" -->
                 <!--           SelectedItem="{Binding SelectedPower, Mode=TwoWay}" /> -->
-                <StackPanel Grid.Column="3" Grid.Row="0" Orientation="Horizontal" Spacing="5">
+                <StackPanel Grid.Column="3" Grid.Row="0" Orientation="Horizontal" Spacing="5"
+                            IsEnabled="{Binding CanConnect}">
                      
                     <Slider MinWidth="150"
                             Maximum="35" Minimum="0"
@@ -113,13 +115,15 @@
                 </StackPanel>
                 
                 <ComboBox Grid.Column="1" Grid.Row="1"
+                          IsEnabled="{Binding CanConnect}"
                           Classes="WfbComboBox"
                           VerticalAlignment="Center"
                           ToolTip.Tip="{x:Static assets:Resources.Select24GHzFrequencyToolTip}"
                           ItemsSource="{Binding Frequencies24GHz}"
                           SelectedItem="{Binding SelectedFrequency24String, Mode=TwoWay}" />
 
-                <StackPanel Grid.Column="3" Grid.Row="1" Orientation="Horizontal" Spacing="5" >
+                <StackPanel Grid.Column="3" Grid.Row="1" Orientation="Horizontal" Spacing="5" 
+                            IsEnabled="{Binding CanConnect}">
                      
                     <Slider MinWidth="150"
                             Maximum="35" Minimum="0"
@@ -135,16 +139,19 @@
                 </StackPanel>
                 
                 <ComboBox Grid.Column="1" Grid.Row="2" ToolTip.Tip="{x:Static assets:Resources.SelectMCSIndexToolTip}"
+                          IsEnabled="{Binding CanConnect}"
                           Classes="WfbComboBox"
                           ItemsSource="{Binding McsIndex}"
                           SelectedItem="{Binding SelectedMcsIndex, Mode=TwoWay}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="3" ToolTip.Tip="{x:Static assets:Resources.SelectFecKToolTip}"
+                          IsEnabled="{Binding CanConnect}"
                           Classes="WfbComboBox"
                           ItemsSource="{Binding FecK}"
                           SelectedItem="{Binding SelectedFecK, Mode=TwoWay}" />
                 
                 <ComboBox Grid.Column="1" Grid.Row="4" ToolTip.Tip="{x:Static assets:Resources.SelectFecNToolTip}"
+                          IsEnabled="{Binding CanConnect}"
                           Classes="WfbComboBox"
                           ItemsSource="{Binding FecN}"
                           SelectedItem="{Binding SelectedFecN, Mode=TwoWay}" />
@@ -156,18 +163,21 @@
                 <!--           SelectedItem="{Binding SelectedStbc, Mode=TwoWay}" /> -->
 
                 <ToggleSwitch Grid.Column="1" Grid.Row="5"
+                              IsEnabled="{Binding CanConnect}"
                               Margin="5,0,0,0"
                               OnContent="" OffContent=""
                               IsChecked="{Binding SelectedStbc, Mode=TwoWay}"
                               ToolTip.Tip="{x:Static assets:Resources.SelectStbcToolTip}" />
 
                 <ToggleSwitch Grid.Column="1" Grid.Row="6"
+                              IsEnabled="{Binding CanConnect}"
                               Margin="5,0,0,0"
                               OnContent="" OffContent=""
                               IsChecked="{Binding SelectedLdpc, Mode=TwoWay}"
                               ToolTip.Tip="{x:Static assets:Resources.SelectLdpcToolTip}" />
 
                 <ComboBox Grid.Column="1" Grid.Row="7" ToolTip.Tip="{x:Static assets:Resources.SelectBandwithToolTip}"
+                          IsEnabled="{Binding CanConnect}"
                           Classes="WfbComboBox"
                           ItemsSource="{Binding Bandwidth}"
                           SelectedItem="{Binding SelectedBandwidth, Mode=TwoWay}" />
