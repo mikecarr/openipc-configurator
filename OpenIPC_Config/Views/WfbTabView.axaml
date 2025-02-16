@@ -109,7 +109,7 @@
                             TickFrequency="5"
                             Value="{Binding SelectedPower}" 
                             ToolTip.Tip="{x:Static assets:Resources.Select58GHzPowerToolTip}" />
-                    <Border Height="20" Width="20" Classes="BoxShadow">
+                    <Border Height="20" Width="25" Classes="BoxShadow" CornerRadius="8">
                     <Label HorizontalContentAlignment="Center" Content="{Binding SelectedPower}"/>
                     </Border>
                 </StackPanel>
@@ -132,7 +132,7 @@
                             TickFrequency="5"
                             Value="{Binding SelectedPower24GHz}" 
                             ToolTip.Tip="{x:Static assets:Resources.Select24GHzPowerToolTip}" />
-                    <Border Height="20" Width="20" Classes="BoxShadow">
+                    <Border Height="20" Width="25" Classes="BoxShadow" CornerRadius="8">
                     <Label HorizontalContentAlignment="Center" 
                            Content="{Binding SelectedPower24GHz}"/>
                     </Border>

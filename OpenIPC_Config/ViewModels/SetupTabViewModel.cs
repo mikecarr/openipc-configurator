@@ -23,8 +23,12 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
+/// <summary>
+/// ViewModel for managing device setup and configuration
+/// </summary>
 public partial class SetupTabViewModel : ViewModelBase
 {
+    #region Private Fields
     private readonly List<string> keyMessages = new()
     {
         "Checking for sysupgrade update...",
@@ -36,170 +40,133 @@ public partial class SetupTabViewModel : ViewModelBase
         "OverlayFS",
         "Unconditional reboot"
     };
+    #endregion
 
+    #region Observable Properties
     [ObservableProperty] private bool _canConnect;
-
     [ObservableProperty] private string _chkSumStatusColor;
     [ObservableProperty] private int _downloadProgress;
     [ObservableProperty] private ObservableCollection<string> _droneKeyActionItems;
-    private ICommand _encryptionKeyActionCommand;
-
-
-    private ICommand _firmwareUpdateCommand;
-
-    [ObservableProperty] public ObservableCollection<string> _firmwareVersions;
-    private ICommand _generateKeysCommand;
-
+    [ObservableProperty] private ObservableCollection<string> _firmwareVersions;
     [ObservableProperty] private bool _isCamera;
     [ObservableProperty] private bool _isGS;
-    [ObservableProperty] private bool _isProgressBarVisible;
     [ObservableProperty] private bool _isRadxa;
+    [ObservableProperty] private bool _isProgressBarVisible;
     [ObservableProperty] private string _keyChecksum;
     [ObservableProperty] private string _localIp;
-    [ObservableProperty] public ObservableCollection<string> _localSensors;
-    private ICommand _offlineUpdateCommand;
+    [ObservableProperty] private ObservableCollection<string> _localSensors;
     [ObservableProperty] private string _progressText;
-    private ICommand _recvDroneKeyCommand;
-    private ICommand _recvGSKeyCommand;
-    private ICommand _resetCameraCommand;
-    private ICommand _scanCommand;
     [ObservableProperty] private string _scanIpLabel;
     [ObservableProperty] private string _scanIPResultTextBox;
     [ObservableProperty] private string _scanMessages;
-
     [ObservableProperty] private ObservableCollection<string> _scriptFileActionItems;
-    private ICommand _scriptFilesBackupCommand;
-
-    private ICommand _scriptFilesCommand;
-    private ICommand _scriptFilesRestoreCommand;
     [ObservableProperty] private string _selectedDroneKeyAction;
     [ObservableProperty] private string _selectedFwVersion;
     [ObservableProperty] private string _selectedScriptFileAction;
     [ObservableProperty] private string _selectedSensor;
+    #endregion
+
+    #region Commands
+    private ICommand _encryptionKeyActionCommand;
+    private ICommand _firmwareUpdateCommand;
+    private ICommand _generateKeysCommand;
+    private ICommand _offlineUpdateCommand;
+    private ICommand _recvDroneKeyCommand;
+    private ICommand _recvGSKeyCommand;
+    private ICommand _resetCameraCommand;
+    private ICommand _scanCommand;
+    private ICommand _scriptFilesCommand;
+    private ICommand _scriptFilesBackupCommand;
+    private ICommand _scriptFilesRestoreCommand;
     private ICommand _sendDroneKeyCommand;
     private ICommand _sendGSKeyCommand;
     private ICommand _sensorDriverUpdateCommand;
     private ICommand _sensorFilesBackupCommand;
     private ICommand _sensorFilesUpdateCommand;
-    public ICommand ShowProgressBarCommand;
+    #endregion
+    
+    // Command Properties
 
+    #region Command Properties
+    public ICommand ShowProgressBarCommand { get; private set; }
+    public ICommand SendGSKeyCommand => _sendGSKeyCommand ??= new RelayCommand(SendGSKey);
+    public ICommand RecvGSKeyCommand => _recvGSKeyCommand ??= new RelayCommand(RecvGSKey);
+    public ICommand ScriptFilesCommand => _scriptFilesCommand ??= new RelayCommand(ScriptFilesAction);
+    public ICommand EncryptionKeyActionCommand =>
+        _encryptionKeyActionCommand ??= new RelayCommand<string>(EncryptionKeyAction);
+    public ICommand SensorFilesUpdateCommand =>
+        _sensorFilesUpdateCommand ??= new RelayCommand(SensorFilesUpdate);
+    public ICommand FirmwareUpdateCommand =>
+        _firmwareUpdateCommand ??= new RelayCommand(SysUpgradeFirmwareUpdate);
+    public ICommand SendDroneKeyCommand =>
+        _sendDroneKeyCommand ??= new RelayCommand(SendDroneKey);
+    public ICommand RecvDroneKeyCommand =>
+        _recvDroneKeyCommand ??= new RelayCommand(RecvDroneKey);
+    public ICommand ResetCameraCommand =>
+        _resetCameraCommand ??= new RelayCommand(ResetCamera);
+    public ICommand OfflineUpdateCommand =>
+        _offlineUpdateCommand ??= new RelayCommand(OfflineUpdate);
+    public ICommand ScanCommand =>
+        _scanCommand ??= new RelayCommand(ScanNetwork);
+    #endregion
 
-    public SetupTabViewModel(ILogger logger,
+    #region Public Properties
+    public bool IsMobile => App.OSType == "Mobile";
+    public bool IsEnabledForView => CanConnect && !IsMobile;
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Initializes a new instance of SetupTabViewModel
+    /// </summary>
+    public SetupTabViewModel(
+        ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService)
         : base(logger, sshClientService, eventSubscriptionService)
     {
         InitializeCollections();
+        InitializeProperties();
+        SubscribeToEvents();
+        InitializeCommands();
+    }
+    #endregion
 
+    #region Initialization Methods
+    private void InitializeProperties()
+    {
         KeyChecksum = string.Empty;
-
         ChkSumStatusColor = "Green";
-
-        //LocalIp = "Device IP: " + NetworkHelper.GetLocalIPAddress();
-
         ScanIpLabel = "192.168.1.";
+    }
 
+    private void InitializeCommands()
+    {
         ShowProgressBarCommand = new RelayCommand(() => IsProgressBarVisible = true);
+    }
 
+    private void SubscribeToEvents()
+    {
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
         EventSubscriptionService
             .Subscribe<DeviceContentUpdateEvent, DeviceContentUpdatedMessage>(OnDeviceContentUpdate);
-
         EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(OnDeviceTypeChange);
     }
-
-    public bool IsMobile => App.OSType == "Mobile";
-    public bool IsEnabledForView => CanConnect && !IsMobile;
-
-    // public ICommand GenerateKeysCommand => _generateKeysCommand ??= new RelayCommand(GenerateKeys);
-    public ICommand SendGSKeyCommand => _sendGSKeyCommand ??= new RelayCommand(SendGSKey);
-    public ICommand RecvGSKeyCommand => _recvGSKeyCommand ??= new RelayCommand(RecvGSKey);
-
-    // public ICommand ScriptFilesBackupCommand => _scriptFilesBackupCommand ??= new RelayCommand(ScriptFilesBackup);
-    public ICommand ScriptFilesCommand => _scriptFilesCommand ??= new RelayCommand(ScriptFilesAction);
-
-    public ICommand EncryptionKeyActionCommand =>
-        _encryptionKeyActionCommand ??= new RelayCommand<string>(EncryptionKeyAction);
-
-
-    // public ICommand SensorFilesBackupCommand => _sensorFilesBackupCommand ??= new RelayCommand(SensorFilesBackup);
-
-
-    // public ICommand SensorDriverUpdateCommand => _sensorDriverUpdateCommand ??= new RelayCommand(SensorDriverUpdate);
-
-    // public ICommand ScriptFilesRestoreCommand => _scriptFilesRestoreCommand ??= new RelayCommand(ScriptFilesRestore);
-
-    public ICommand SensorFilesUpdateCommand => _sensorFilesUpdateCommand ??= new RelayCommand(SensorFilesUpdate);
-
-
-    public ICommand FirmwareUpdateCommand =>
-        _firmwareUpdateCommand ??= new RelayCommand(SysUpgradeFirmwareUpdate);
-
-    public ICommand SendDroneKeyCommand =>
-        _sendDroneKeyCommand ??= new RelayCommand(SendDroneKey);
-
-    public ICommand RecvDroneKeyCommand =>
-        _recvDroneKeyCommand ??= new RelayCommand(RecvDroneKey);
-
-    public ICommand ResetCameraCommand =>
-        _resetCameraCommand ??= new RelayCommand(ResetCamera);
-
-    public ICommand OfflineUpdateCommand =>
-        _offlineUpdateCommand ??= new RelayCommand(OfflineUpdate);
-
-    public ICommand ScanCommand =>
-        _scanCommand ??= new RelayCommand(ScanNetwork);
-
-    private void OnDeviceTypeChange(DeviceType deviceType)
-    {
-        if (deviceType != null)
-            switch (deviceType)
-            {
-                case DeviceType.Camera:
-                    IsCamera = true;
-                    IsRadxa = false;
-                    break;
-                case DeviceType.Radxa:
-                    IsCamera = false;
-                    IsRadxa = true;
-                    break;
-            }
-    }
-
-    private async void OnDeviceContentUpdate(DeviceContentUpdatedMessage _deviceContentUpdatedMessage)
-    {
-        if (_deviceContentUpdatedMessage != null)
-            if (_deviceContentUpdatedMessage.DeviceConfig != null)
-                if (!string.IsNullOrEmpty(_deviceContentUpdatedMessage.DeviceConfig.KeyChksum))
-                {
-                    KeyChecksum = _deviceContentUpdatedMessage.DeviceConfig.KeyChksum;
-                    if (KeyChecksum != OpenIPC.KeyMD5Sum)
-                        ChkSumStatusColor = "Red";
-                    else
-                        ChkSumStatusColor = "Green";
-                }
-    }
-
-    private void OnAppMessage(AppMessage appMessage)
-    {
-        if (appMessage.CanConnect) CanConnect = appMessage.CanConnect;
-        //Log.Information($"CanConnect {CanConnect.ToString()}");
-    }
-
 
     private void InitializeCollections()
     {
         ScriptFileActionItems = new ObservableCollectionExtended<string> { "Backup", "Restore" };
         DroneKeyActionItems = new ObservableCollectionExtended<string> { "Send", "Receive" };
 
-        // load sensor files from local folder
-
         var binariesPath = OpenIPC.GetBinariesPath();
         var directoryPath = Path.Combine(binariesPath, "sensors");
-        //var directoryPath = OpenIPC.LocalSensorsFolder;
         PopulateSensorFileNames(directoryPath);
 
+        InitializeFirmwareVersions();
+    }
 
+    private void InitializeFirmwareVersions()
+    {
         FirmwareVersions = new ObservableCollection<string>
         {
             "ssc338q_fpv_emax-wyvern-link-nor",
@@ -225,7 +192,41 @@ public partial class SetupTabViewModel : ViewModelBase
             "openipc.hi3516ev200-nor-fpv"
         };
     }
+    #endregion
 
+    #region Event Handlers
+    private void OnDeviceTypeChange(DeviceType deviceType)
+    {
+        if (deviceType != null)
+            switch (deviceType)
+            {
+                case DeviceType.Camera:
+                    IsCamera = true;
+                    IsRadxa = false;
+                    break;
+                case DeviceType.Radxa:
+                    IsCamera = false;
+                    IsRadxa = true;
+                    break;
+            }
+    }
+
+    private void OnDeviceContentUpdate(DeviceContentUpdatedMessage message)
+    {
+        if (message?.DeviceConfig?.KeyChksum != null)
+        {
+            KeyChecksum = message.DeviceConfig.KeyChksum;
+            ChkSumStatusColor = KeyChecksum != OpenIPC.KeyMD5Sum ? "Red" : "Green";
+        }
+    }
+
+    private void OnAppMessage(AppMessage appMessage)
+    {
+        CanConnect = appMessage.CanConnect;
+    }
+    #endregion
+
+    #region Command Handlers
     private async void ScriptFilesAction()
     {
         var action = SelectedScriptFileAction;
@@ -276,7 +277,6 @@ public partial class SetupTabViewModel : ViewModelBase
         Log.Debug("Backup script executed...done");
     }
 
-
     private async void ScriptFilesRestore()
     {
         Log.Debug("Restore script executed...not implemented yet");
@@ -287,7 +287,6 @@ public partial class SetupTabViewModel : ViewModelBase
         try
         {
             Log.Debug($"Directory path: {directoryPath}");
-
             var files = Directory.GetFiles(directoryPath);
             LocalSensors = new ObservableCollection<string>(files.Select(f => Path.GetFileName(f)));
         }
@@ -402,7 +401,7 @@ public partial class SetupTabViewModel : ViewModelBase
         var confirmBox = MessageBoxManager.GetMessageBoxStandard("Scan completed", "Scan completed");
         await confirmBox.ShowAsync();
     }
-
+    #endregion
 
     /// <summary>
     ///     Extracts a value from a string using a regular expression pattern.

@@ -19,36 +19,98 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
+/// <summary>
+/// ViewModel for managing device connection controls and status
+/// </summary>
 public partial class ConnectControlsViewModel : ViewModelBase
 {
+    #region Private Fields
     private readonly CancellationTokenSource? _cancellationTokenSourc;
-
     private readonly DispatcherTimer _dispatcherTimer;
-
     private readonly IEventSubscriptionService _eventSubscriptionService;
-
     private readonly SolidColorBrush _offlineColorBrush = new(Colors.Red);
     private readonly SolidColorBrush _onlineColorBrush = new(Colors.Green);
     private readonly Ping _ping = new();
-
     private readonly TimeSpan _pingInterval = TimeSpan.FromSeconds(1);
     private readonly TimeSpan _pingTimeout = TimeSpan.FromMilliseconds(500);
-    
     private bool _canConnect;
-
     private DeviceConfig _deviceConfig;
-
-    [ObservableProperty] private string _ipAddress;
-
-    [ObservableProperty] private string _password;
-
     private SolidColorBrush _pingStatusColor = new(Colors.Red);
     private DispatcherTimer _pingTimer;
-
-    [ObservableProperty] private int _port = 22;
-
     private DeviceType _selectedDeviceType;
+    #endregion
 
+    #region Observable Properties
+    [ObservableProperty] private string _ipAddress;
+    [ObservableProperty] private string _password;
+    [ObservableProperty] private int _port = 22;
+    #endregion
+
+    #region Public Properties
+    /// <summary>
+    /// Gets or sets whether the device can be connected to
+    /// </summary>
+    public bool CanConnect
+    {
+        get => _canConnect;
+        set => SetProperty(ref _canConnect, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the color indicating ping status
+    /// </summary>
+    public SolidColorBrush PingStatusColor
+    {
+        get => _pingStatusColor;
+        set
+        {
+            _pingStatusColor = value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the selected device type
+    /// </summary>
+    public DeviceType SelectedDeviceType
+    {
+        get => _selectedDeviceType;
+        set
+        {
+            if (_selectedDeviceType != value)
+            {
+                _selectedDeviceType = value;
+                SendDeviceTypeMessage(_selectedDeviceType);
+                OnPropertyChanged();
+                CheckIfCanConnect();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the orientation based on the operating system
+    /// </summary>
+    public Orientation Orientation
+    {
+        get
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
+                RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
+                RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return Orientation.Horizontal;
+            return Orientation.Vertical;
+        }
+    }
+    #endregion
+
+    #region Commands
+    public ICommand ConnectCommand { get; private set; }
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Initializes a new instance of ConnectControlsViewModel
+    /// </summary>
     public ConnectControlsViewModel(ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService,
@@ -63,64 +125,13 @@ public partial class ConnectControlsViewModel : ViewModelBase
 
         _eventSubscriptionService = eventSubscriptionService ??
                                     throw new ArgumentNullException(nameof(eventSubscriptionService));
-        
+
 
         UpdateUIMessage("Ready");
     }
+    #endregion
 
-    public ICommand ConnectCommand { get; private set; }
-
-    public Orientation Orientation
-    {
-        get
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-                RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
-                RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                return Orientation.Horizontal;
-            return Orientation.Vertical;
-        }
-    }
-
-
-    public bool CanConnect
-    {
-        get => _canConnect;
-        set => SetProperty(ref _canConnect, value);
-    }
-
-    public SolidColorBrush PingStatusColor
-    {
-        get => _pingStatusColor;
-        set
-        {
-            _pingStatusColor = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public DeviceType SelectedDeviceType
-    {
-        get => _selectedDeviceType;
-        set
-        {
-            // Ignore setting to None if it's due to a binding update
-            //if (value == DeviceType.None) return;
-
-            if (_selectedDeviceType != value)
-            {
-                _selectedDeviceType = value;
-
-                // Now only send the message with the selected device type
-                SendDeviceTypeMessage(_selectedDeviceType);
-
-                // Trigger any other actions, like OnPropertyChanged if needed
-                OnPropertyChanged();
-                CheckIfCanConnect();
-            }
-        }
-    }
-
+    #region Property Change Handlers
     partial void OnPortChanged(int value)
     {
         CheckIfCanConnect();
@@ -136,7 +147,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         CheckIfCanConnect();
         if (Utilities.IsValidIpAddress(IpAddress))
         {
-            Log.Debug("Valid IP address: {IpAddress}", IpAddress);
+            Logger.Debug("Valid IP address: {IpAddress}", IpAddress);
             StartPingTimer();
         }
         else
@@ -144,7 +155,9 @@ public partial class ConnectControlsViewModel : ViewModelBase
             StopPingTimer();
         }
     }
+    #endregion
 
+    #region Private Methods
     private void LoadSettings()
     {
         var settings = SettingsManager.LoadSettings();
@@ -156,7 +169,6 @@ public partial class ConnectControlsViewModel : ViewModelBase
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(SelectedDeviceType);
     }
 
-
     private void SetDefaults()
     {
         PingStatusColor = _offlineColorBrush;
@@ -167,7 +179,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
     {
         // Insert logic to send a message based on the selected device type
         // For example, use an event aggregator, messenger, or direct call
-        Log.Debug($"Device type selected: {deviceType}");
+        Logger.Debug($"Device type selected: {deviceType}");
         //Console.WriteLine($"Device type selected: {deviceType}");
 
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(deviceType);
@@ -212,7 +224,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error occurred during ping");
+            Logger.Error(ex, "Error occurred during ping");
             PingStatusColor = _offlineColorBrush;
         }
     }
@@ -480,13 +492,8 @@ public partial class ConnectControlsViewModel : ViewModelBase
     // }
 
     /// <summary>
-    ///     Retrieves the hostname of the device asynchronously using SSH.
-    ///     <para>
-    ///         The command execution is cancelled after 10 seconds if no response is received.
-    ///         If the command execution times out, a message box is displayed with an error message.
-    ///     </para>
+    /// Retrieves the hostname of the device asynchronously using SSH
     /// </summary>
-    /// <param name="deviceConfig">The device configuration to use for the SSH connection.</param>
     private async Task getHostname(DeviceConfig deviceConfig)
     {
         deviceConfig.Hostname = string.Empty;
@@ -494,27 +501,21 @@ public partial class ConnectControlsViewModel : ViewModelBase
         var cts = new CancellationTokenSource(10000); // 10 seconds
         var cancellationToken = cts.Token;
 
-        var cmdResult =
-            await SshClientService.ExecuteCommandWithResponseAsync(deviceConfig, DeviceCommands.GetHostname,
-                cancellationToken);
+        var cmdResult = await SshClientService.ExecuteCommandWithResponseAsync(
+            deviceConfig,
+            DeviceCommands.GetHostname,
+            cancellationToken);
 
-        // If the command execution takes longer than 10 seconds, the task will be cancelled
         if (cmdResult == null)
         {
-            // Handle the timeout
-            // .
-            var resp = MessageBoxManager.GetMessageBoxStandard("Timeout Error!",
+            var resp = MessageBoxManager.GetMessageBoxStandard(
+                "Timeout Error!",
                 "The command took too long to execute. Please check device..");
             await resp.ShowAsync();
             return;
         }
 
-        var hostName = Utilities.RemoveSpecialCharacters(cmdResult.Result);
-        deviceConfig.Hostname = hostName;
-        //_deviceConfig.Hostname = hostName;
-        //Hostname = hostName;
-
-        // Cleanup
+        deviceConfig.Hostname = Utilities.RemoveSpecialCharacters(cmdResult.Result);
         cts.Dispose();
     }
 
@@ -525,7 +526,7 @@ public partial class ConnectControlsViewModel : ViewModelBase
         _deviceConfig.Port = Port;
         _deviceConfig.Password = Password;
 
-        // save config to file
         SettingsManager.SaveSettings(_deviceConfig);
     }
+    #endregion
 }

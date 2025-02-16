@@ -14,13 +14,81 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
+/// <summary>
+/// ViewModel for managing telemetry settings and configuration
+/// </summary>
 public partial class TelemetryTabViewModel : ViewModelBase
 {
+    #region Private Fields
     private readonly IMessageBoxService _messageBoxService;
-    
-    #region Constructor
+    #endregion
 
-    public TelemetryTabViewModel(ILogger logger,
+    #region Public Properties
+    public bool IsMobile => App.OSType == "Mobile";
+    public bool IsEnabledForView => CanConnect && !IsMobile;
+    #endregion
+
+    #region Observable Properties
+    [ObservableProperty] private bool _canConnect;
+    [ObservableProperty] private string _selectedAggregate;
+    [ObservableProperty] private string _selectedBaudRate;
+    [ObservableProperty] private string _selectedMcsIndex;
+    [ObservableProperty] private string _selectedRcChannel;
+    [ObservableProperty] private string _selectedRouter;
+    [ObservableProperty] private string _selectedSerialPort;
+    [ObservableProperty] private string _telemetryContent;
+    #endregion
+
+    #region Collections
+    /// <summary>
+    /// Available serial ports for telemetry
+    /// </summary>
+    public ObservableCollection<string> SerialPorts { get; private set; }
+
+    /// <summary>
+    /// Available baud rates for serial communication
+    /// </summary>
+    public ObservableCollection<string> BaudRates { get; private set; }
+
+    /// <summary>
+    /// Available MCS index values
+    /// </summary>
+    public ObservableCollection<string> McsIndex { get; private set; }
+
+    /// <summary>
+    /// Available aggregate values
+    /// </summary>
+    public ObservableCollection<string> Aggregate { get; private set; }
+
+    /// <summary>
+    /// Available RC channel options
+    /// </summary>
+    public ObservableCollection<string> RC_Channel { get; private set; }
+
+    /// <summary>
+    /// Available router options
+    /// </summary>
+    public ObservableCollection<string> Router { get; private set; }
+    #endregion
+
+    #region Commands
+    public ICommand EnableUART0Command { get; private set; }
+    public ICommand DisableUART0Command { get; private set; }
+    public ICommand AddMavlinkCommand { get; private set; }
+    public ICommand UploadLatestVtxMenuCommand { get; private set; }
+    public ICommand Enable40MhzCommand { get; private set; }
+    public ICommand MSPOSDExtraCameraCommand { get; private set; }
+    public ICommand MSPOSDExtraGSCommand { get; private set; }
+    public ICommand RemoveMSPOSDExtraCommand { get; private set; }
+    public ICommand SaveAndRestartTelemetryCommand { get; private set; }
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Initializes a new instance of TelemetryTabViewModel
+    /// </summary>
+    public TelemetryTabViewModel(
+        ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService,
         IMessageBoxService messageBoxService)
@@ -32,58 +100,9 @@ public partial class TelemetryTabViewModel : ViewModelBase
         InitializeCommands();
         SubscribeToEvents();
     }
-
     #endregion
 
-    public bool IsMobile => App.OSType == "Mobile";
-    public bool IsEnabledForView => CanConnect && !IsMobile;
-
-    #region Observable Properties
-
-    [ObservableProperty] private bool _canConnect;
-    [ObservableProperty] private string _selectedAggregate;
-    [ObservableProperty] private string _selectedBaudRate;
-    [ObservableProperty] private string _selectedMcsIndex;
-    [ObservableProperty] private string _selectedRcChannel;
-    [ObservableProperty] private string _selectedRouter;
-    [ObservableProperty] private string _selectedSerialPort;
-    [ObservableProperty] private string _telemetryContent;
-
-    #endregion
-
-
-    #region Collections
-
-    public ObservableCollection<string> SerialPorts { get; private set; }
-    public ObservableCollection<string> BaudRates { get; private set; }
-    public ObservableCollection<string> McsIndex { get; private set; }
-    public ObservableCollection<string> Aggregate { get; private set; }
-    public ObservableCollection<string> RC_Channel { get; private set; }
-    public ObservableCollection<string> Router { get; private set; }
-
-    #endregion
-
-    #region Commands
-
-    public ICommand EnableUART0Command { get; private set; }
-    public ICommand DisableUART0Command { get; private set; }
-
-    public ICommand AddMavlinkCommand { get; private set; }
-
-    // public ICommand UploadMSPOSDCommand { get; private set; }
-    public ICommand UploadLatestVtxMenuCommand { get; private set; }
-    public ICommand Enable40MhzCommand { get; private set; }
-    public ICommand MSPOSDExtraCameraCommand { get; private set; }
-    
-    public ICommand MSPOSDExtraGSCommand { get; private set; }
-    
-    public ICommand RemoveMSPOSDExtraCommand { get; private set; }
-    public ICommand SaveAndRestartTelemetryCommand { get; private set; }
-
-    #endregion
-
-    #region Initialization
-
+    #region Initialization Methods
     private void InitializeCollections()
     {
         SerialPorts = new ObservableCollection<string> { "/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2" };
@@ -103,7 +122,6 @@ public partial class TelemetryTabViewModel : ViewModelBase
         Enable40MhzCommand = new RelayCommand(Enable40Mhz);
         MSPOSDExtraCameraCommand = new RelayCommand(AddMSPOSDCameraExtra);
         MSPOSDExtraGSCommand = new RelayCommand(AddMSPOSDGSExtra);
-        
         RemoveMSPOSDExtraCommand = new RelayCommand(RemoveMSPOSDExtra);
         SaveAndRestartTelemetryCommand = new RelayCommand(SaveAndRestartTelemetry);
     }
@@ -113,13 +131,10 @@ public partial class TelemetryTabViewModel : ViewModelBase
         EventSubscriptionService.Subscribe<TelemetryContentUpdatedEvent, TelemetryContentUpdatedMessage>(
             OnTelemetryContentUpdated);
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
-        
     }
-
     #endregion
 
     #region Event Handlers
-
     private void OnAppMessage(AppMessage appMessage)
     {
         CanConnect = appMessage.CanConnect;
@@ -131,16 +146,13 @@ public partial class TelemetryTabViewModel : ViewModelBase
         ParseTelemetryContent();
     }
 
-    private async void OnTelemetryContentUpdated(TelemetryContentUpdatedMessage message)
+    private void OnTelemetryContentUpdated(TelemetryContentUpdatedMessage message)
     {
         HandleTelemetryContentUpdated(message);
     }
-    
-
     #endregion
 
-    #region Commands
-
+    #region Command Handlers
     private async void EnableUART0()
     {
         UpdateUIMessage("Enabling UART0...");
@@ -175,59 +187,6 @@ public partial class TelemetryTabViewModel : ViewModelBase
 
         Log.Debug("UploadLatestVtxMenu executed...done");
     }
-    // private async void UploadMSPOSD()
-    // {
-    //     Log.Debug("UploadMSPOSDCommand executed");
-    //
-    //     var msposdFile = "msposd_star6e";
-    //
-    //     // Get all files in the binaries folder
-    //     var binariesFolderPath = OpenIPC.GetBinariesPath();
-    //
-    //     var files = Directory.GetFiles(binariesFolderPath).Where(f => f.Contains(msposdFile));
-    //
-    //     if (files == null || !files.Any())
-    //     {
-    //         _messageBoxService.ShowMessageBox("File not found!", "File " + msposdFile + " not found!"); 
-    //         // var box = MessageBoxManager
-    //         //     .GetMessageBoxStandard("File not found!", "File " + msposdFile + " not found!");
-    //         // await box.ShowAsync();
-    //         return;
-    //     }
-    //
-    //     // killall -q msposd
-    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "killall -q msposd");
-    //     // upload msposd
-    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteBinariesFolder, "msposd_star6e");
-    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "mv /usr/bin/msposd_star6e /usr/bin/msposd");
-    //     // chmod +x /usr/bin/msposd
-    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x /usr/bin/msposd");
-    //
-    //     // upload betaflight fonts
-    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
-    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-    //         Models.OpenIPC.FileType.BetaFlightFonts, "font.png");
-    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-    //         Models.OpenIPC.FileType.BetaFlightFonts, "font_hd.png");
-    //
-    //     // upload vtxmenu.ini /etc
-    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteEtcFolder, "vtxmenu.ini");
-    //
-    //
-    //     // ensure file is unix formatted
-    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "dos2unix /etc/vtxmenu.ini");
-    //
-    //     // reboot
-    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
-    //
-    //     //Thread.Sleep(3000);
-    //
-    //     _messageBoxService.ShowMessageBox("Done!", "MSPOSD setup, wait for device to restart!");
-    //
-    //     // var MsgBox = MessageBoxManager
-    //     //     .GetMessageBoxStandard("Done!", "MSPOSD setup, wait for device to restart!", ButtonEnum.Ok);
-    //     // await MsgBox.ShowAsync();
-    // }
 
     private async void Enable40Mhz()
     {
@@ -240,87 +199,49 @@ public partial class TelemetryTabViewModel : ViewModelBase
             $"chmod +x {OpenIPC.RemoteWifiBroadcastBinFileLoc}");
         UpdateUIMessage("Enabling 40MHz...done");
     }
-    // private async void UploadINav()
-    // {
-    //     Log.Debug("UploadINavCommand executed");
-    //     // upload betaflight fonts
-    //     await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, $"mkdir {Models.OpenIPC.RemoteFontsFolder}");
-    //     
-    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-    //         Models.OpenIPC.FileType.iNavFonts, "font.png");
-    //     await SshClientService.UploadBinaryAsync(DeviceConfig.Instance, Models.OpenIPC.RemoteFontsFolder,
-    //         Models.OpenIPC.FileType.iNavFonts, "font_hd.png");
-    // }
-
-
 
     private async void RemoveMSPOSDExtra()
     {
-        // if "%1" == "mspextra" (
-        // 	plink -ssh root@%2 -pw %3 sed -i 's/echo \"Starting wifibroadcast service...\"/echo \"\&L70 \&F35 CPU:\&C \&B Temp:\&T\" ">"\/tmp\/MSPOSD.msg "\&"/' /etc/init.d/S98datalink
-        // 	plink -ssh root@%2 -pw %3 reboot	
-        // )
-        // 
         Log.Debug("Remove MSPOSDExtra executed");
 
-
         var remoteTelemetryFile = Path.Join(OpenIPC.RemoteBinariesFolder, "telemetry");
-
 
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance,
             $"sed -i 's/sleep 5/#sleep 5/' {remoteTelemetryFile}");
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
 
-        //TODO: do we need to restart the camera?
-        //await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.RebootCommand);
-
         _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!");
     }
 
-
     private async void AddMSPOSDCameraExtra()
     {
-        // if "%1" == "mspextra" (
-        // 	plink -ssh root@%2 -pw %3 sed -i 's/echo \"Starting wifibroadcast service...\"/echo \"\&L70 \&F35 CPU:\&C \&B Temp:\&T\" ">"\/tmp\/MSPOSD.msg "\&"/' /etc/init.d/S98datalink
-        // 	plink -ssh root@%2 -pw %3 reboot	
-        // )
-        // 
         Log.Debug("MSPOSDExtra executed");
 
         var telemetryFile = Path.Join(OpenIPC.GetBinariesPath(), "clean", "telemetry_msposd_extra");
         var remoteTelemetryFile = Path.Join(OpenIPC.RemoteBinariesFolder, "telemetry");
 
-
         await SshClientService.UploadFileAsync(DeviceConfig.Instance, telemetryFile, remoteTelemetryFile);
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, "chmod +x " + remoteTelemetryFile);
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
-        
-        _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!");
 
+        _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!");
     }
+
     private async void AddMSPOSDGSExtra()
     {
-        // if "%1" == "mspextra" (
-        // 	plink -ssh root@%2 -pw %3 sed -i 's/echo \"Starting wifibroadcast service...\"/echo \"\&L70 \&F35 CPU:\&C \&B Temp:\&T\" ">"\/tmp\/MSPOSD.msg "\&"/' /etc/init.d/S98datalink
-        // 	plink -ssh root@%2 -pw %3 reboot	
-        // )
-        // 
         Log.Debug("MSPOSDExtra executed");
 
         var telemetryFile = Path.Join(OpenIPC.GetBinariesPath(), "clean", "telemetry_msposd_gs");
         var remoteTelemetryFile = Path.Join(OpenIPC.RemoteBinariesFolder, "telemetry");
 
-
         await SshClientService.UploadFileAsync(DeviceConfig.Instance, telemetryFile, remoteTelemetryFile);
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.DataLinkRestart);
-        
-        _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!");
 
+        _messageBoxService.ShowMessageBox("Done!", "Please wait for datalink to restart!");
     }
 
     private async void SaveAndRestartTelemetry()
     {
-        
         Log.Debug("Saving and restarting telemetry...");
         TelemetryContent = UpdateTelemetryContent(SelectedSerialPort, SelectedBaudRate, SelectedRouter,
             SelectedMcsIndex, SelectedAggregate, SelectedRcChannel);
@@ -328,20 +249,18 @@ public partial class TelemetryTabViewModel : ViewModelBase
             TelemetryContent);
         await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.TelemetryRestartCommand);
     }
-
     #endregion
 
     #region Helper Methods
-
+    /// <summary>
+    /// Parses telemetry content and updates corresponding properties
+    /// </summary>
     private void ParseTelemetryContent()
     {
-        Log.Debug("Parsing TelemetryContent.");
-
+        Logger.Debug("Parsing TelemetryContent.");
         if (string.IsNullOrEmpty(TelemetryContent)) return;
 
-        // Logic to parse wfbConfContent, e.g., split by lines or delimiters
         var lines = TelemetryContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
         foreach (var line in lines)
         {
             // Example: Parse key-value pairs
@@ -350,124 +269,121 @@ public partial class TelemetryTabViewModel : ViewModelBase
             {
                 var key = parts[0].Trim();
                 var value = parts[1].Trim();
-
-                switch (key)
-                {
-                    case Telemetry.Serial:
-                        if (SerialPorts?.Contains(value) ?? false)
-                        {
-                            SelectedSerialPort = value;
-                        }
-                        else
-                        {
-                            SerialPorts.Add(value);
-                            SelectedSerialPort = value;
-                        }
-
-                        break;
-                    case Telemetry.Baud:
-                        if (BaudRates?.Contains(value) ?? false)
-                        {
-                            SelectedBaudRate = value;
-                        }
-                        else
-                        {
-                            BaudRates.Add(value);
-                            SelectedBaudRate = value;
-                        }
-
-                        break;
-                    case Telemetry.Router:
-                        if (Router?.Contains(value) ?? false)
-                        {
-                            SelectedRouter = value;
-                        }
-                        else
-                        {
-                            Router.Add(value);
-                            SelectedRouter = value;
-                        }
-
-                        break;
-                    case Telemetry.McsIndex:
-                        if (McsIndex?.Contains(value) ?? false)
-                        {
-                            SelectedMcsIndex = value;
-                        }
-                        else
-                        {
-                            McsIndex.Add(value);
-                            SelectedMcsIndex = value;
-                        }
-
-                        break;
-                    case Telemetry.Aggregate:
-                        if (Aggregate?.Contains(value) ?? false)
-                        {
-                            SelectedAggregate = value;
-                        }
-                        else
-                        {
-                            Aggregate.Add(value);
-                            SelectedAggregate = value;
-                        }
-
-                        break;
-                    case Telemetry.RcChannel:
-                        if (RC_Channel?.Contains(value) ?? false)
-                        {
-                            SelectedRcChannel = value;
-                        }
-                        else
-                        {
-                            RC_Channel.Add(value);
-                            SelectedRcChannel = value;
-                        }
-
-                        break;
-                    default:
-                        // Handle other key-value pairs
-                        Log.Debug($"Telemetry - Unknown key: {key}, value: {value}");
-                        break;
-                }
-
-
-                // Handle parsed data, e.g., store in a dictionary or bind to properties
-                Log.Debug($"Telemetry - Key: {key}, Value: {value}");
+                UpdatePropertyFromTelemetryLine(key, value);
             }
         }
     }
 
-    private string UpdateTelemetryContent(string serial, string baudRate, string router, string mcsIndex,
-        string aggregate, string rcChannel)
+    /// <summary>
+    /// Updates the corresponding property based on the telemetry line key-value pair
+    /// </summary>
+    private void UpdatePropertyFromTelemetryLine(string key, string value)
     {
-        // Logic to update WfbConfContent with the new values
-        var lines = TelemetryContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-        var regex = new Regex(
-            @"(serial|baud|router|mcs_index|aggregate|channels)=.*");
-        var updatedContent = regex.Replace(TelemetryContent, match =>
+        switch (key)
         {
-            switch (match.Groups[1].Value)
-            {
-                case Telemetry.Serial:
-                    return $"serial={serial}";
-                case Telemetry.Baud:
-                    return $"baud={baudRate}";
-                case Telemetry.Router:
-                    return $"router={router}";
-                case Telemetry.McsIndex:
-                    return $"mcs_index={mcsIndex}";
-                case Telemetry.Aggregate:
-                    return $"aggregate={aggregate}";
-                case Telemetry.RcChannel:
-                    return $"channels={rcChannel}";
+            case Telemetry.Serial:
+                if (SerialPorts?.Contains(value) ?? false)
+                {
+                    SelectedSerialPort = value;
+                }
+                else
+                {
+                    SerialPorts.Add(value);
+                    SelectedSerialPort = value;
+                }
+                break;
 
-                default:
-                    return match.Value;
-            }
-        });
-        return updatedContent;
+            case Telemetry.Baud:
+                if (BaudRates?.Contains(value) ?? false)
+                {
+                    SelectedBaudRate = value;
+                }
+                else
+                {
+                    BaudRates.Add(value);
+                    SelectedBaudRate = value;
+                }
+                break;
+
+            case Telemetry.Router:
+                if (Router?.Contains(value) ?? false)
+                {
+                    SelectedRouter = value;
+                }
+                else
+                {
+                    Router.Add(value);
+                    SelectedRouter = value;
+                }
+                break;
+
+            case Telemetry.McsIndex:
+                if (McsIndex?.Contains(value) ?? false)
+                {
+                    SelectedMcsIndex = value;
+                }
+                else
+                {
+                    McsIndex.Add(value);
+                    SelectedMcsIndex = value;
+                }
+                break;
+
+            case Telemetry.Aggregate:
+                if (Aggregate?.Contains(value) ?? false)
+                {
+                    SelectedAggregate = value;
+                }
+                else
+                {
+                    Aggregate.Add(value);
+                    SelectedAggregate = value;
+                }
+                break;
+
+            case Telemetry.RcChannel:
+                if (RC_Channel?.Contains(value) ?? false)
+                {
+                    SelectedRcChannel = value;
+                }
+                else
+                {
+                    RC_Channel.Add(value);
+                    SelectedRcChannel = value;
+                }
+                break;
+
+            default:
+                Logger.Debug($"Telemetry - Unknown key: {key}, value: {value}");
+                break;
+        }
     }
 
+    /// <summary>
+    /// Updates telemetry content with new configuration values
+    /// </summary>
+    private string UpdateTelemetryContent(
+        string serial,
+        string baudRate,
+        string router,
+        string mcsIndex,
+        string aggregate,
+        string rcChannel)
+    {
+        var regex = new Regex(@"(serial|baud|router|mcs_index|aggregate|channels)=.*");
+        return regex.Replace(TelemetryContent, match =>
+        {
+            return match.Groups[1].Value switch
+            {
+                Telemetry.Serial => $"serial={serial}",
+                Telemetry.Baud => $"baud={baudRate}",
+                Telemetry.Router => $"router={router}",
+                Telemetry.McsIndex => $"mcs_index={mcsIndex}",
+                Telemetry.Aggregate => $"aggregate={aggregate}",
+                Telemetry.RcChannel => $"channels={rcChannel}",
+                _ => match.Value
+            };
+        });
+    }
     #endregion
 }

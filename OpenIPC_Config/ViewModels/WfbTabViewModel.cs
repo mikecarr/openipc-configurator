@@ -15,88 +15,72 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
+/// <summary>
+/// ViewModel for managing WiFi Broadcast (WFB) settings and configuration
+/// </summary>
 public partial class WfbTabViewModel : ViewModelBase
 {
+    #region Private Fields
     private readonly Dictionary<int, string> _24FrequencyMapping = FrequencyMappings.Frequency24GHz;
     private readonly Dictionary<int, string> _58FrequencyMapping = FrequencyMappings.Frequency58GHz;
-    
     private bool _isDisposed;
+    #endregion
 
-    public WfbTabViewModel(ILogger logger,
+    #region Observable Properties
+    [ObservableProperty] private bool _canConnect;
+    [ObservableProperty] private string _wfbConfContent;
+    [ObservableProperty] private int _selectedChannel;
+    [ObservableProperty] private int _selectedPower24GHz;
+    [ObservableProperty] private int _selectedBandwidth;
+    [ObservableProperty] private int _selectedPower;
+    [ObservableProperty] private int _selectedLdpc;
+    [ObservableProperty] private int _selectedMcsIndex;
+    [ObservableProperty] private int _selectedStbc;
+    [ObservableProperty] private int _selectedFecK;
+    [ObservableProperty] private int _selectedFecN;
+    [ObservableProperty] private string _selectedFrequency24String;
+    [ObservableProperty] private string _selectedFrequency58String;
+    #endregion
+
+    #region Collections
+    [ObservableProperty] private ObservableCollection<string> _frequencies58GHz;
+    [ObservableProperty] private ObservableCollection<string> _frequencies24GHz;
+    [ObservableProperty] private ObservableCollection<int> _power58GHz;
+    [ObservableProperty] private ObservableCollection<int> _power24GHz;
+    [ObservableProperty] private ObservableCollection<int> _bandwidth;
+    [ObservableProperty] private ObservableCollection<int> _mcsIndex;
+    [ObservableProperty] private ObservableCollection<int> _stbc;
+    [ObservableProperty] private ObservableCollection<int> _ldpc;
+    [ObservableProperty] private ObservableCollection<int> _fecK;
+    [ObservableProperty] private ObservableCollection<int> _fecN;
+    [ObservableProperty] private int _maxPower58GHz = 50;
+    [ObservableProperty] private int _maxPower24GHz = 50;
+    #endregion
+
+    #region Commands
+    /// <summary>
+    /// Command to restart the WFB service
+    /// </summary>
+    public ICommand RestartWfbCommand { get; set; }
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Initializes a new instance of WfbTabViewModel
+    /// </summary>
+    public WfbTabViewModel(
+        ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService)
         : base(logger, sshClientService, eventSubscriptionService)
     {
         InitializeCollections();
-
-        RestartWfbCommand = new RelayCommand(RestartWfb);
-
+        InitializeCommands();
         SubscribeToEvents();
     }
-
-    public ICommand RestartWfbCommand { get; }
-
-    #region Observable Properties
-
-    [ObservableProperty] private bool _canConnect;
-
-    [ObservableProperty] private string _wfbConfContent;
-
-    [ObservableProperty] private int _selectedChannel;
-
-    [ObservableProperty] private int _selectedPower24GHz;
-
-    [ObservableProperty] private int _selectedBandwidth;
-
-    [ObservableProperty] private int _selectedPower;
-
-    [ObservableProperty] private int _selectedLdpc;
-
-    [ObservableProperty] private int _selectedMcsIndex;
-
-    [ObservableProperty] private int _selectedStbc;
-
-    [ObservableProperty] private int _selectedFecK;
-
-    [ObservableProperty] private int _selectedFecN;
-
-    [ObservableProperty] private string _selectedFrequency24String;
-
-    [ObservableProperty] private string _selectedFrequency58String;
-
     #endregion
 
-    #region Collections
-
-    [ObservableProperty] private ObservableCollection<string> _frequencies58GHz;
-
-    [ObservableProperty] private ObservableCollection<string> _frequencies24GHz;
-
-    [ObservableProperty] private ObservableCollection<int> _power58GHz;
-
-    [ObservableProperty] private ObservableCollection<int> _power24GHz;
-
-    [ObservableProperty] private ObservableCollection<int> _bandwidth;
-
-    [ObservableProperty] private ObservableCollection<int> _mcsIndex;
-
-    [ObservableProperty] private ObservableCollection<int> _stbc;
-
-    [ObservableProperty] private ObservableCollection<int> _ldpc;
-
-    [ObservableProperty] private ObservableCollection<int> _fecK;
-
-    [ObservableProperty] private ObservableCollection<int> _fecN;
-    
-    [ObservableProperty] private int _maxPower58GHz = 50;
-    
-    [ObservableProperty] private int _maxPower24GHz = 50;
-
-
-    #endregion
-
-    #region Initialization
-
+    #region Initialization Methods
     private void InitializeCollections()
     {
         Frequencies58GHz = new ObservableCollectionExtended<string>(_58FrequencyMapping.Values);
@@ -104,7 +88,7 @@ public partial class WfbTabViewModel : ViewModelBase
 
         Power58GHz = new ObservableCollection<int>(Enumerable.Range(1, MaxPower58GHz).Select(i => (i * 5)));
         Power24GHz = new ObservableCollection<int>(Enumerable.Range(1, MaxPower24GHz).Select(i => (i * 5)));
-        
+
         Bandwidth = new ObservableCollectionExtended<int> { 20, 40 };
         McsIndex = new ObservableCollectionExtended<int>(Enumerable.Range(1, 31));
         Stbc = new ObservableCollectionExtended<int> { 0, 1 };
@@ -113,27 +97,20 @@ public partial class WfbTabViewModel : ViewModelBase
         FecN = new ObservableCollectionExtended<int>(Enumerable.Range(0, 13));
     }
 
+    private void InitializeCommands()
+    {
+        RestartWfbCommand = new RelayCommand(RestartWfb);
+    }
+
     private void SubscribeToEvents()
     {
         EventSubscriptionService.Subscribe<WfbConfContentUpdatedEvent, WfbConfContentUpdatedMessage>(
             OnWfbConfContentUpdated);
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
     }
-
     #endregion
 
-    #region Methods
-
-    // public void Dispose()
-    // {
-    //     if (_isDisposed) return;
-    //
-    //     EventAggregator.GetEvent<WfbConfContentUpdatedEvent>().Unsubscribe(OnWfbConfContentUpdated);
-    //     EventAggregator.GetEvent<AppMessageEvent>().Unsubscribe(OnAppMessage);
-    //
-    //     _isDisposed = true;
-    // }
-
+    #region Event Handlers
     private void OnWfbConfContentUpdated(WfbConfContentUpdatedMessage message)
     {
         WfbConfContent = message.Content;
@@ -144,7 +121,9 @@ public partial class WfbTabViewModel : ViewModelBase
     {
         CanConnect = message.CanConnect;
     }
+    #endregion
 
+    #region Property Change Handlers
     partial void OnWfbConfContentChanged(string value)
     {
         if (!string.IsNullOrEmpty(value)) ParseWfbConfContent();
@@ -159,7 +138,47 @@ public partial class WfbTabViewModel : ViewModelBase
     {
         if (!string.IsNullOrEmpty(value)) HandleFrequencyChange(value, _58FrequencyMapping);
     }
+    #endregion
 
+    #region Command Handlers
+    private async void RestartWfb()
+    {
+        UpdateUIMessage("Restarting WFB...");
+        EventSubscriptionService.Publish<TabMessageEvent, string>("Restart Pushed");
+
+        var updatedWfbConfContent = UpdateWfbConfContent(
+            WfbConfContent,
+            SelectedFrequency58String,
+            SelectedFrequency24String,
+            SelectedPower,
+            SelectedPower24GHz,
+            SelectedBandwidth,
+            SelectedMcsIndex,
+            SelectedStbc,
+            SelectedLdpc,
+            SelectedFecK,
+            SelectedFecN,
+            SelectedChannel
+        );
+
+        if (string.IsNullOrEmpty(updatedWfbConfContent))
+        {
+            await MessageBoxManager.GetMessageBoxStandard("Error", "WfbConfContent is empty").ShowAsync();
+            return;
+        }
+
+        WfbConfContent = updatedWfbConfContent;
+
+        Logger.Information($"Uploading new : {OpenIPC.WfbConfFileLoc}");
+        await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.WfbConfFileLoc, WfbConfContent);
+
+        UpdateUIMessage("Restarting Wfb");
+        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.WfbRestartCommand);
+        UpdateUIMessage("Restarting Wfb..done");
+    }
+    #endregion
+
+    #region Helper Methods
     private void ParseWfbConfContent()
     {
         if (string.IsNullOrEmpty(WfbConfContent))
@@ -176,8 +195,6 @@ public partial class WfbTabViewModel : ViewModelBase
 
             var key = parts[0].Trim();
             var value = parts[1].Trim();
-
-            // Map values to properties
             MapWfbKeyToProperty(key, value);
         }
     }
@@ -239,61 +256,6 @@ public partial class WfbTabViewModel : ViewModelBase
         return int.TryParse(value, out var result) ? result : fallback;
     }
 
-    private async void RestartWfb()
-    {
-        UpdateUIMessage("Restarting WFB...");
-
-        EventSubscriptionService.Publish<TabMessageEvent, string>("Restart Pushed");
-
-        UpdateUIMessage("Getting new content");
-
-        var newFrequency58 = SelectedFrequency58String;
-        var newFrequency24 = SelectedFrequency24String;
-
-        var newPower58 = SelectedPower;
-        var newPower24 = SelectedPower24GHz;
-        var newBandwidth = SelectedBandwidth;
-        var newMcsIndex = SelectedMcsIndex;
-        var newStbc = SelectedStbc;
-        var newLdpc = SelectedLdpc;
-        var newFecK = SelectedFecK;
-        var newFecN = SelectedFecN;
-        var newChannel = SelectedChannel;
-
-        // Update WfbConfContent with the new values
-        var updatedWfbConfContent = UpdateWfbConfContent(
-            WfbConfContent,
-            newFrequency58,
-            newFrequency24,
-            newPower58,
-            newPower24,
-            newBandwidth,
-            newMcsIndex,
-            newStbc,
-            newLdpc,
-            newFecK,
-            newFecN,
-            newChannel
-        );
-
-        WfbConfContent = updatedWfbConfContent;
-
-        // make sure we are not uploading an empty string/file
-        if (string.IsNullOrEmpty(updatedWfbConfContent))
-            await MessageBoxManager.GetMessageBoxStandard("Error", "WfbConfContent is empty").ShowAsync();
-
-        UpdateUIMessage($"Uploading new {OpenIPC.WfbConfFileLoc}");
-
-
-        Logger.Information($"Uploading new : {OpenIPC.WfbConfFileLoc}");
-        await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.WfbConfFileLoc, WfbConfContent);
-
-        UpdateUIMessage("Restarting Wfb");
-
-        await SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.WfbRestartCommand);
-        UpdateUIMessage("Restarting Wfb..done");
-    }
-
     private void HandleFrequencyChange(string newValue, Dictionary<int, string> frequencyMapping)
     {
         // Reset the other frequency collection to its first value
@@ -308,14 +270,12 @@ public partial class WfbTabViewModel : ViewModelBase
             SelectedPower24GHz = Power24GHz.FirstOrDefault();
         }
 
-        // Extract the channel number using a regular expression
+        // Extract the channel number
         var match = Regex.Match(newValue, @"\[(\d+)\]");
-        if (match.Success && int.TryParse(match.Groups[1].Value, out var channel))
-            SelectedChannel = channel;
-        else
-            SelectedChannel = -1; // Default value if parsing fails
+        SelectedChannel = match.Success && int.TryParse(match.Groups[1].Value, out var channel)
+            ? channel
+            : -1;
     }
-
 
     private string UpdateWfbConfContent(
         string wfbConfContent,
@@ -329,25 +289,13 @@ public partial class WfbTabViewModel : ViewModelBase
         int newLdpc,
         int newFecK,
         int newFecN,
-        int newChannel
-    )
+        int newChannel)
     {
-        // Logic to update WfbConfContent with the new values
-        var lines = wfbConfContent.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-        // This regex matches configuration lines in the `wfbConfContent` that define specific settings,
-        // while ignoring lines that start with a `#` (comments). It looks for lines that:
-        // - Do NOT start with a `#` (negative lookahead: `^(?!#.*)`).
-        // - Contain one of the following keys: `frequency`, `channel`, `driver_txpower_override`,
-        //   `frequency24`, `bandwidth`, `txpower`, `mcs_index`, `stbc`, `ldpc`, `fec_k`, or `fec_n`.
-        // - Have an equals sign (`=`) followed by any value (`=.*`).
-        // The `RegexOptions.Multiline` ensures that each line in the input is treated separately,
-        // allowing the regex to match lines individually in a multi-line string.
         var regex = new Regex(
             @"^(?!#.*)(frequency|channel|driver_txpower_override|frequency24|bandwidth|txpower|mcs_index|stbc|ldpc|fec_k|fec_n)=.*",
             RegexOptions.Multiline);
 
-        var updatedContent = regex.Replace(wfbConfContent, match =>
+        return regex.Replace(wfbConfContent, match =>
         {
             var key = match.Groups[1].Value;
             Logger.Debug($"Updating key: {key}");
@@ -363,11 +311,9 @@ public partial class WfbTabViewModel : ViewModelBase
                 "ldpc" => $"ldpc={newLdpc}",
                 "fec_k" => $"fec_k={newFecK}",
                 "fec_n" => $"fec_n={newFecN}",
-                _ => match.Value // Default: return the original line
+                _ => match.Value
             };
         });
-        return updatedContent;
     }
-
     #endregion
 }
