@@ -6,83 +6,153 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
+/// <summary>
+/// ViewModel for managing and displaying application logs
+/// </summary>
 public class LogViewerViewModel : ViewModelBase
 {
+    #region Private Fields
     private readonly IEventSubscriptionService _eventSubscriptionService;
     private int _duplicateCount;
     private DateTime _lastFlushTime = DateTime.Now;
-
     private string _lastMessage = string.Empty;
-
     private string _messageText;
+    #endregion
 
-    public LogViewerViewModel(ILogger logger,
-        ISshClientService sshClientService,
-        IEventSubscriptionService eventSubscriptionService)
-        : base(logger, sshClientService, eventSubscriptionService)
-    {
-        LogMessages = new ObservableCollection<string>();
-
-        _eventSubscriptionService = eventSubscriptionService ??
-                                    throw new ArgumentNullException(nameof(eventSubscriptionService));
-
-        _eventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(
-            AppMessageReceived);
-        _eventSubscriptionService.Subscribe<LogMessageEvent, string>(
-            LogMessageReceived);
-    }
-
+    #region Public Properties
+    /// <summary>
+    /// Collection of log messages to display
+    /// </summary>
     public ObservableCollection<string> LogMessages { get; set; }
 
+    /// <summary>
+    /// Gets or sets the current message text
+    /// </summary>
     public string MessageText
     {
         get => _messageText;
         set => SetProperty(ref _messageText, value);
     }
+    #endregion
 
+    #region Constructor
+    /// <summary>
+    /// Initializes a new instance of LogViewerViewModel
+    /// </summary>
+    public LogViewerViewModel(
+        ILogger logger,
+        ISshClientService sshClientService,
+        IEventSubscriptionService eventSubscriptionService)
+        : base(logger, sshClientService, eventSubscriptionService)
+    {
+        _eventSubscriptionService = eventSubscriptionService ??
+            throw new ArgumentNullException(nameof(eventSubscriptionService));
+
+        InitializeCollections();
+        SubscribeToEvents();
+    }
+    #endregion
+
+    #region Initialization Methods
+    private void InitializeCollections()
+    {
+        LogMessages = new ObservableCollection<string>();
+    }
+
+    private void SubscribeToEvents()
+    {
+        _eventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(AppMessageReceived);
+        _eventSubscriptionService.Subscribe<LogMessageEvent, string>(LogMessageReceived);
+    }
+    #endregion
+
+    #region Event Handlers
+    /// <summary>
+    /// Handles incoming log messages and manages duplicate message handling
+    /// </summary>
     private void LogMessageReceived(string message)
     {
-        var formattedMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
+        var formattedMessage = FormatLogMessage(message);
 
-        // Check if the current message is the same as the previous one
         if (message == _lastMessage)
         {
-            _duplicateCount++;
-
-            // Periodically flush duplicate count to the log (e.g., every 5 seconds)
-            if ((DateTime.Now - _lastFlushTime).TotalSeconds >= 5 && _duplicateCount > 0) FlushDuplicateMessage();
+            HandleDuplicateMessage();
         }
         else
         {
-            // Flush any existing duplicate message summary before adding a new message
-            if (_duplicateCount > 0) FlushDuplicateMessage();
-
-            // Reset the duplicate counter and update the last message
-            _duplicateCount = 0;
-            _lastMessage = message;
-
-            // Add the new message to the log
-            LogMessages.Insert(0, formattedMessage);
+            HandleNewMessage(message, formattedMessage);
         }
     }
 
-    // Helper method to flush the duplicate message summary
+    /// <summary>
+    /// Handles incoming application messages
+    /// </summary>
+    private void AppMessageReceived(AppMessage message)
+    {
+        if (message.UpdateLogView)
+        {
+            var formattedMessage = FormatLogMessage(message.ToString());
+            LogMessages.Insert(0, formattedMessage);
+        }
+    }
+    #endregion
+
+    #region Private Methods
+    /// <summary>
+    /// Formats a log message with timestamp
+    /// </summary>
+    private string FormatLogMessage(string message)
+    {
+        return $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
+    }
+
+    /// <summary>
+    /// Handles processing of duplicate messages
+    /// </summary>
+    private void HandleDuplicateMessage()
+    {
+        _duplicateCount++;
+
+        // Periodically flush duplicate count (every 5 seconds)
+        if ((DateTime.Now - _lastFlushTime).TotalSeconds >= 5 && _duplicateCount > 0)
+        {
+            FlushDuplicateMessage();
+        }
+    }
+
+    /// <summary>
+    /// Handles processing of new messages
+    /// </summary>
+    private void HandleNewMessage(string message, string formattedMessage)
+    {
+        // Flush any existing duplicate message summary
+        if (_duplicateCount > 0)
+        {
+            FlushDuplicateMessage();
+        }
+
+        // Reset duplicate counter and update last message
+        _duplicateCount = 0;
+        _lastMessage = message;
+
+        // Add new message to log
+        LogMessages.Insert(0, formattedMessage);
+    }
+
+    /// <summary>
+    /// Flushes duplicate message summary to the log
+    /// </summary>
     private void FlushDuplicateMessage()
     {
         if (_duplicateCount > 0)
         {
-            var duplicateMessage =
-                $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - [Last message repeated {_duplicateCount} times]";
+            var duplicateMessage = FormatLogMessage(
+                $"[Last message repeated {_duplicateCount} times]");
+
             LogMessages.Insert(0, duplicateMessage);
             _duplicateCount = 0;
             _lastFlushTime = DateTime.Now;
         }
     }
-
-    private void AppMessageReceived(AppMessage message)
-    {
-        var formattedMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}";
-
-        if (message.UpdateLogView) LogMessages.Insert(0, formattedMessage);
-    }
+    #endregion
 }

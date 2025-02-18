@@ -23,153 +23,138 @@ using SharpCompress.Archives;
 
 namespace OpenIPC_Config.ViewModels;
 
+/// <summary>
+/// ViewModel for managing firmware updates and device configuration
+/// </summary>
 public partial class FirmwareTabViewModel : ViewModelBase
 {
+    #region Private Fields
     private readonly HttpClient _httpClient;
     private readonly SysUpgradeService _sysupgradeService;
     private CancellationTokenSource _cancellationTokenSource;
+    private FirmwareData _firmwareData;
+    #endregion
 
+    #region Observable Properties
     [ObservableProperty] private bool _canConnect;
-    
-    [ObservableProperty] private bool isConnected;
-    [ObservableProperty] private bool isFirmwareSelected;
-    [ObservableProperty] private bool isManufacturerSelected;
-    
-    // Derived property to determine if dropdowns should be enabled
+    [ObservableProperty] private bool _isConnected;
+    [ObservableProperty] private bool _isFirmwareSelected;
+    [ObservableProperty] private bool _isManufacturerSelected;
+    [ObservableProperty] private bool _canDownloadFirmware;
+    [ObservableProperty] private bool _isManualUpdateEnabled = true;
+    [ObservableProperty] private string _selectedDevice;
+    [ObservableProperty] private string _selectedFirmware;
+    [ObservableProperty] private string _selectedManufacturer;
+    [ObservableProperty] private string _manualFirmwareFile;
+    [ObservableProperty] private int _progressValue;
+    #endregion
+
+    #region Public Properties
+    /// <summary>
+    /// Gets whether dropdowns should be enabled based on connection and firmware selection state
+    /// </summary>
     public bool CanUseDropdowns => IsConnected && !IsFirmwareSelected;
+
+    /// <summary>
+    /// Gets whether firmware selection is available based on connection and manufacturer selection state
+    /// </summary>
     public bool CanUseSelectFirmware => IsConnected && !IsManufacturerSelected;
 
-    private FirmwareData _firmwareData;
+    /// <summary>
+    /// Collection of available manufacturers
+    /// </summary>
+    public ObservableCollection<string> Manufacturers { get; set; } = new();
 
-    [ObservableProperty] private bool _canDownloadFirmware;
+    /// <summary>
+    /// Collection of available devices for selected manufacturer
+    /// </summary>
+    public ObservableCollection<string> Devices { get; set; } = new();
 
-    [ObservableProperty] private bool _isManualUpdateEnabled = true;
+    /// <summary>
+    /// Collection of available firmware versions
+    /// </summary>
+    public ObservableCollection<string> Firmwares { get; set; } = new();
+    #endregion
 
-    [ObservableProperty] private string _selectedDevice;
+    #region Commands
+    public ICommand SelectFirmwareCommand { get; set; }
+    public ICommand PerformFirmwareUpgradeAsyncCommand { get; set; }
+    public ICommand ClearFormCommand { get; set; }
+    public IRelayCommand DownloadFirmwareAsyncCommand { get; set; }
+    #endregion
 
-    [ObservableProperty] private string _selectedFirmware;
-
-    [ObservableProperty] private string _selectedManufacturer;
-
-    [ObservableProperty] private string _manualFirmwareFile;
-
-    // [ObservableProperty] private string _progressLog;
-
-    [ObservableProperty] private int _progressValue;
-
-    public FirmwareTabViewModel(ILogger logger, ISshClientService sshClientService,
+    #region Constructor
+    /// <summary>
+    /// Initializes a new instance of FirmwareTabViewModel
+    /// </summary>
+    public FirmwareTabViewModel(
+        ILogger logger,
+        ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService)
         : base(logger, sshClientService, eventSubscriptionService)
     {
         _httpClient = new HttpClient();
-
-        SubscribeToEvents();
-
         _sysupgradeService = new SysUpgradeService(sshClientService, logger);
 
-        CanConnect = false; // Default to disabled
+        InitializeProperties();
+        InitializeCommands();
+        SubscribeToEvents();
+        LoadManufacturers();
+    }
+    #endregion
+
+    #region Initialization Methods
+    private void InitializeProperties()
+    {
+        CanConnect = false;
         IsConnected = false;
         IsFirmwareSelected = false;
         IsManufacturerSelected = false;
-        
-        // Initialize DownloadFirmwareAsyncCommand with CanExecute logic
+    }
+
+    private void InitializeCommands()
+    {
         DownloadFirmwareAsyncCommand = new RelayCommand(
             async () => await PerformFirmwareUpgradeAsync(),
             CanExecuteDownloadFirmware);
 
-        LoadManufacturers();
-
         PerformFirmwareUpgradeAsyncCommand = new RelayCommand(
-            async () => await PerformFirmwareUpgradeAsync()
-        );
+            async () => await PerformFirmwareUpgradeAsync());
 
-        SelectFirmwareCommand = new RelayCommand<Window>(async window => await SelectFirmware(window));
-        ClearFormCommand = new RelayCommand(() =>
-        {
-            SelectedManufacturer = string.Empty;
-            SelectedDevice = string.Empty;
-            SelectedFirmware = string.Empty;
-            IsFirmwareSelected = false;
-            IsManufacturerSelected = false;
-            IsManualUpdateEnabled = true;
-            UpdateCanExecuteCommands();
-        });
+        SelectFirmwareCommand = new RelayCommand<Window>(async window =>
+            await SelectFirmware(window));
+
+        ClearFormCommand = new RelayCommand(ClearForm);
     }
-
-    public ICommand SelectFirmwareCommand { get; }
-    public ICommand PerformFirmwareUpgradeAsyncCommand { get; }
-
-    public ICommand ClearFormCommand { get; }
-    public IRelayCommand DownloadFirmwareAsyncCommand { get; }
-
-
-    public ObservableCollection<string> Manufacturers { get; set; } = new();
-    public ObservableCollection<string> Devices { get; set; } = new();
-    public ObservableCollection<string> Firmwares { get; set; } = new();
-
 
     private void SubscribeToEvents()
     {
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
     }
+    #endregion
 
+    #region Event Handlers
     private void OnAppMessage(AppMessage message)
     {
         CanConnect = message.CanConnect;
+        IsConnected = message.CanConnect;
 
-        if (CanConnect)
+        if (!IsConnected)
         {
-            IsConnected = true; // Mark as connected
-        }
-        else
-        {
-            IsConnected = false; // Reset state if disconnected
-            IsFirmwareSelected = false; // Reset firmware selection state
-            IsManufacturerSelected = false; // Reset manufacturer selection state
+            IsFirmwareSelected = false;
+            IsManufacturerSelected = false;
         }
 
-        UpdateCanExecuteCommands(); // Notify UI to update based on new state
-    }
-
-    public async Task SelectFirmware(Window window)
-    {
-        IsFirmwareSelected = true; // Disable dropdowns if Select Firmware is clicked
-        IsManufacturerSelected = false; // Reset manufacturer selection
-        
         UpdateCanExecuteCommands();
-
-        var dialog = new OpenFileDialog
-        {
-            Title = "Select a File",
-            Filters = new List<FileDialogFilter>
-            {
-                new() { Name = "Compressed", Extensions = { "tgz" } },
-                new() { Name = "Bin Files", Extensions = { "bin" } },
-                new() { Name = "All Files", Extensions = { "*" } }
-            }
-        };
-
-        // Show the dialog and get the selected file(s)
-        var result = await dialog.ShowAsync(window);
-
-        if (result != null && result.Length > 0)
-        {
-            var selectedFile = result[0]; // Get the first selected file
-            var fileName = Path.GetFileName(selectedFile); // Extract just the filename
-            Console.WriteLine($"Selected File: {selectedFile}");
-            ManualFirmwareFile = selectedFile;
-        }
     }
 
     partial void OnSelectedManufacturerChanged(string value)
     {
         LoadDevices(value);
-        IsManufacturerSelected = !string.IsNullOrEmpty(value); // Disable Select Firmware if manufacturer is selected
-        IsFirmwareSelected = false; // Reset if the manufacturer is selected
+        IsManufacturerSelected = !string.IsNullOrEmpty(value);
+        IsFirmwareSelected = false;
         UpdateCanExecuteCommands();
-        //IsManualUpdateEnabled = false;
     }
-    
 
     partial void OnSelectedDeviceChanged(string value)
     {
@@ -182,6 +167,13 @@ public partial class FirmwareTabViewModel : ViewModelBase
         UpdateCanExecuteCommands();
     }
 
+    partial void OnManualFirmwareFileChanged(string value)
+    {
+        UpdateCanExecuteCommands();
+    }
+    #endregion
+
+    #region Public Methods
     public async void LoadManufacturers()
     {
         try
@@ -192,17 +184,18 @@ public partial class FirmwareTabViewModel : ViewModelBase
             if (data?.Manufacturers != null && data.Manufacturers.Any())
             {
                 Manufacturers.Clear();
-
                 foreach (var manufacturer in data.Manufacturers)
                 {
-                    // Check if the manufacturer has valid firmware types
                     var hasValidFirmwareType = manufacturer.Devices.Any(device =>
-                        device.Firmware.Any(firmware => firmware.Contains("fpv") || firmware.Contains("rubyfpv")));
+                        device.Firmware.Any(firmware =>
+                            firmware.Contains("fpv") || firmware.Contains("rubyfpv")));
 
-                    if (hasValidFirmwareType) Manufacturers.Add(manufacturer.Name);
+                    if (hasValidFirmwareType)
+                        Manufacturers.Add(manufacturer.Name);
                 }
 
-                if (!Manufacturers.Any()) Logger.Warning("No manufacturers with valid firmware types found.");
+                if (!Manufacturers.Any())
+                    Logger.Warning("No manufacturers with valid firmware types found.");
             }
             else
             {
@@ -215,7 +208,6 @@ public partial class FirmwareTabViewModel : ViewModelBase
         }
     }
 
-
     public void LoadDevices(string manufacturer)
     {
         Devices.Clear();
@@ -226,7 +218,8 @@ public partial class FirmwareTabViewModel : ViewModelBase
             return;
         }
 
-        var manufacturerData = _firmwareData?.Manufacturers.FirstOrDefault(m => m.Name == manufacturer);
+        var manufacturerData = _firmwareData?.Manufacturers
+            .FirstOrDefault(m => m.Name == manufacturer);
 
         if (manufacturerData == null || !manufacturerData.Devices.Any())
         {
@@ -234,11 +227,11 @@ public partial class FirmwareTabViewModel : ViewModelBase
             return;
         }
 
-        foreach (var device in manufacturerData.Devices) Devices.Add(device.Name);
+        foreach (var device in manufacturerData.Devices)
+            Devices.Add(device.Name);
 
         Logger.Information($"Loaded {Devices.Count} devices for manufacturer: {manufacturer}");
     }
-
 
     public void LoadFirmwares(string device)
     {
@@ -262,18 +255,50 @@ public partial class FirmwareTabViewModel : ViewModelBase
 
         foreach (var firmware in deviceData.Firmware)
         {
-            // Extract the firmware type (e.g., 'fpv' or 'rubyfpv') from the firmware identifier
             var components = firmware.Split('-');
             if (components.Length > 0)
             {
-                var firmwareType = components[0]; // The first component is the firmware type
-                if (!Firmwares.Contains(firmwareType)) Firmwares.Add(firmwareType); // Add only the firmware type
+                var firmwareType = components[0];
+                if (!Firmwares.Contains(firmwareType))
+                    Firmwares.Add(firmwareType);
             }
         }
 
         Logger.Information($"Loaded {Firmwares.Count} firmware types for device: {device}");
     }
+    #endregion
 
+    #region Private Methods
+    private void ClearForm()
+    {
+        SelectedManufacturer = string.Empty;
+        SelectedDevice = string.Empty;
+        SelectedFirmware = string.Empty;
+        IsFirmwareSelected = false;
+        IsManufacturerSelected = false;
+        IsManualUpdateEnabled = true;
+        UpdateCanExecuteCommands();
+    }
+
+    private bool CanExecuteDownloadFirmware()
+    {
+        return CanConnect &&
+               (!string.IsNullOrEmpty(SelectedManufacturer) &&
+                !string.IsNullOrEmpty(SelectedDevice) &&
+                !string.IsNullOrEmpty(SelectedFirmware)) ||
+               !string.IsNullOrEmpty(ManualFirmwareFile);
+    }
+
+    private void UpdateCanExecuteCommands()
+    {
+        CanDownloadFirmware = CanExecuteDownloadFirmware();
+
+        OnPropertyChanged(nameof(CanUseDropdowns));
+        OnPropertyChanged(nameof(CanUseSelectFirmware));
+
+        (DownloadFirmwareAsyncCommand as RelayCommand)?.NotifyCanExecuteChanged();
+        (PerformFirmwareUpgradeAsyncCommand as RelayCommand)?.NotifyCanExecuteChanged();
+    }
 
     private async Task<FirmwareData> FetchFirmwareListAsync()
     {
@@ -349,13 +374,10 @@ public partial class FirmwareTabViewModel : ViewModelBase
         }
     }
 
-
     private async Task<string> DownloadFirmwareAsync(string url = null, string filename = null)
     {
         try
         {
-            //ProgressLog += "Downloading firmware file...\n";
-
             var filePath = Path.Combine(Path.GetTempPath(), filename);
             Logger.Information($"Downloading firmware from {url} to {filePath}");
 
@@ -382,12 +404,10 @@ public partial class FirmwareTabViewModel : ViewModelBase
         }
     }
 
-
     private string DecompressTgzToTar(string tgzFilePath)
     {
         try
         {
-            //ProgressLog += "Decompressing tgz to tar file...\n";
             var tarFilePath = Path.Combine(Path.GetTempPath(), $"{Path.GetFileNameWithoutExtension(tgzFilePath)}.tar");
 
             using (var fileStream = File.OpenRead(tgzFilePath))
@@ -412,12 +432,9 @@ public partial class FirmwareTabViewModel : ViewModelBase
     {
         try
         {
-            //ProgressLog += "Decompressing firmware...\n";
-            // Step 1: Decompress the `.tgz` to a `.tar` file
             var tarFilePath = DecompressTgzToTar(tgzFilePath);
 
             ProgressValue = 4;
-            // Step 2: Define output directory for extraction
             var tempDir = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(tgzFilePath));
             if (Directory.Exists(tempDir))
                 Directory.Delete(tempDir, true);
@@ -425,7 +442,6 @@ public partial class FirmwareTabViewModel : ViewModelBase
             Directory.CreateDirectory(tempDir);
 
             ProgressValue = 8;
-            // Step 3: Extract the `.tar` file using SharpCompress
             using (var archive = SharpCompress.Archives.Tar.TarArchive.Open(tarFilePath))
             {
                 foreach (var entry in archive.Entries.Where(entry => !entry.IsDirectory))
@@ -454,34 +470,26 @@ public partial class FirmwareTabViewModel : ViewModelBase
         }
     }
 
-
     private void ValidateFirmwareFiles(string extractedDir)
     {
         try
         {
-            //ProgressLog += "Validating firmware files...\n";
-            // Fetch all files in the directory
             var allFiles = Directory.GetFiles(extractedDir);
 
-            // Find all `.md5sum` files
             var md5Files = allFiles.Where(file => file.EndsWith(".md5sum")).ToList();
 
             if (!md5Files.Any())
                 throw new InvalidOperationException("No MD5 checksum files found in the extracted directory.");
 
-            // Validate each `.md5sum` file
             foreach (var md5File in md5Files)
             {
-                // Get the base file name (without the `.md5sum` extension)
                 var baseFileName = Path.GetFileNameWithoutExtension(md5File);
 
-                // Locate the corresponding data file
                 var dataFile = allFiles.FirstOrDefault(file => Path.GetFileName(file) == baseFileName);
                 if (dataFile == null)
                     throw new FileNotFoundException(
                         $"Data file '{baseFileName}' referenced by '{md5File}' is missing.");
 
-                // Validate MD5 checksum
                 ValidateMd5Checksum(md5File, dataFile);
             }
 
@@ -498,32 +506,27 @@ public partial class FirmwareTabViewModel : ViewModelBase
     {
         try
         {
-            // Read the line from the `.md5sum` file
             var md5Line = File.ReadAllText(md5FilePath).Trim();
 
-            // Split the line into the expected MD5 checksum and the filename
             var parts = md5Line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length < 2)
             {
                 throw new InvalidOperationException($"Invalid format in MD5 file: {md5FilePath}");
             }
 
-            var expectedMd5 = parts[0]; // The first part is the MD5 checksum
-            var expectedFilename = parts[1]; // The second part is the filename
+            var expectedMd5 = parts[0];
+            var expectedFilename = parts[1];
 
-            // Ensure the expected filename matches the actual file
             if (Path.GetFileName(dataFilePath) != expectedFilename)
             {
                 throw new InvalidOperationException(
                     $"Filename mismatch: expected '{expectedFilename}', found '{Path.GetFileName(dataFilePath)}'");
             }
 
-            // Compute the actual MD5 checksum of the data file
             using var md5 = System.Security.Cryptography.MD5.Create();
             using var stream = File.OpenRead(dataFilePath);
             var actualMd5 = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
 
-            // Compare the checksums
             if (expectedMd5 != actualMd5)
             {
                 throw new InvalidOperationException(
@@ -538,7 +541,6 @@ public partial class FirmwareTabViewModel : ViewModelBase
             throw;
         }
     }
-
 
     public async Task PerformFirmwareUpgradeAsync()
     {
@@ -565,7 +567,6 @@ public partial class FirmwareTabViewModel : ViewModelBase
 
                 Logger.Information("Performing firmware upgrade using selected dropdown options.");
 
-                // Construct the firmware file URL
                 var manufacturer = _firmwareData?.Manufacturers
                     .FirstOrDefault(m => m.Name == SelectedManufacturer);
 
@@ -588,7 +589,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
                     var downloadUrl = $"https://github.com/OpenIPC/builder/releases/download/latest/{filename}";
 
                     firmwareFilePath = await DownloadFirmwareAsync(downloadUrl, filename);
-                    
+
                 }
                 else
                 {
@@ -599,7 +600,6 @@ public partial class FirmwareTabViewModel : ViewModelBase
 
             if (!string.IsNullOrEmpty(firmwareFilePath))
             {
-                // Proceed with common upgrade process
                 await UpgradeFirmwareFromFileAsync(firmwareFilePath);
             }
         }
@@ -622,16 +622,12 @@ public partial class FirmwareTabViewModel : ViewModelBase
 
             ProgressValue = 5;
             Logger.Debug("UncompressFirmware ProgressValue: " + ProgressValue);
-            // Step 1: Uncompress the firmware file
             var extractedDir = UncompressFirmware(firmwareFilePath);
 
             ProgressValue = 10;
             Logger.Debug("ValidateFirmwareFiles ProgressValue: " + ProgressValue);
-            // Step 2: Validate firmware files dynamically
             ValidateFirmwareFiles(extractedDir);
 
-
-            // Step 3: Extract kernel and rootfs paths
             ProgressValue = 20;
             Logger.Debug("Before PerformSysupgradeAsync ProgressValue: " + ProgressValue);
             var kernelFile = Directory.GetFiles(extractedDir)
@@ -643,7 +639,6 @@ public partial class FirmwareTabViewModel : ViewModelBase
             if (kernelFile == null || rootfsFile == null)
                 throw new InvalidOperationException("Kernel or RootFS file is missing after validation.");
 
-            // Step 4: Configure device and perform sysupgrade
             var sysupgradeService = new SysUpgradeService(SshClientService, Logger);
 
             await Task.Run(async () =>
@@ -653,8 +648,6 @@ public partial class FirmwareTabViewModel : ViewModelBase
                     {
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
-                            //ProgressLog += progress + Environment.NewLine;
-                        
                             switch (progress)
                             {
                                 case var s when s.Contains("Update kernel from"):
@@ -678,14 +671,12 @@ public partial class FirmwareTabViewModel : ViewModelBase
                                     Logger.Debug("Erase overlay partition ProgressValue: " + ProgressValue);
                                     break;
                             }
-                            
+
                             Logger.Debug(progress);
                         });
                     },
                     CancellationToken.None);
 
-
-                // Ensure the final progress update is on the UI thread
                 await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     ProgressValue = 100;
@@ -702,42 +693,38 @@ public partial class FirmwareTabViewModel : ViewModelBase
         }
     }
 
-
-    partial void OnManualFirmwareFileChanged(string value)
+    public async Task SelectFirmware(Window window)
     {
+        IsFirmwareSelected = true;
+        IsManufacturerSelected = false;
+
         UpdateCanExecuteCommands();
+
+        var dialog = new OpenFileDialog
+        {
+            Title = "Select a File",
+            Filters = new List<FileDialogFilter>
+            {
+                new() { Name = "Compressed", Extensions = { "tgz" } },
+                new() { Name = "Bin Files", Extensions = { "bin" } },
+                new() { Name = "All Files", Extensions = { "*" } }
+            }
+        };
+
+        var result = await dialog.ShowAsync(window);
+
+        if (result != null && result.Length > 0)
+        {
+            var selectedFile = result[0];
+            var fileName = Path.GetFileName(selectedFile);
+            Console.WriteLine($"Selected File: {selectedFile}");
+            ManualFirmwareFile = selectedFile;
+        }
     }
-
-    private bool CanExecuteDownloadFirmware()
-    {
-        return CanConnect &&
-               (!string.IsNullOrEmpty(SelectedManufacturer) &&
-                !string.IsNullOrEmpty(SelectedDevice) &&
-                !string.IsNullOrEmpty(SelectedFirmware)) ||
-               !string.IsNullOrEmpty(ManualFirmwareFile);
-    }
-
-    // private void UpdateCanExecuteCommands()
-    // {
-    //     CanDownloadFirmware = CanExecuteDownloadFirmware(); // Update the `CanDownloadFirmware` property.
-    //
-    //     // Notify the commands to re-evaluate their CanExecute logic.
-    //     (DownloadFirmwareAsyncCommand as RelayCommand)?.NotifyCanExecuteChanged();
-    //     (PerformFirmwareUpgradeAsyncCommand as RelayCommand)?.NotifyCanExecuteChanged();
-    // }
-    private void UpdateCanExecuteCommands()
-    {
-        CanDownloadFirmware = CanExecuteDownloadFirmware();
-
-        // Notify UI of property changes
-        OnPropertyChanged(nameof(CanUseDropdowns));
-        OnPropertyChanged(nameof(CanUseSelectFirmware));
-
-        (DownloadFirmwareAsyncCommand as RelayCommand)?.NotifyCanExecuteChanged();
-        (PerformFirmwareUpgradeAsyncCommand as RelayCommand)?.NotifyCanExecuteChanged();
-    }
+    #endregion
 }
 
+#region Support Classes
 public class FirmwareData
 {
     public ObservableCollection<Manufacturer> Manufacturers { get; set; }
@@ -754,3 +741,4 @@ public class Device
     public string Name { get; set; }
     public ObservableCollection<string> Firmware { get; set; }
 }
+#endregion

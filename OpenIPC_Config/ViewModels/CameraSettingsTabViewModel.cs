@@ -13,84 +13,83 @@ using Serilog;
 
 namespace OpenIPC_Config.ViewModels;
 
+/// <summary>
+/// ViewModel for managing camera settings and configurations
+/// </summary>
 public partial class CameraSettingsTabViewModel : ViewModelBase
 {
+    #region Private Fields
     private readonly IEventSubscriptionService _eventSubscriptionService;
-
     private readonly Dictionary<string, string> _yamlConfig = new();
     private readonly IYamlConfigService _yamlConfigService;
+    #endregion
 
-    [ObservableProperty] private ObservableCollection<string> _bitrate;
-
-    [ObservableProperty] private bool _canConnect;
-
-    [ObservableProperty] private ObservableCollection<string> _codec;
-
-    [ObservableProperty] private string _combinedFpvRoiRectValue;
-    [ObservableProperty] private ObservableCollection<string> _contrast;
-
-    [ObservableProperty] private ObservableCollection<string> _exposure;
-    [ObservableProperty] private ObservableCollection<string> _flip;
+    #region Observable Collections
+    [ObservableProperty] private ObservableCollection<string> _resolution;
     [ObservableProperty] private ObservableCollection<string> _fps;
+    [ObservableProperty] private ObservableCollection<string> _codec;
+    [ObservableProperty] private ObservableCollection<string> _bitrate;
+    [ObservableProperty] private ObservableCollection<string> _exposure;
+    [ObservableProperty] private ObservableCollection<string> _contrast;
+    [ObservableProperty] private ObservableCollection<string> _hue;
+    [ObservableProperty] private ObservableCollection<string> _saturation;
+    [ObservableProperty] private ObservableCollection<string> _luminance;
+    [ObservableProperty] private ObservableCollection<string> _flip;
+    [ObservableProperty] private ObservableCollection<string> _mirror;
+    #endregion
 
+    #region FPV Settings Collections
     [ObservableProperty] private ObservableCollection<string> _fpvEnabled;
-    [ObservableProperty] private ObservableCollection<string> _fpvIntraLine;
-    [ObservableProperty] private ObservableCollection<string> _fpvIntraQp;
     [ObservableProperty] private ObservableCollection<string> _fpvNoiseLevel;
+    [ObservableProperty] private ObservableCollection<string> _fpvRoiQp;
     [ObservableProperty] private ObservableCollection<string> _fpvRefEnhance;
     [ObservableProperty] private ObservableCollection<string> _fpvRefPred;
-    [ObservableProperty] private ObservableCollection<string> _fpvRoiQp;
-    [ObservableProperty] private ObservableCollection<string> _fpvRoiRectHeight = new() { "" };
-
+    [ObservableProperty] private ObservableCollection<string> _fpvIntraLine;
+    [ObservableProperty] private ObservableCollection<string> _fpvIntraQp;
     [ObservableProperty] private ObservableCollection<string> _fpvRoiRectLeft = new() { "" };
     [ObservableProperty] private ObservableCollection<string> _fpvRoiRectTop = new() { "" };
+    [ObservableProperty] private ObservableCollection<string> _fpvRoiRectHeight = new() { "" };
     [ObservableProperty] private ObservableCollection<string> _fpvRoiRectWidth = new() { "" };
-    [ObservableProperty] private ObservableCollection<string> _hue;
-    [ObservableProperty] private ObservableCollection<string> _luminance;
+    #endregion
 
-    [ObservableProperty] private ObservableCollection<string> _mirror;
-
-    [ObservableProperty] private ObservableCollection<string> _resolution;
-    [ObservableProperty] private ObservableCollection<string> _saturation;
-
-    [ObservableProperty] private string _selectedBitrate;
-
-    [ObservableProperty] private string _selectedCodec;
-
-    [ObservableProperty] private string _selectedContrast;
-
-    [ObservableProperty] private string _selectedExposure;
-
-    [ObservableProperty] private string _selectedFlip;
-
-    [ObservableProperty] private string _selectedFps;
-
-    [ObservableProperty] private string _selectedFpvEnabled;
-
-    [ObservableProperty] private string _selectedFpvIntraLine;
-
-    [ObservableProperty] private string _selectedFpvIntraQp;
-
-    [ObservableProperty] private string _selectedFpvNoiseLevel;
-
-    [ObservableProperty] private string _selectedFpvRefEnhance;
-
-    [ObservableProperty] private string _selectedFpvRefPred;
-
-    [ObservableProperty] private string _selectedFpvRoiQp;
-
-    [ObservableProperty] private string _selectedHue;
-
-    [ObservableProperty] private string _selectedLuminance;
-
-    [ObservableProperty] private string _selectedMirror;
-
+    #region Selected Values
     [ObservableProperty] private string _selectedResolution;
-
+    [ObservableProperty] private string _selectedFps;
+    [ObservableProperty] private string _selectedCodec;
+    [ObservableProperty] private string _selectedBitrate;
+    [ObservableProperty] private string _selectedExposure;
+    [ObservableProperty] private string _selectedContrast;
+    [ObservableProperty] private string _selectedHue;
     [ObservableProperty] private string _selectedSaturation;
+    [ObservableProperty] private string _selectedLuminance;
+    [ObservableProperty] private string _selectedFlip;
+    [ObservableProperty] private string _selectedMirror;
+    #endregion
 
+    #region FPV Selected Values
+    [ObservableProperty] private string _selectedFpvEnabled;
+    [ObservableProperty] private string _selectedFpvNoiseLevel;
+    [ObservableProperty] private string _selectedFpvRoiQp;
+    [ObservableProperty] private string _selectedFpvRefEnhance;
+    [ObservableProperty] private string _selectedFpvRefPred;
+    [ObservableProperty] private string _selectedFpvIntraLine;
+    [ObservableProperty] private string _selectedFpvIntraQp;
+    [ObservableProperty] private string _combinedFpvRoiRectValue;
+    #endregion
+
+    #region Other Properties
+    [ObservableProperty] private bool _canConnect;
     [ObservableProperty] private bool _isOnboardRecOn;
+    #endregion
 
+    #region Commands
+    public ICommand RestartMajesticCommand { get; }
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Initializes a new instance of CameraSettingsTabViewModel
+    /// </summary>
     public CameraSettingsTabViewModel(
         ILogger logger,
         ISshClientService sshClientService,
@@ -100,198 +99,148 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
     {
         _yamlConfigService = yamlConfigService ?? throw new ArgumentNullException(nameof(yamlConfigService));
         _eventSubscriptionService = eventSubscriptionService ??
-                                    throw new ArgumentNullException(nameof(eventSubscriptionService));
+            throw new ArgumentNullException(nameof(eventSubscriptionService));
 
         InitializeCollections();
-
         RestartMajesticCommand = new RelayCommand(async () => await SaveRestartMajesticCommand());
 
         _eventSubscriptionService.Subscribe<MajesticContentUpdatedEvent, MajesticContentUpdatedMessage>(
             OnMajesticContentUpdated);
-
-        _eventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(
-            OnAppMessageEvent);
+        _eventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessageEvent);
     }
+    #endregion
 
-    public ICommand RestartMajesticCommand { get; }
-
-    private void OnAppMessageEvent(AppMessage appMessage)
-    {
-        // controls buttons
-        CanConnect = appMessage.CanConnect;
-    }
-
-    
+    #region Property Change Handlers
     partial void OnSelectedResolutionChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedResolution updated to {value}");
+        Logger.Debug($"SelectedResolution updated to {value}");
         UpdateYamlConfig(Majestic.VideoSize, value);
     }
 
     partial void OnSelectedFpsChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedFps updated to {value}");
+        Logger.Debug($"SelectedFps updated to {value}");
         UpdateYamlConfig(Majestic.VideoFps, value);
     }
 
     partial void OnSelectedCodecChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedCodec updated to {value}");
+        Logger.Debug($"SelectedCodec updated to {value}");
         UpdateYamlConfig(Majestic.VideoCodec, value);
     }
 
     partial void OnSelectedBitrateChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedBitrate updated to {value}");
+        Logger.Debug($"SelectedBitrate updated to {value}");
         UpdateYamlConfig(Majestic.VideoBitrate, value);
     }
 
     partial void OnSelectedExposureChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedExposure updated to {value}");
+        Logger.Debug($"SelectedExposure updated to {value}");
         UpdateYamlConfig(Majestic.IspExposure, value);
     }
 
     partial void OnSelectedHueChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedHue updated to {value}");
+        Logger.Debug($"SelectedHue updated to {value}");
         UpdateYamlConfig(Majestic.ImageHue, value);
     }
 
     partial void OnSelectedContrastChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedContrast updated to {value}");
+        Logger.Debug($"SelectedContrast updated to {value}");
         UpdateYamlConfig(Majestic.ImageContrast, value);
     }
 
     partial void OnSelectedSaturationChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedSaturation updated to {value}");
+        Logger.Debug($"SelectedSaturation updated to {value}");
         UpdateYamlConfig(Majestic.ImageSaturation, value);
     }
 
     partial void OnSelectedLuminanceChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedLuminance updated to {value}");
+        Logger.Debug($"SelectedLuminance updated to {value}");
         UpdateYamlConfig(Majestic.ImageLuminance, value);
     }
 
     partial void OnSelectedFlipChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedFlip updated to {value}");
+        Logger.Debug($"SelectedFlip updated to {value}");
         UpdateYamlConfig(Majestic.ImageFlip, value);
     }
 
     partial void OnSelectedMirrorChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedMirror updated to {value}");
+        Logger.Debug($"SelectedMirror updated to {value}");
         UpdateYamlConfig(Majestic.ImageMirror, value);
     }
 
     partial void OnSelectedFpvEnabledChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SlectedFpvEnabledChanged updated to {value}");
+        Logger.Debug($"SlectedFpvEnabledChanged updated to {value}");
         UpdateYamlConfig(Majestic.FpvEnabled, value);
     }
-    
-    // Partial method invoked when the property changes
+
     partial void OnIsOnboardRecOnChanged(bool value)
     {
-        // Handle the change (e.g., update a setting or call a service)
         Logger.Information($"Onboard recording toggled to: {value}");
-
-        // Example: Update a configuration or notify another service
-        _yamlConfig[Majestic.RecordsEnabled] = value.ToString().ToLower(); // Save the value back to the config
+        _yamlConfig[Majestic.RecordsEnabled] = value.ToString().ToLower();
     }
 
     partial void OnSelectedFpvNoiseLevelChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedFpvNoiseLevelChanged updated to {value}");
+        Logger.Debug($"SelectedFpvNoiseLevelChanged updated to {value}");
         UpdateYamlConfig(Majestic.FpvNoiseLevel, value);
     }
 
     partial void OnSelectedFpvRoiQpChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedFpvRoiQpChanged updated to {value}");
+        Logger.Debug($"SelectedFpvRoiQpChanged updated to {value}");
         UpdateYamlConfig(Majestic.FpvRoiQp, value);
     }
 
     partial void OnSelectedFpvRefEnhanceChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedFpvRefEnhanceChanged updated to {value}");
+        Logger.Debug($"SelectedFpvRefEnhanceChanged updated to {value}");
         UpdateYamlConfig(Majestic.FpvRefEnhance, value);
     }
 
     partial void OnSelectedFpvRefPredChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedFpvRefPredChanged updated to {value}");
+        Logger.Debug($"SelectedFpvRefPredChanged updated to {value}");
         UpdateYamlConfig(Majestic.FpvRefPred, value);
     }
 
     partial void OnSelectedFpvIntraLineChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedFpvIntraLineChanged updated to {value}");
+        Logger.Debug($"SelectedFpvIntraLineChanged updated to {value}");
         UpdateYamlConfig(Majestic.FpvIntraLine, value);
     }
 
     partial void OnSelectedFpvIntraQpChanged(string value)
     {
-        // Custom logic when the property changes
-        Log.Debug($"SelectedFpvIntraQpChanged updated to {value}");
+        Logger.Debug($"SelectedFpvIntraQpChanged updated to {value}");
         UpdateYamlConfig(Majestic.FpvIntraQp, value);
     }
+    #endregion
 
-
-    private void UpdateCombinedValue()
+    #region Event Handlers
+    private void OnAppMessageEvent(AppMessage appMessage)
     {
-        var fpvRoiRectLeft = FpvRoiRectLeft[0];
-        var fpvRoiRectTop = FpvRoiRectTop[0];
-        var fpvRoiRectHeight = FpvRoiRectHeight[0];
-        var fpvRoiRectWidth = FpvRoiRectWidth[0];
-
-        if (string.IsNullOrEmpty(fpvRoiRectLeft) &&
-            string.IsNullOrEmpty(fpvRoiRectTop) &&
-            string.IsNullOrEmpty(fpvRoiRectHeight) &&
-            string.IsNullOrEmpty(fpvRoiRectWidth)
-           )
-            // set to empty so that it removes the settings
-            CombinedFpvRoiRectValue = "";
-        else
-            CombinedFpvRoiRectValue =
-                $"{FpvRoiRectLeft[0]}x{FpvRoiRectTop[0]}x{FpvRoiRectHeight[0]}x{FpvRoiRectWidth[0]}";
-
-        Log.Debug($"Combined value updated to {CombinedFpvRoiRectValue}");
-        UpdateYamlConfig(Majestic.FpvRoiRect, CombinedFpvRoiRectValue);
+        CanConnect = appMessage.CanConnect;
     }
 
-    public void UpdateYamlConfig(string key, string newValue)
+    public void OnMajesticContentUpdated(MajesticContentUpdatedMessage message)
     {
-        if (_yamlConfig.ContainsKey(key))
-            _yamlConfig[key] = newValue;
-        else
-            _yamlConfig.Add(key, newValue);
-
-        if (string.IsNullOrEmpty(newValue)) _yamlConfig.Remove(key);
+        Logger.Debug("Processing MajesticContentUpdatedMessage.");
+        _yamlConfigService.ParseYaml(message.Content, _yamlConfig);
+        UpdateViewModelPropertiesFromYaml();
     }
+    #endregion
 
-
+    #region Private Methods
     private void InitializeCollections()
     {
         Resolution = new ObservableCollection<string>
@@ -306,8 +255,6 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         };
 
         Codec = new ObservableCollection<string> { "h264", "h265" };
-        // Bitrate = new ObservableCollection<string>
-        //     { "1024", "2048", "3072", "4096", "5120", "6144", "7168", "8192", "9216" };
         Bitrate = new ObservableCollection<string>(Enumerable.Range(1, 20).Select(i => (i * 1024).ToString()));
         Exposure = new ObservableCollection<string> { "5", "6", "8", "10", "11", "12", "14", "16", "33", "50" };
 
@@ -318,17 +265,15 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
 
         Flip = new ObservableCollection<string> { "true", "false" };
         SelectedFlip = "false";
-        
+
         Mirror = new ObservableCollection<string> { "true", "false" };
         SelectedMirror = "false";
-        
+
         FpvEnabled = new ObservableCollection<string> { "true", "false" };
         SelectedFpvEnabled = "false";
-        
+
         FpvNoiseLevel = new ObservableCollection<string> { "", "0", "1", "2" };
 
-
-        // Create an ObservableCollection with values from -30 to 30
         FpvRoiQp = new ObservableCollection<string>(Enumerable.Range(-30, 61).Select(i => i.ToString()));
         FpvRoiQp.Insert(0, "");
 
@@ -345,11 +290,22 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         FpvRoiRectLeft = new ObservableCollection<string> { "" };
     }
 
-    public void OnMajesticContentUpdated(MajesticContentUpdatedMessage message)
+    private void UpdateCombinedValue()
     {
-        Logger.Debug("Processing MajesticContentUpdatedMessage.");
-        _yamlConfigService.ParseYaml(message.Content, _yamlConfig);
-        UpdateViewModelPropertiesFromYaml();
+        var fpvRoiRectLeft = FpvRoiRectLeft[0];
+        var fpvRoiRectTop = FpvRoiRectTop[0];
+        var fpvRoiRectHeight = FpvRoiRectHeight[0];
+        var fpvRoiRectWidth = FpvRoiRectWidth[0];
+
+        CombinedFpvRoiRectValue = string.IsNullOrEmpty(fpvRoiRectLeft) &&
+                                 string.IsNullOrEmpty(fpvRoiRectTop) &&
+                                 string.IsNullOrEmpty(fpvRoiRectHeight) &&
+                                 string.IsNullOrEmpty(fpvRoiRectWidth)
+            ? ""
+            : $"{FpvRoiRectLeft[0]}x{FpvRoiRectTop[0]}x{FpvRoiRectHeight[0]}x{FpvRoiRectWidth[0]}";
+
+        Logger.Debug($"Combined value updated to {CombinedFpvRoiRectValue}");
+        UpdateYamlConfig(Majestic.FpvRoiRect, CombinedFpvRoiRectValue);
     }
 
     private void UpdateViewModelPropertiesFromYaml()
@@ -375,7 +331,7 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         if (_yamlConfig.TryGetValue(Majestic.ImageFlip, out var flip)) SelectedFlip = flip;
 
         if (_yamlConfig.TryGetValue(Majestic.ImageMirror, out var mirror)) SelectedMirror = mirror;
-        
+
         if (_yamlConfig.TryGetValue(Majestic.RecordsEnabled, out var onboardRecValue) &&
             bool.TryParse(onboardRecValue?.ToString(), out var isOnboardRec))
         {
@@ -383,7 +339,7 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
         }
         else
         {
-            IsOnboardRecOn = false; // Default value if the config is missing or invalid
+            IsOnboardRecOn = false;
         }
 
         if (_yamlConfig.TryGetValue(Majestic.FpvEnabled, out var fpvEnabled)) SelectedFpvEnabled = fpvEnabled;
@@ -407,8 +363,6 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
             var parts = fpvRoiRect.Split('x');
             if (parts.Length == 4)
             {
-                // Update ObservableCollection values
-                // Update the first element of each ObservableCollection
                 if (FpvRoiRectLeft.Count > 0) FpvRoiRectLeft[0] = parts[0];
                 if (FpvRoiRectTop.Count > 0) FpvRoiRectTop[0] = parts[1];
                 if (FpvRoiRectHeight.Count > 0) FpvRoiRectHeight[0] = parts[2];
@@ -416,25 +370,42 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
             }
             else
             {
-                Log.Warning($"Invalid format for FpvRoiRect value: {fpvRoiRect}");
+                Logger.Warning($"Invalid format for FpvRoiRect value: {fpvRoiRect}");
             }
         }
+    }
+    #endregion
+
+    #region Public Methods
+    public void UpdateYamlConfig(string key, string newValue)
+    {
+        if (_yamlConfig.ContainsKey(key))
+            _yamlConfig[key] = newValue;
+        else
+            _yamlConfig.Add(key, newValue);
+
+        if (string.IsNullOrEmpty(newValue))
+            _yamlConfig.Remove(key);
     }
 
     public async Task SaveRestartMajesticCommand()
     {
         Logger.Debug("Preparing to Save Majestic YAML file.");
 
-        var h = FpvRoiRectLeft[0];
         UpdateCombinedValue();
-
         var updatedYamlContent = _yamlConfigService.UpdateYaml(_yamlConfig);
 
         try
         {
-            await SshClientService.UploadFileStringAsync(DeviceConfig.Instance, OpenIPC.MajesticFileLoc,
+            await SshClientService.UploadFileStringAsync(
+                DeviceConfig.Instance,
+                OpenIPC.MajesticFileLoc,
                 updatedYamlContent);
-            SshClientService.ExecuteCommandAsync(DeviceConfig.Instance, DeviceCommands.MajesticRestartCommand);
+
+            SshClientService.ExecuteCommandAsync(
+                DeviceConfig.Instance,
+                DeviceCommands.MajesticRestartCommand);
+
             Logger.Information("Majestic configuration updated and service is restarting.");
         }
         catch (Exception ex)
@@ -442,4 +413,5 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
             Logger.Error("Failed to update Majestic configuration: {ExceptionMessage}", ex.Message);
         }
     }
+    #endregion
 }
