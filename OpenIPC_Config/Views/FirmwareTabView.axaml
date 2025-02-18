@@ -13,40 +13,53 @@
         <!-- <Rectangle Height="300" Width="300" Fill="LightGray" /> -->
 
         <Border Background="#F0F0F0" CornerRadius="8" Padding="16" Margin="8">
-            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,Auto,*">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,Auto,*" ShowGridLines="False">
 
+                <!-- Chip Type -->
+                
+                <TextBlock Text="SOC Family" Grid.Row="0" Grid.Column="0"
+                           Margin="0,0,0,10"
+                           VerticalAlignment="Center" />
+                
+                <TextBlock Text="{Binding ChipType}" Grid.Row="0" Grid.Column="1"
+                           Margin="5,0,0,10"
+                           Padding="10,0,0,0"
+                           VerticalAlignment="Center"
+                            />
+                
+                
                 <!-- Manufacturer -->
-                <TextBlock Text="Manufacturer" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" />
-                <ComboBox Grid.Row="0" Grid.Column="1"
+                <TextBlock Text="Manufacturer" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" />
+                <ComboBox Grid.Row="1" Grid.Column="1"
                           IsEnabled="{Binding CanUseDropdowns}"
                           SelectedItem="{Binding SelectedManufacturer, Mode=TwoWay}"
                           ItemsSource="{Binding Manufacturers}" />
 
                 <!-- Device -->
-                <TextBlock Text="Device" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" />
-                <ComboBox Grid.Row="1" Grid.Column="1"
+                <TextBlock Text="Device" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" />
+                <ComboBox Grid.Row="2" Grid.Column="1"
                           IsEnabled="{Binding CanUseDropdowns}"
                           SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
                           ItemsSource="{Binding Devices}" />
 
                 <!-- WFB/Ruby -->
-                <TextBlock Text="WFB/Ruby" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" />
-                <ComboBox Grid.Row="2" Grid.Column="1"
+                <TextBlock Text="WFB/Ruby" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" />
+                <ComboBox Grid.Row="3" Grid.Column="1"
                           IsEnabled="{Binding CanUseDropdowns}"
                           SelectedItem="{Binding SelectedFirmware, Mode=TwoWay}"
                           ItemsSource="{Binding Firmwares}" />
 
                 <!-- Manual upload -->
-                <TextBlock Text="Local" Grid.Row="3" Grid.Column="0"
+                <TextBlock Text="Local" Grid.Row="4" Grid.Column="0"
                            VerticalAlignment="Center" />
 
-                <Button Grid.Row="3" Grid.Column="1" Content="Select Firmware"
-                        Margin="0,10,0,0"
+                <Button Grid.Row="4" Grid.Column="1" Content="Select Firmware"
+                        Margin="5,10,0,0"
                         IsEnabled="{Binding CanUseSelectFirmware}"
                         Command="{Binding SelectFirmwareCommand}"
                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" />
                 
-                <TextBox Grid.Row="3" Grid.Column="2" 
+                <TextBox Grid.Row="4" Grid.Column="2" 
                         Margin="0,10,0,0"
                         IsReadOnly="True"
                         IsEnabled="{Binding CanUseSelectFirmware}"
@@ -55,17 +68,17 @@
 
                 <!-- Update Button -->
                 <Button Content="Update"
-                        Grid.Row="4"
+                        Grid.Row="5"
                         Grid.Column="1"
                         HorizontalAlignment="Left"
                         Width="100"
                         Command="{Binding PerformFirmwareUpgradeAsyncCommand}"
                         IsEnabled="{Binding CanConnect}"
-                        Margin="0,10,0,0" />
+                        Margin="5,10,0,0" />
 
                 <!-- Clear Button -->
                 <Button Content="Clear"
-                        Grid.Row="4"
+                        Grid.Row="5"
                         Grid.Column="2"
                         HorizontalAlignment="Left"
                         Width="100"
@@ -74,10 +87,10 @@
                         Margin="0,10,0,0" />
                 
                 
-                <TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="3" 
+                <TextBlock Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" 
                            Margin="0,50,0,5"
                            Text="Firmware Upgrade Progress" FontWeight="Medium"  />
-                <ProgressBar Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" 
+                <ProgressBar Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3" 
                              Minimum="0" Maximum="100" Value="{Binding ProgressValue}" Height="20" />
                 <!-- <TextBox Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3" -->
                 <!--          BorderBrush="Transparent" -->

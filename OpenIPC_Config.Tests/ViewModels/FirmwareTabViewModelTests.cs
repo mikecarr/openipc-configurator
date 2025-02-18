@@ -1,5 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Net;
+using System.Reflection;
 using Moq;
+using Moq.Protected;
 using OpenIPC_Config.Services;
 using OpenIPC_Config.ViewModels;
 using Serilog;
@@ -13,6 +16,7 @@ public class FirmwareTabViewModelTests
     private Mock<ILogger> _mockLogger;
     private Mock<ISshClientService> _mockSshClientService;
     private Mock<IEventSubscriptionService> _mockEventSubscriptionService;
+    private Mock<HttpMessageHandler> _mockHttpMessageHandler;
 
     [SetUp]
     public void Setup()
@@ -20,6 +24,7 @@ public class FirmwareTabViewModelTests
         _mockLogger = new Mock<ILogger>();
         _mockSshClientService = new Mock<ISshClientService>();
         _mockEventSubscriptionService = new Mock<IEventSubscriptionService>();
+        _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
 
         _viewModel = new FirmwareTabViewModel(
             _mockLogger.Object,
@@ -173,5 +178,54 @@ public class FirmwareTabViewModelTests
 
         // Assert
         Assert.IsTrue(canExecute);
+    }
+    
+    [Test]
+    public async Task FetchFirmwareListAsync_ValidResponse_PopulatesFirmwareData()
+    {
+        // Arrange: Load mock JSON from file
+        var fileDir = GetTestFilePath("mock_firmware_data.json");
+        
+        var jsonResponse = File.ReadAllText(GetTestFilePath("mock_firmware_data.json"));
+
+        // Setup the mocked HTTP response
+        _mockHttpMessageHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(jsonResponse)
+            });
+
+        // Act
+        //var result = await _viewModel.FetchFirmwareListAsync();
+        _viewModel.ChipType = "ssc338q";
+        await _viewModel.LoadManufacturers();
+
+        Assert.IsNotEmpty(_viewModel.Manufacturers);
+
+        // Assert
+        // Assert.IsNotNull(result);
+        // Assert.IsNotEmpty(result.Manufacturers);
+        // Assert.That(result.Manufacturers.Any(m => m.Name == "runcam"));
+        // Assert.That(result.Manufacturers.Any(m => m.Name == "generic"));
+    }
+
+    private string GetTestFilePath(string filename)
+    {
+        var resourcePath = Path.Combine(
+            AppContext.BaseDirectory,
+            "Assets",
+            "TestResources",
+            "MockData",
+            filename
+        );
+
+        return resourcePath;
     }
 }

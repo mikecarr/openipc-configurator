@@ -50,4 +50,32 @@
         </None>
     </ItemGroup>
 
+<!--    <ItemGroup>-->
+<!--      <None Remove="TestResources\MockData\mock_firmware_data.json" />-->
+<!--      <EmbeddedResource Include="TestResources\MockData\mock_firmware_data.json" />-->
+<!--    </ItemGroup>-->
+
+<!--    <ItemGroup Condition="'$(Configuration)' == 'Debug'">-->
+<!--        <Content Include="TestResources\**\*">-->
+<!--            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>-->
+<!--        </Content>-->
+<!--    </ItemGroup>-->
+<!--    <ItemGroup>-->
+<!--        &lt;!&ndash; These resources will be available in both Debug and Release &ndash;&gt;-->
+<!--        <EmbeddedResource Include="Assets\TestResources\MockData\mock_firmware_data.json" />-->
+<!--        <EmbeddedResource Include="TestResources\**\*.json" />-->
+<!--        <EmbeddedResource Include="TestResources\**\*.yaml" />-->
+<!--    </ItemGroup>-->
+
+    <ItemGroup>
+        <!-- Copy test resources to output directory -->
+        <Content Include="Assets\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
+
 </Project>

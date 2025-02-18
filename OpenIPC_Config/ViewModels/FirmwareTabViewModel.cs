@@ -29,13 +29,16 @@ namespace OpenIPC_Config.ViewModels;
 public partial class FirmwareTabViewModel : ViewModelBase
 {
     #region Private Fields
+
     private readonly HttpClient _httpClient;
     private readonly SysUpgradeService _sysupgradeService;
     private CancellationTokenSource _cancellationTokenSource;
     private FirmwareData _firmwareData;
+
     #endregion
 
     #region Observable Properties
+
     [ObservableProperty] private bool _canConnect;
     [ObservableProperty] private bool _isConnected;
     [ObservableProperty] private bool _isFirmwareSelected;
@@ -47,9 +50,12 @@ public partial class FirmwareTabViewModel : ViewModelBase
     [ObservableProperty] private string _selectedManufacturer;
     [ObservableProperty] private string _manualFirmwareFile;
     [ObservableProperty] private int _progressValue;
+    [ObservableProperty] private string _chipType;
+
     #endregion
 
     #region Public Properties
+
     /// <summary>
     /// Gets whether dropdowns should be enabled based on connection and firmware selection state
     /// </summary>
@@ -74,16 +80,20 @@ public partial class FirmwareTabViewModel : ViewModelBase
     /// Collection of available firmware versions
     /// </summary>
     public ObservableCollection<string> Firmwares { get; set; } = new();
+
     #endregion
 
     #region Commands
+
     public ICommand SelectFirmwareCommand { get; set; }
     public ICommand PerformFirmwareUpgradeAsyncCommand { get; set; }
     public ICommand ClearFormCommand { get; set; }
     public IRelayCommand DownloadFirmwareAsyncCommand { get; set; }
+
     #endregion
 
     #region Constructor
+
     /// <summary>
     /// Initializes a new instance of FirmwareTabViewModel
     /// </summary>
@@ -99,11 +109,12 @@ public partial class FirmwareTabViewModel : ViewModelBase
         InitializeProperties();
         InitializeCommands();
         SubscribeToEvents();
-        LoadManufacturers();
     }
+
     #endregion
 
     #region Initialization Methods
+
     private void InitializeProperties()
     {
         CanConnect = false;
@@ -131,13 +142,19 @@ public partial class FirmwareTabViewModel : ViewModelBase
     {
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
     }
+
     #endregion
 
     #region Event Handlers
+
     private void OnAppMessage(AppMessage message)
     {
         CanConnect = message.CanConnect;
         IsConnected = message.CanConnect;
+        ChipType = message.DeviceConfig.ChipType;
+
+        // gets firmware list
+        LoadManufacturers();
 
         if (!IsConnected)
         {
@@ -171,10 +188,39 @@ public partial class FirmwareTabViewModel : ViewModelBase
     {
         UpdateCanExecuteCommands();
     }
+
     #endregion
 
     #region Public Methods
-    public async void LoadManufacturers()
+
+    public async Task<FirmwareData> GetFirmwareData()
+    {
+        try
+        {
+            var url = "https://api.github.com/repos/OpenIPC/builder/releases/latest";
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; OpenIPC-Config/1.0)");
+            var response = await _httpClient.GetStringAsync(url);
+
+            var releaseData = JObject.Parse(response);
+            var assets = releaseData["assets"];
+            var filenames =
+                assets?.Select(asset => asset["name"]?.ToString()).Where(name => !string.IsNullOrEmpty(name)) ??
+                Enumerable.Empty<string>();
+
+            Logger.Information($"Fetched {filenames.Count()} firmware files.");
+
+            var firmwareData = new FirmwareData { Manufacturers = new ObservableCollection<Manufacturer>() };
+
+            return firmwareData;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Error fetching firmware list.");
+            return null;
+        }
+    }
+
+    public async Task LoadManufacturers()
     {
         try
         {
@@ -186,9 +232,11 @@ public partial class FirmwareTabViewModel : ViewModelBase
                 Manufacturers.Clear();
                 foreach (var manufacturer in data.Manufacturers)
                 {
+                    Logger.Debug($"Manufacturer: {manufacturer.Name}");
+
                     var hasValidFirmwareType = manufacturer.Devices.Any(device =>
                         device.Firmware.Any(firmware =>
-                            firmware.Contains("fpv") || firmware.Contains("rubyfpv")));
+                            firmware.Contains(ChipType) && firmware.Contains("fpv") || firmware.Contains("rubyfpv")));
 
                     if (hasValidFirmwareType)
                         Manufacturers.Add(manufacturer.Name);
@@ -266,9 +314,11 @@ public partial class FirmwareTabViewModel : ViewModelBase
 
         Logger.Information($"Loaded {Firmwares.Count} firmware types for device: {device}");
     }
+
     #endregion
 
     #region Private Methods
+
     private void ClearForm()
     {
         SelectedManufacturer = string.Empty;
@@ -322,6 +372,10 @@ public partial class FirmwareTabViewModel : ViewModelBase
             {
                 var match = Regex.Match(filename,
                     @"^(?<sensor>[^_]+)_(?<firmwareType>[^_]+)_(?<manufacturer>[^-]+)-(?<device>.+?)-(?<memoryType>nand|nor)");
+
+                // var match = Regex.Match(filename,
+                //     @"^(?<sensor>[^_]+)_(?<firmwareType>[^_]+)(?:_(?<manufacturer>[^-]+))?-(?<device>.+?)-(?<memoryType>nand|nor)");
+
                 if (match.Success)
                 {
                     var sensor = match.Groups["sensor"].Value;
@@ -330,7 +384,14 @@ public partial class FirmwareTabViewModel : ViewModelBase
                     var deviceName = match.Groups["device"].Value;
                     var memoryType = match.Groups["memoryType"].Value;
 
-                    Debug.WriteLine(
+                    if (!sensor.Contains(ChipType))
+                        continue;
+
+                    if (!firmwareType.Contains("rubyfpv") | firmwareType.Contains("fpv"))
+                        continue;
+
+
+                    Logger.Verbose(
                         $"Parsed file: Sensor={sensor}, FirmwareType={firmwareType}, Manufacturer={manufacturerName}, Device={deviceName}, MemoryType={memoryType}");
 
                     var manufacturer = firmwareData.Manufacturers.FirstOrDefault(m => m.Name == manufacturerName);
@@ -374,6 +435,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
         }
     }
 
+
     private async Task<string> DownloadFirmwareAsync(string url = null, string filename = null)
     {
         try
@@ -403,6 +465,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
             return null;
         }
     }
+
 
     private string DecompressTgzToTar(string tgzFilePath)
     {
@@ -589,7 +652,6 @@ public partial class FirmwareTabViewModel : ViewModelBase
                     var downloadUrl = $"https://github.com/OpenIPC/builder/releases/download/latest/{filename}";
 
                     firmwareFilePath = await DownloadFirmwareAsync(downloadUrl, filename);
-
                 }
                 else
                 {
@@ -664,7 +726,8 @@ public partial class FirmwareTabViewModel : ViewModelBase
                                     break;
                                 case var s when s.Contains("Root filesystem uploaded successfully"):
                                     ProgressValue = 70;
-                                    Logger.Debug("Root filesystem uploaded successfully ProgressValue: " + ProgressValue);
+                                    Logger.Debug(
+                                        "Root filesystem uploaded successfully ProgressValue: " + ProgressValue);
                                     break;
                                 case var s when s.Contains("Erase overlay partition"):
                                     ProgressValue = 90;
@@ -677,7 +740,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
                     },
                     CancellationToken.None);
 
-                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     ProgressValue = 100;
                     Logger.Information("Firmware upgrade completed successfully.");
@@ -721,10 +784,12 @@ public partial class FirmwareTabViewModel : ViewModelBase
             ManualFirmwareFile = selectedFile;
         }
     }
+
     #endregion
 }
 
 #region Support Classes
+
 public class FirmwareData
 {
     public ObservableCollection<Manufacturer> Manufacturers { get; set; }
@@ -741,4 +806,5 @@ public class Device
     public string Name { get; set; }
     public ObservableCollection<string> Firmware { get; set; }
 }
+
 #endregion

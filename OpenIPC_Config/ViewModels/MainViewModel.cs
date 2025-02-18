@@ -217,6 +217,9 @@ public partial class MainViewModel : ViewModelBase
 
         UpdateUIMessage("Getting hostname");
 
+        
+        await getChipType(_deviceConfig);
+        
         await getHostname(_deviceConfig);
         if (_deviceConfig.Hostname == string.Empty)
         {
@@ -317,6 +320,44 @@ public partial class MainViewModel : ViewModelBase
         deviceConfig.Hostname = hostName;
         //_deviceConfig.Hostname = hostName;
         //Hostname = hostName;
+
+        // Cleanup
+        cts.Dispose();
+    }
+    
+    /// <summary>
+    ///     Retrieves the hostname of the device asynchronously using SSH.
+    ///     <para>
+    ///         The command execution is cancelled after 10 seconds if no response is received.
+    ///         If the command execution times out, a message box is displayed with an error message.
+    ///     </para>
+    /// </summary>
+    /// <param name="deviceConfig">The device configuration to use for the SSH connection.</param>
+    private async Task getChipType(DeviceConfig deviceConfig)
+    {
+        deviceConfig.Hostname = string.Empty;
+
+        var cts = new CancellationTokenSource(10000); // 10 seconds
+        var cancellationToken = cts.Token;
+
+        var cmdResult =
+            await SshClientService.ExecuteCommandWithResponseAsync(deviceConfig, DeviceCommands.GetChipType,
+                cancellationToken);
+
+        // If the command execution takes longer than 10 seconds, the task will be cancelled
+        if (cmdResult == null)
+        {
+            // Handle the timeout
+            // .
+            var resp = MessageBoxManager.GetMessageBoxStandard("Timeout Error!",
+                "The command took too long to execute. Please check device..");
+            await resp.ShowAsync();
+            return;
+        }
+
+        var chipType = Utilities.RemoveSpecialCharacters(cmdResult.Result);
+        deviceConfig.ChipType = chipType;
+        
 
         // Cleanup
         cts.Dispose();
