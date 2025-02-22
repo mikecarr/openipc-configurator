@@ -46,6 +46,33 @@
             <Svg Width="16"  Path="/Assets/Icons/ic-discord.svg" />
             </Button>
         </StackPanel>
+        
+        <StackPanel Orientation="Vertical" Grid.Column="2" HorizontalAlignment="Left"
+                    VerticalAlignment="Center" Spacing="3" >
+
+            <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto, Auto" ShowGridLines="False"
+                  Margin="5">
+                <!-- SOC -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="SOC:"
+                           Padding="5"
+                           HorizontalAlignment="Right" 
+                           VerticalAlignment="Center" Foreground="White" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Soc}" 
+                           HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" />
+            
+                <!-- Sensor -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Sensor:" 
+                           Padding="5" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Sensor}" 
+                           HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="White" />
+                
+                <!-- Placeholder -->
+                <TextBlock Grid.Row="2" Grid.Column="0"  />
+            
+            </Grid>
+            
+            
+        </StackPanel>
 
         <!-- Connection Fields -->
         <Grid Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" >
