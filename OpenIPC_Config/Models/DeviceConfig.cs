@@ -18,6 +18,8 @@ public class DeviceConfig : INotifyPropertyChanged
     private string _password;
     private string _chipType;
     private string _sensorType;
+    private string _networkCardType;
+    
     private int _port;
     private string _username;
     #endregion
@@ -149,6 +151,21 @@ public class DeviceConfig : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+    
+    /// <summary>
+    /// Gets or sets the network card type of the device
+    /// </summary>
+    public string NetworkCardType
+    {
+        get => _networkCardType;
+        set
+        {
+            _networkCardType = value;
+            OnPropertyChanged();
+        }
+    }
+    
+    
     #endregion
     
     /// <summary>

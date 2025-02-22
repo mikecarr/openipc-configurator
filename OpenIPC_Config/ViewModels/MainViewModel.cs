@@ -28,6 +28,7 @@ public partial class MainViewModel : ViewModelBase
     
     [ObservableProperty] private string _soc;
     [ObservableProperty] private string _sensor;
+    [ObservableProperty] private string _networkCardType;
 
     private readonly IServiceProvider _serviceProvider;
     private readonly GlobalSettingsViewModel _globalSettingsSettingsViewModel;
@@ -45,6 +46,8 @@ public partial class MainViewModel : ViewModelBase
         _appVersionText = GetFormattedAppVersion();
         CanConnect = false;
         _globalSettingsSettingsViewModel = globalSettingsSettingsViewModel;
+        
+        LoadSettings();
         
         Tabs = new ObservableCollection<TabItemViewModel> { };
         // Subscribe to device type change events
@@ -67,6 +70,9 @@ public partial class MainViewModel : ViewModelBase
 
         Soc = "";
         Sensor = "";
+        Soc = string.Empty;
+        Sensor = string.Empty;
+        NetworkCardType = string.Empty;
         IsVRXEnabled = false;
     }
 
@@ -221,12 +227,17 @@ public partial class MainViewModel : ViewModelBase
 
         UpdateUIMessage("Getting hostname");
 
+        
         await getSensorType(_deviceConfig);
         Sensor = _deviceConfig.SensorType;
+        
+        await getNetworkCardType(_deviceConfig);
+        NetworkCardType = _deviceConfig.NetworkCardType;
         
         await getChipType(_deviceConfig);
         Soc = _deviceConfig.ChipType;
         
+        UpdateUIMessage("Getting hostname");
         await getHostname(_deviceConfig);
         if (_deviceConfig.Hostname == string.Empty)
         {
@@ -402,6 +413,45 @@ public partial class MainViewModel : ViewModelBase
 
         var sensorType = Utilities.RemoveSpecialCharacters(cmdResult.Result);
         deviceConfig.SensorType = sensorType;
+        
+
+        // Cleanup
+        cts.Dispose();
+    }
+    
+    /// <summary>
+    ///     Retrieves the network card type of the device asynchronously using SSH.
+    ///     <para>
+    ///         The command execution is cancelled after 10 seconds if no response is received.
+    ///         If the command execution times out, a message box is displayed with an error message.
+    ///     </para>
+    /// </summary>
+    /// <param name="deviceConfig">The device configuration to use for the SSH connection.</param>
+    private async Task getNetworkCardType(DeviceConfig deviceConfig)
+    {
+        deviceConfig.Hostname = string.Empty;
+
+        var cts = new CancellationTokenSource(10000); // 10 seconds
+        var cancellationToken = cts.Token;
+
+        var cmdResult =
+            await SshClientService.ExecuteCommandWithResponseAsync(deviceConfig, DeviceCommands.GetNetworkCardType,
+                cancellationToken);
+
+        // If the command execution takes longer than 10 seconds, the task will be cancelled
+        if (cmdResult == null)
+        {
+            // Handle the timeout
+            // .
+            var resp = MessageBoxManager.GetMessageBoxStandard("Timeout Error!",
+                "The command took too long to execute. Please check device..");
+            await resp.ShowAsync();
+            return;
+        }
+
+        var lsusbResults = Utilities.RemoveLastChar(cmdResult.Result);
+        var networkCardType= WifiCardDetector.DetectWifiCard(lsusbResults);
+        deviceConfig.NetworkCardType = networkCardType;
         
 
         // Cleanup

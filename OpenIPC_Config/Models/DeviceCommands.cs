@@ -69,4 +69,6 @@ public static class DeviceCommands
     public static string GetChipType = "fw_printenv soc | awk -F= '{print $2}'";
     
     public static string GetSensorType = "fw_printenv sensor | awk -F= '{print $2}'";
+    
+    public static string GetNetworkCardType = "lsusb";
 }
