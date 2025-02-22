@@ -99,7 +99,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
         InitializeProperties();
         InitializeCommands();
         SubscribeToEvents();
-        LoadManufacturers();
+        
     }
     #endregion
 
@@ -138,7 +138,9 @@ public partial class FirmwareTabViewModel : ViewModelBase
     {
         CanConnect = message.CanConnect;
         IsConnected = message.CanConnect;
-
+        
+        LoadManufacturers();
+        
         if (!IsConnected)
         {
             IsFirmwareSelected = false;
@@ -179,6 +181,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
         try
         {
             Logger.Information("Loading firmware list...");
+            Manufacturers.Clear();
             var data = await FetchFirmwareListAsync();
 
             if (data?.Manufacturers != null && data.Manufacturers.Any())
@@ -325,6 +328,11 @@ public partial class FirmwareTabViewModel : ViewModelBase
                 if (match.Success)
                 {
                     var sensor = match.Groups["sensor"].Value;
+                    
+                    // only show firmware that matches the selected sensor/soc
+                    if(DeviceConfig.Instance.ChipType != sensor)
+                        continue;
+                    
                     var firmwareType = match.Groups["firmwareType"].Value;
                     var manufacturerName = match.Groups["manufacturer"].Value;
                     var deviceName = match.Groups["device"].Value;

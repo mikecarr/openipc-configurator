@@ -12,6 +12,18 @@ public static class Utilities
         var output = Regex.Replace(input, pattern, "");
         return output;
     }
+    
+    public static string RemoveLastChar(string input)
+    {
+        if (input.Length > 0)
+        {
+            return input.Substring(0, input.Length - 1);
+        }
+        else
+        {
+            return input;
+        }
+    }
 
     public static string ComputeMd5Hash(byte[] rawData)
     {

@@ -65,4 +65,10 @@ public static class DeviceCommands
     // // "sed -i 's/echo \\\"Starting wifibroadcast service...\\\"/echo \\\"\\&L70 \\&F35 CPU:\\&C \\&B Temp:\\&T\\\" > \\/tmp\\/MSPOSD.msg /' /etc/init.d/S98datalink";
 
     public static string DataLinkRestart = "/etc/init.d/S98datalink stop ;/etc/init.d/S98datalink start";
+    
+    public static string GetChipType = "fw_printenv soc | awk -F= '{print $2}'";
+    
+    public static string GetSensorType = "fw_printenv sensor | awk -F= '{print $2}'";
+    
+    public static string GetNetworkCardType = "lsusb";
 }
