@@ -24,4 +24,5 @@ public static class Majestic
     public const string FpvRoiRect = "fpv.roiRect";
 
     public const string RecordsEnabled = "records.enabled";
+    public const string AudioEnabled = "audio.enabled";
 }

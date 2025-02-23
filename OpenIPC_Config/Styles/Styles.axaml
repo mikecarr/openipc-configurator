@@ -68,7 +68,7 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="10,5" />
 
-        <Setter Property="Background" Value="CornflowerBlue" />
+        <Setter Property="Background" Value="#4C61D8" />
         <Setter Property="Foreground" Value="White" />
         <!-- <Setter Property="Background" Value="#B0D5FF"/> -->
         <!-- <Setter Property="Foreground" Value="#000000"/> -->

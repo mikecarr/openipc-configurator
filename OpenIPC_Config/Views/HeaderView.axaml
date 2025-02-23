@@ -15,6 +15,7 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
         <!-- Logo and Title -->
@@ -46,9 +47,58 @@
             <Svg Width="16"  Path="/Assets/Icons/ic-discord.svg" />
             </Button>
         </StackPanel>
+        
+        <StackPanel Orientation="Vertical" Grid.Column="2" HorizontalAlignment="Right"
+                    VerticalAlignment="Center" Spacing="3" >
+
+            <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto, Auto" 
+                  ShowGridLines="False"
+                  Margin="5">
+                <!-- SOC -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="SOC:"
+                           Margin="5,0,0,5"
+                           HorizontalAlignment="Right" 
+                           VerticalAlignment="Center" 
+                           Foreground="White" />
+                <TextBlock Grid.Row="0" Grid.Column="1" 
+                           Margin="5,0,0,5"
+                           Text="{Binding Soc}" 
+                           Width="75"
+                           HorizontalAlignment="Left" 
+                           VerticalAlignment="Center" 
+                           Foreground="White" />
+            
+                <!-- Sensor -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Sensor:" 
+                           Margin="5,0,0,5"
+                           VerticalAlignment="Center" 
+                           HorizontalAlignment="Right" 
+                           Foreground="White" />
+                <TextBlock Grid.Row="1" Grid.Column="1" 
+                           Text="{Binding Sensor}"
+                           Margin="5,0,0,5"
+                           HorizontalAlignment="Left" 
+                           VerticalAlignment="Center" 
+                           Foreground="White" />
+                <!-- Network Card -->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Net Card:"
+                           Margin="5,0,0,5"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Foreground="White" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding NetworkCardType}"
+                           Margin="5,0,0,5"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Foreground="White" />
+            
+            </Grid>
+            
+            
+        </StackPanel>
 
         <!-- Connection Fields -->
-        <Grid Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" >
+        <Grid Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -88,7 +138,7 @@
         </Grid>
 
         <!-- Circular Connect Button -->
-        <StackPanel Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,10,0">
+        <StackPanel Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,10,0">
             <Button Width="60" Height="60" Command="{Binding ConnectCommand}"
                     IsEnabled="{Binding CanConnect}"
                     Classes="CircularButton" />

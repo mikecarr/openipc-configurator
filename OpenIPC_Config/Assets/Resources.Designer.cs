@@ -320,6 +320,11 @@ namespace OpenIPC_Config.Assets {
             get { return ResourceManager.GetString("MSPOSDExtraRemovalToolTip", resourceCulture); }
             
         }
+        
+        public static string AudioEnabledToolTip
+        {
+            get { return ResourceManager.GetString("AudioEnabledToolTip", resourceCulture); }
+        }
 
     }
 }
