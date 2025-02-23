@@ -13,6 +13,7 @@ public class FirmwareTabViewModelTests
     private Mock<ILogger> _mockLogger;
     private Mock<ISshClientService> _mockSshClientService;
     private Mock<IEventSubscriptionService> _mockEventSubscriptionService;
+    private Mock<GitHubService> _mockGithubService;
 
     [SetUp]
     public void Setup()
@@ -24,10 +25,10 @@ public class FirmwareTabViewModelTests
         _viewModel = new FirmwareTabViewModel(
             _mockLogger.Object,
             _mockSshClientService.Object,
-            _mockEventSubscriptionService.Object);
+            _mockEventSubscriptionService.Object,
+            _mockGithubService.Object);
     }
 
-    
 
     [Test]
     public void LoadDevices_ValidManufacturer_PopulatesDevices()
