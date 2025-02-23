@@ -80,6 +80,8 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
     #region Other Properties
     [ObservableProperty] private bool _canConnect;
     [ObservableProperty] private bool _isOnboardRecOn;
+    [ObservableProperty] private bool _isAudioEnabled;
+    
     #endregion
 
     #region Commands
@@ -187,6 +189,12 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
     {
         Logger.Information($"Onboard recording toggled to: {value}");
         _yamlConfig[Majestic.RecordsEnabled] = value.ToString().ToLower();
+    }
+    
+    partial void OnIsAudioEnabledChanged(bool value)
+    {
+        Logger.Information($"audio toggled to: {value}");
+        _yamlConfig[Majestic.AudioEnabled] = value.ToString().ToLower();
     }
 
     partial void OnSelectedFpvNoiseLevelChanged(string value)
@@ -372,6 +380,16 @@ public partial class CameraSettingsTabViewModel : ViewModelBase
             {
                 Logger.Warning($"Invalid format for FpvRoiRect value: {fpvRoiRect}");
             }
+        }
+        
+        if (_yamlConfig.TryGetValue(Majestic.AudioEnabled, out var audioEnabledValue) &&
+            bool.TryParse(audioEnabledValue?.ToString(), out var audioEnabled))
+        {
+            IsAudioEnabled = audioEnabled;
+        }
+        else
+        {
+            IsAudioEnabled = false;
         }
     }
     #endregion

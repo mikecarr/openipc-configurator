@@ -283,4 +283,7 @@ Add OSD SOC Temperature</value>
     <data name="MSPOSDExtraRemovalToolTip" xml:space="preserve">
         <value>Remove OSD Temperature</value>
     </data>
+    <data name="AudioEnabledToolTip" xml:space="preserve">
+        <value>Enables or disables audio, works for all ssc30kq and ssc338q devices.</value>
+    </data>
 </root>
