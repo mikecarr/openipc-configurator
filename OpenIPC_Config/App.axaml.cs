@@ -303,6 +303,9 @@ public class App : Application
 
     private JObject createDefaultAppSettings()
     {
+
+        string logPath = Path.Combine(OpenIPC.AppDataConfigDirectory, "Logs", "configurator.log");
+
         // Create default settings
         var defaultSettings = new JObject(
             new JProperty("UpdateChecker",
@@ -324,8 +327,7 @@ public class App : Application
                                 new JProperty("Name", "File"),
                                 new JProperty("Args",
                                     new JObject(
-                                        new JProperty("path",
-                                            $"{OpenIPC.AppDataConfigDirectory}/Logs/configurator.log"),
+                                        new JProperty("path", logPath),
                                         new JProperty("rollingInterval",
                                             "Day"),
                                         new JProperty("retainedFileCountLimit",
