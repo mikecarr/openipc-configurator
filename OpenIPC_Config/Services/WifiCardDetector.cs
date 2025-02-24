@@ -12,7 +12,7 @@ namespace OpenIPC_Config.Services;
     {
         // Parse the lsusb output to extract device IDs.  This is more robust than cutting by spaces.
         // Assumes each line in lsusbOutput contains "ID <vendorID>:<productID>"
-        var deviceIds = lsusbOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+        var deviceIds = lsusbOutput.Split(new[] { "\n" }, StringSplitOptions.RemoveEmptyEntries)
             .Select(line =>
             {
                 Match match = Regex.Match(line, @"ID\s+([0-9a-f]{4}):([0-9a-f]{4})", RegexOptions.IgnoreCase);
