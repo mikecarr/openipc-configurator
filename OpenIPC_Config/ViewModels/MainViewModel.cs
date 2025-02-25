@@ -226,7 +226,12 @@ public partial class MainViewModel : ViewModelBase
         _deviceConfig.DeviceType = SelectedDeviceType;
 
         UpdateUIMessage("Getting hostname");
-
+        await getHostname(_deviceConfig);
+        if (_deviceConfig.Hostname == string.Empty)
+        {
+            Log.Error("Failed to get hostname, stopping");
+            return;
+        }
         
         await getSensorType(_deviceConfig);
         Sensor = _deviceConfig.SensorType;
@@ -237,14 +242,7 @@ public partial class MainViewModel : ViewModelBase
         await getChipType(_deviceConfig);
         Soc = _deviceConfig.ChipType;
         
-        UpdateUIMessage("Getting hostname");
-        await getHostname(_deviceConfig);
-        if (_deviceConfig.Hostname == string.Empty)
-        {
-            Log.Error("Failed to get hostname, stopping");
-            return;
-        }
-
+        
         var validator = App.ServiceProvider.GetRequiredService<DeviceConfigValidator>();
         if (!validator.IsDeviceConfigValid(_deviceConfig))
         {
