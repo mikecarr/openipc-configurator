@@ -233,16 +233,6 @@ public partial class MainViewModel : ViewModelBase
             return;
         }
         
-        await getSensorType(_deviceConfig);
-        Sensor = _deviceConfig.SensorType;
-        
-        await getNetworkCardType(_deviceConfig);
-        NetworkCardType = _deviceConfig.NetworkCardType;
-        
-        await getChipType(_deviceConfig);
-        Soc = _deviceConfig.ChipType;
-        
-        
         var validator = App.ServiceProvider.GetRequiredService<DeviceConfigValidator>();
         if (!validator.IsDeviceConfigValid(_deviceConfig))
         {
@@ -258,8 +248,15 @@ public partial class MainViewModel : ViewModelBase
                 return;
             }
         }
-
-
+        
+        await getSensorType(_deviceConfig);
+        Sensor = _deviceConfig.SensorType;
+        
+        await getNetworkCardType(_deviceConfig);
+        NetworkCardType = _deviceConfig.NetworkCardType;
+        
+        await getChipType(_deviceConfig);
+        Soc = _deviceConfig.ChipType;
         // Save the config to app settings
         SaveConfig();
 
@@ -351,7 +348,7 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="deviceConfig">The device configuration to use for the SSH connection.</param>
     private async Task getChipType(DeviceConfig deviceConfig)
     {
-        deviceConfig.Hostname = string.Empty;
+        deviceConfig.ChipType = string.Empty;
 
         var cts = new CancellationTokenSource(10000); // 10 seconds
         var cancellationToken = cts.Token;
@@ -389,7 +386,7 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="deviceConfig">The device configuration to use for the SSH connection.</param>
     private async Task getSensorType(DeviceConfig deviceConfig)
     {
-        deviceConfig.Hostname = string.Empty;
+        deviceConfig.SensorType = string.Empty;
 
         var cts = new CancellationTokenSource(10000); // 10 seconds
         var cancellationToken = cts.Token;
@@ -427,7 +424,7 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="deviceConfig">The device configuration to use for the SSH connection.</param>
     private async Task getNetworkCardType(DeviceConfig deviceConfig)
     {
-        deviceConfig.Hostname = string.Empty;
+        deviceConfig.NetworkCardType = string.Empty;
 
         var cts = new CancellationTokenSource(10000); // 10 seconds
         var cancellationToken = cts.Token;
