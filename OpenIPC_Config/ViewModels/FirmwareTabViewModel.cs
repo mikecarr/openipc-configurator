@@ -33,6 +33,8 @@ public partial class FirmwareTabViewModel : ViewModelBase
     private readonly SysUpgradeService _sysupgradeService;
     private CancellationTokenSource _cancellationTokenSource;
     private FirmwareData _firmwareData;
+    private readonly GitHubService _gitHubService;
+    
     #endregion
 
     #region Observable Properties
@@ -74,6 +76,11 @@ public partial class FirmwareTabViewModel : ViewModelBase
     /// Collection of available firmware versions
     /// </summary>
     public ObservableCollection<string> Firmwares { get; set; } = new();
+    
+    /// <summary>
+    /// Collection of available firmware versions
+    /// </summary>
+    public ObservableCollection<string> FirmwareBySoc { get; set; } = new();
     #endregion
 
     #region Commands
@@ -90,9 +97,11 @@ public partial class FirmwareTabViewModel : ViewModelBase
     public FirmwareTabViewModel(
         ILogger logger,
         ISshClientService sshClientService,
-        IEventSubscriptionService eventSubscriptionService)
+        IEventSubscriptionService eventSubscriptionService,
+        GitHubService gitHubService)
         : base(logger, sshClientService, eventSubscriptionService)
     {
+        _gitHubService = gitHubService;
         _httpClient = new HttpClient();
         _sysupgradeService = new SysUpgradeService(sshClientService, logger);
 
@@ -304,83 +313,121 @@ public partial class FirmwareTabViewModel : ViewModelBase
     }
 
     private async Task<FirmwareData> FetchFirmwareListAsync()
+{
+    try
     {
-        try
-        {
-            var url = "https://api.github.com/repos/OpenIPC/builder/releases/latest";
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; OpenIPC-Config/1.0)");
-            var response = await _httpClient.GetStringAsync(url);
+        Logger.Information("Fetching firmware list...");
 
-            var releaseData = JObject.Parse(response);
-            var assets = releaseData["assets"];
-            var filenames =
-                assets?.Select(asset => asset["name"]?.ToString()).Where(name => !string.IsNullOrEmpty(name)) ??
-                Enumerable.Empty<string>();
+        IEnumerable<string> filenames = await GetFilenamesAsync();
 
-            Logger.Information($"Fetched {filenames.Count()} firmware files.");
+        Logger.Information($"Fetched {filenames.Count()} firmware files.");
 
-            var firmwareData = new FirmwareData { Manufacturers = new ObservableCollection<Manufacturer>() };
+        FirmwareData firmwareData = ProcessFilenames(filenames);
 
-            foreach (var filename in filenames)
-            {
-                var match = Regex.Match(filename,
-                    @"^(?<sensor>[^_]+)_(?<firmwareType>[^_]+)_(?<manufacturer>[^-]+)-(?<device>.+?)-(?<memoryType>nand|nor)");
-                if (match.Success)
-                {
-                    var sensor = match.Groups["sensor"].Value;
-                    
-                    // only show firmware that matches the selected sensor/soc
-                    if(DeviceConfig.Instance.ChipType != sensor)
-                        continue;
-                    
-                    var firmwareType = match.Groups["firmwareType"].Value;
-                    var manufacturerName = match.Groups["manufacturer"].Value;
-                    var deviceName = match.Groups["device"].Value;
-                    var memoryType = match.Groups["memoryType"].Value;
-
-                    Debug.WriteLine(
-                        $"Parsed file: Sensor={sensor}, FirmwareType={firmwareType}, Manufacturer={manufacturerName}, Device={deviceName}, MemoryType={memoryType}");
-
-                    var manufacturer = firmwareData.Manufacturers.FirstOrDefault(m => m.Name == manufacturerName);
-                    if (manufacturer == null)
-                    {
-                        manufacturer = new Manufacturer
-                        {
-                            Name = manufacturerName,
-                            Devices = new ObservableCollection<Device>()
-                        };
-                        firmwareData.Manufacturers.Add(manufacturer);
-                    }
-
-                    var device = manufacturer.Devices.FirstOrDefault(d => d.Name == deviceName);
-                    if (device == null)
-                    {
-                        device = new Device
-                        {
-                            Name = deviceName,
-                            Firmware = new ObservableCollection<string>()
-                        };
-                        manufacturer.Devices.Add(device);
-                    }
-
-                    var firmwareIdentifier = $"{firmwareType}-{sensor}-{memoryType}";
-                    if (!device.Firmware.Contains(firmwareIdentifier)) device.Firmware.Add(firmwareIdentifier);
-                }
-                else
-                {
-                    Debug.WriteLine($"Filename '{filename}' does not match the expected pattern.");
-                }
-            }
-
-            _firmwareData = firmwareData;
-            return firmwareData;
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Error fetching firmware list.");
-            return null;
-        }
+        _firmwareData = firmwareData;
+        return firmwareData;
     }
+    catch (Exception ex)
+    {
+        Logger.Error(ex, "Error fetching firmware list.");
+        return null;
+    }
+}
+
+private async Task<IEnumerable<string>> GetFilenamesAsync()
+{
+    var response = await _gitHubService.GetGitHubDataAsync(OpenIPC.OpenIPCBuilderGitHubApiUrl);
+    var releaseData = JObject.Parse(response.ToString());
+    var assets = releaseData["assets"];
+    return assets?.Select(asset => asset["name"]?.ToString()).Where(name => !string.IsNullOrEmpty(name)) ??
+           Enumerable.Empty<string>();
+}
+
+private FirmwareData ProcessFilenames(IEnumerable<string> filenames)
+{
+    var firmwareData = new FirmwareData { Manufacturers = new ObservableCollection<Manufacturer>() };
+
+    foreach (var filename in filenames)
+    {
+        ProcessFilename(filename, firmwareData);
+    }
+
+    return firmwareData;
+}
+
+private void ProcessFilename(string filename, FirmwareData firmwareData)
+{
+    var match = Regex.Match(filename,
+        @"^(?<sensor>[^_]+)_(?<firmwareType>[^_]+)_(?<manufacturer>[^-]+)-(?<device>.+?)-(?<memoryType>nand|nor)");
+    if (match.Success)
+    {
+        ProcessFirmwareMatch(match, firmwareData);
+    }
+    else
+    {
+        Debug.WriteLine($"Filename '{filename}' does not match the expected pattern.");
+    }
+}
+
+private void ProcessFirmwareMatch(Match match, FirmwareData firmwareData)
+{
+    var sensor = match.Groups["sensor"].Value;
+
+    // only show firmware that matches the selected sensor/soc
+    if (DeviceConfig.Instance.ChipType != sensor)
+        return; // using `return` to exit the method. continue is no longer relevant here
+
+    var firmwareType = match.Groups["firmwareType"].Value;
+    var manufacturerName = match.Groups["manufacturer"].Value;
+    var deviceName = match.Groups["device"].Value;
+    var memoryType = match.Groups["memoryType"].Value;
+
+    Debug.WriteLine(
+        $"Parsed file: Sensor={sensor}, FirmwareType={firmwareType}, Manufacturer={manufacturerName}, Device={deviceName}, MemoryType={memoryType}");
+
+    AddFirmwareData(firmwareData, manufacturerName, deviceName, firmwareType, sensor, memoryType);
+}
+
+private void AddFirmwareData(FirmwareData firmwareData, string manufacturerName, string deviceName,
+    string firmwareType, string sensor, string memoryType)
+{
+    var manufacturer = firmwareData.Manufacturers.FirstOrDefault(m => m.Name == manufacturerName);
+    if (manufacturer == null)
+    {
+        manufacturer = CreateAndAddManufacturer(firmwareData, manufacturerName);
+    }
+
+    var device = manufacturer.Devices.FirstOrDefault(d => d.Name == deviceName);
+    if (device == null)
+    {
+        device = CreateAndAddDevice(manufacturer, deviceName);
+    }
+
+    var firmwareIdentifier = $"{firmwareType}-{sensor}-{memoryType}";
+    if (!device.Firmware.Contains(firmwareIdentifier)) device.Firmware.Add(firmwareIdentifier);
+}
+
+private Manufacturer CreateAndAddManufacturer(FirmwareData firmwareData, string manufacturerName)
+{
+    var manufacturer = new Manufacturer
+    {
+        Name = manufacturerName,
+        Devices = new ObservableCollection<Device>()
+    };
+    firmwareData.Manufacturers.Add(manufacturer);
+    return manufacturer;
+}
+
+private Device CreateAndAddDevice(Manufacturer manufacturer, string deviceName)
+{
+    var device = new Device
+    {
+        Name = deviceName,
+        Firmware = new ObservableCollection<string>()
+    };
+    manufacturer.Devices.Add(device);
+    return device;
+}
 
     private async Task<string> DownloadFirmwareAsync(string url = null, string filename = null)
     {

@@ -14,8 +14,10 @@ public class OpenIPC
         Sensors
     }
 
+    
     public const string AppName = "OpenIPC_Config";
 
+    public const string OpenIPCBuilderGitHubApiUrl = "https://api.github.com/repos/OpenIPC/builder/releases/latest";
     public const string MajesticFileLoc = "/etc/majestic.yaml";
     public const string WfbConfFileLoc = "/etc/wfb.conf";
     public const string TelemetryConfFileLoc = "/etc/telemetry.conf";

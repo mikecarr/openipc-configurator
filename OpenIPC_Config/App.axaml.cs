@@ -253,6 +253,12 @@ public class App : Application
         // Register IConfiguration
         services.AddTransient<DeviceConfigValidator>();
 
+        services.AddSingleton<HttpClient>();
+        services.AddTransient<GitHubService>();
+
+        // add memory cache
+        services.AddMemoryCache();
+
         // Register ViewModels
         RegisterViewModels(services);
 
