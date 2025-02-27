@@ -254,7 +254,7 @@ public class App : Application
         services.AddTransient<DeviceConfigValidator>();
 
         services.AddSingleton<HttpClient>();
-        services.AddTransient<GitHubService>();
+        services.AddSingleton<IGitHubService, GitHubService>();
 
         // add memory cache
         services.AddMemoryCache();

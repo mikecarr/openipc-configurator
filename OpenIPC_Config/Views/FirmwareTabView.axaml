@@ -11,7 +11,7 @@
         <!-- <Rectangle Height="300" Width="300" Fill="LightGray" /> -->
 
         <Border Background="#F0F0F0" CornerRadius="8" Padding="16" Margin="8">
-            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,Auto,*">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,Auto,Auto,*" ShowGridLines="False">
 
                 <!-- Manufacturer -->
                 <TextBlock Text="Manufacturer" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" />
@@ -40,12 +40,12 @@
                            IsEnabled="{Binding CanUseDropdowns}"
                            VerticalAlignment="Center" />
 
-                <ComboBox Grid.Row="3" Grid.Column="1"
-                          IsEnabled="{Binding CanUseDropdowns}"
-                          SelectedItem="{Binding SelectedFirmware, Mode=TwoWay}"
+                <ComboBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Width="400"
+                          IsEnabled="{Binding CanUseDropdownsBySoc}"
+                          SelectedItem="{Binding SelectedFirmwareBySoc, Mode=TwoWay}"
                           ItemsSource="{Binding FirmwareBySoc}" />
 
-                <TextBlock Text="or" Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" />
+                <TextBlock Text="   or" Grid.Row="3" Grid.Column="4" VerticalAlignment="Center" />
                 
                 <!-- Manual upload -->
                 <TextBlock Text="Local" Grid.Row="4" Grid.Column="0"

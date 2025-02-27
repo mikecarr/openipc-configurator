@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -29,38 +29,50 @@ namespace OpenIPC_Config.ViewModels;
 public partial class FirmwareTabViewModel : ViewModelBase
 {
     #region Private Fields
+
     private readonly HttpClient _httpClient;
     private readonly SysUpgradeService _sysupgradeService;
     private CancellationTokenSource _cancellationTokenSource;
     private FirmwareData _firmwareData;
-    private readonly GitHubService _gitHubService;
-    
+    private readonly IGitHubService _gitHubService;
+
     #endregion
 
     #region Observable Properties
+
     [ObservableProperty] private bool _canConnect;
     [ObservableProperty] private bool _isConnected;
     [ObservableProperty] private bool _isFirmwareSelected;
+    [ObservableProperty] private bool _isFirmwareBySocSelected;
     [ObservableProperty] private bool _isManufacturerSelected;
     [ObservableProperty] private bool _canDownloadFirmware;
     [ObservableProperty] private bool _isManualUpdateEnabled = true;
     [ObservableProperty] private string _selectedDevice;
     [ObservableProperty] private string _selectedFirmware;
+    [ObservableProperty] private string _selectedFirmwareBySoc;
     [ObservableProperty] private string _selectedManufacturer;
     [ObservableProperty] private string _manualFirmwareFile;
     [ObservableProperty] private int _progressValue;
+
     #endregion
 
     #region Public Properties
+
     /// <summary>
     /// Gets whether dropdowns should be enabled based on connection and firmware selection state
     /// </summary>
-    public bool CanUseDropdowns => IsConnected && !IsFirmwareSelected;
+    public bool CanUseDropdowns => IsConnected && !IsFirmwareSelected && !IsFirmwareBySocSelected;
 
+    /// <summary>
+    /// Gets whether soc dropdowns should be enabled based on connection and firmware selection state
+    /// </summary>
+    public bool CanUseDropdownsBySoc => IsConnected && !IsManufacturerSelected;
+
+    
     /// <summary>
     /// Gets whether firmware selection is available based on connection and manufacturer selection state
     /// </summary>
-    public bool CanUseSelectFirmware => IsConnected && !IsManufacturerSelected;
+    public bool CanUseSelectFirmware => IsConnected && !IsManufacturerSelected && !IsFirmwareBySocSelected;
 
     /// <summary>
     /// Collection of available manufacturers
@@ -76,21 +88,25 @@ public partial class FirmwareTabViewModel : ViewModelBase
     /// Collection of available firmware versions
     /// </summary>
     public ObservableCollection<string> Firmwares { get; set; } = new();
-    
+
     /// <summary>
     /// Collection of available firmware versions
     /// </summary>
     public ObservableCollection<string> FirmwareBySoc { get; set; } = new();
+
     #endregion
 
     #region Commands
+
     public ICommand SelectFirmwareCommand { get; set; }
     public ICommand PerformFirmwareUpgradeAsyncCommand { get; set; }
     public ICommand ClearFormCommand { get; set; }
     public IRelayCommand DownloadFirmwareAsyncCommand { get; set; }
+
     #endregion
 
     #region Constructor
+
     /// <summary>
     /// Initializes a new instance of FirmwareTabViewModel
     /// </summary>
@@ -98,7 +114,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
         ILogger logger,
         ISshClientService sshClientService,
         IEventSubscriptionService eventSubscriptionService,
-        GitHubService gitHubService)
+        IGitHubService gitHubService)
         : base(logger, sshClientService, eventSubscriptionService)
     {
         _gitHubService = gitHubService;
@@ -108,11 +124,12 @@ public partial class FirmwareTabViewModel : ViewModelBase
         InitializeProperties();
         InitializeCommands();
         SubscribeToEvents();
-        
     }
+
     #endregion
 
     #region Initialization Methods
+
     private void InitializeProperties()
     {
         CanConnect = false;
@@ -124,11 +141,11 @@ public partial class FirmwareTabViewModel : ViewModelBase
     private void InitializeCommands()
     {
         DownloadFirmwareAsyncCommand = new RelayCommand(
-            async () => await PerformFirmwareUpgradeAsync(),
+            async () => await DownloadAndPerformFirmwareUpgradeAsync(), 
             CanExecuteDownloadFirmware);
 
         PerformFirmwareUpgradeAsyncCommand = new RelayCommand(
-            async () => await PerformFirmwareUpgradeAsync());
+            async () => await DownloadAndPerformFirmwareUpgradeAsync()); 
 
         SelectFirmwareCommand = new RelayCommand<Window>(async window =>
             await SelectFirmware(window));
@@ -140,16 +157,18 @@ public partial class FirmwareTabViewModel : ViewModelBase
     {
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
     }
+
     #endregion
 
     #region Event Handlers
+
     private void OnAppMessage(AppMessage message)
     {
         CanConnect = message.CanConnect;
         IsConnected = message.CanConnect;
-        
+
         LoadManufacturers();
-        
+
         if (!IsConnected)
         {
             IsFirmwareSelected = false;
@@ -159,6 +178,13 @@ public partial class FirmwareTabViewModel : ViewModelBase
         UpdateCanExecuteCommands();
     }
 
+    partial void OnSelectedFirmwareBySocChanged(string value)
+    {
+        IsFirmwareBySocSelected = !string.IsNullOrEmpty(value);
+        
+        UpdateCanExecuteCommands();
+    }
+    
     partial void OnSelectedManufacturerChanged(string value)
     {
         LoadDevices(value);
@@ -182,9 +208,11 @@ public partial class FirmwareTabViewModel : ViewModelBase
     {
         UpdateCanExecuteCommands();
     }
+
     #endregion
 
     #region Public Methods
+
     public async void LoadManufacturers()
     {
         try
@@ -245,6 +273,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
         Logger.Information($"Loaded {Devices.Count} devices for manufacturer: {manufacturer}");
     }
 
+    
     public void LoadFirmwares(string device)
     {
         Firmwares.Clear();
@@ -278,9 +307,11 @@ public partial class FirmwareTabViewModel : ViewModelBase
 
         Logger.Information($"Loaded {Firmwares.Count} firmware types for device: {device}");
     }
+
     #endregion
 
     #region Private Methods
+
     private void ClearForm()
     {
         SelectedManufacturer = string.Empty;
@@ -306,6 +337,7 @@ public partial class FirmwareTabViewModel : ViewModelBase
         CanDownloadFirmware = CanExecuteDownloadFirmware();
 
         OnPropertyChanged(nameof(CanUseDropdowns));
+        OnPropertyChanged(nameof(CanUseDropdownsBySoc));
         OnPropertyChanged(nameof(CanUseSelectFirmware));
 
         (DownloadFirmwareAsyncCommand as RelayCommand)?.NotifyCanExecuteChanged();
@@ -313,121 +345,148 @@ public partial class FirmwareTabViewModel : ViewModelBase
     }
 
     private async Task<FirmwareData> FetchFirmwareListAsync()
-{
-    try
     {
-        Logger.Information("Fetching firmware list...");
+        try
+        {
+            Logger.Information("Fetching firmware list...");
 
-        IEnumerable<string> filenames = await GetFilenamesAsync();
+            IEnumerable<string> filenames = await GetFilenamesAsync();
 
-        Logger.Information($"Fetched {filenames.Count()} firmware files.");
+            Logger.Information($"Fetched {filenames.Count()} firmware files.");
 
-        FirmwareData firmwareData = ProcessFilenames(filenames);
+            FirmwareData firmwareData = ProcessFilenames(filenames);
+            
+            // Populate FirmwareBySoc
+            PopulateFirmwareBySoc(filenames); // Calling populate method here
 
-        _firmwareData = firmwareData;
+            _firmwareData = firmwareData;
+            return firmwareData;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Error fetching firmware list.");
+            return null;
+        }
+    }
+    
+    private void PopulateFirmwareBySoc(IEnumerable<string> filenames)
+    {
+        FirmwareBySoc.Clear(); // Clear existing list
+
+        var chipType = DeviceConfig.Instance.ChipType;
+
+        foreach (var filename in filenames)
+        {
+            string pattern = $@"^(?=.*{Regex.Escape(chipType)})(?=.*fpv).*?(?<memoryType>nand|nor)\.tgz$";  //Dynamically create regex with escaped chipType
+            var match = Regex.Match(filename, pattern, RegexOptions.IgnoreCase); //Added RegexOptions.IgnoreCase to compare 
+            if (match.Success)
+            {
+                if (!FirmwareBySoc.Contains(filename))
+                {
+                    FirmwareBySoc.Add(filename);
+                    Logger.Information($"Added FirmwareBySoc: {filename}");
+                }
+            }
+        }
+
+        Logger.Information($"Populated FirmwareBySoc with {FirmwareBySoc.Count} entries.");
+    }
+
+    private async Task<IEnumerable<string>> GetFilenamesAsync()
+    {
+        var response = await _gitHubService.GetGitHubDataAsync(OpenIPC.OpenIPCBuilderGitHubApiUrl);
+        var releaseData = JObject.Parse(response.ToString());
+        var assets = releaseData["assets"];
+        return assets?.Select(asset => asset["name"]?.ToString()).Where(name => !string.IsNullOrEmpty(name)) ??
+               Enumerable.Empty<string>();
+    }
+
+    private FirmwareData ProcessFilenames(IEnumerable<string> filenames)
+    {
+        var firmwareData = new FirmwareData { Manufacturers = new ObservableCollection<Manufacturer>() };
+
+        foreach (var filename in filenames)
+        {
+            ProcessFilenameByManufacturer(filename, firmwareData);
+        }
+
         return firmwareData;
     }
-    catch (Exception ex)
+    
+    private void ProcessFilenameByManufacturer(string filename, FirmwareData firmwareData)
     {
-        Logger.Error(ex, "Error fetching firmware list.");
-        return null;
-    }
-}
-
-private async Task<IEnumerable<string>> GetFilenamesAsync()
-{
-    var response = await _gitHubService.GetGitHubDataAsync(OpenIPC.OpenIPCBuilderGitHubApiUrl);
-    var releaseData = JObject.Parse(response.ToString());
-    var assets = releaseData["assets"];
-    return assets?.Select(asset => asset["name"]?.ToString()).Where(name => !string.IsNullOrEmpty(name)) ??
-           Enumerable.Empty<string>();
-}
-
-private FirmwareData ProcessFilenames(IEnumerable<string> filenames)
-{
-    var firmwareData = new FirmwareData { Manufacturers = new ObservableCollection<Manufacturer>() };
-
-    foreach (var filename in filenames)
-    {
-        ProcessFilename(filename, firmwareData);
+        var match = Regex.Match(filename,
+            @"^(?<sensor>[^_]+)_(?<firmwareType>[^_]+)_(?<manufacturer>[^-]+)-(?<device>.+?)-(?<memoryType>nand|nor)");
+        if (match.Success)
+        {
+            ProcessFirmwareMatch(match, firmwareData);
+        }
+        else
+        {
+            Debug.WriteLine($"Filename '{filename}' does not match the expected pattern.");
+        }
     }
 
-    return firmwareData;
-}
-
-private void ProcessFilename(string filename, FirmwareData firmwareData)
-{
-    var match = Regex.Match(filename,
-        @"^(?<sensor>[^_]+)_(?<firmwareType>[^_]+)_(?<manufacturer>[^-]+)-(?<device>.+?)-(?<memoryType>nand|nor)");
-    if (match.Success)
+    
+    private void ProcessFirmwareMatch(Match match, FirmwareData firmwareData)
     {
-        ProcessFirmwareMatch(match, firmwareData);
-    }
-    else
-    {
-        Debug.WriteLine($"Filename '{filename}' does not match the expected pattern.");
-    }
-}
+        var sensor = match.Groups["sensor"].Value;
 
-private void ProcessFirmwareMatch(Match match, FirmwareData firmwareData)
-{
-    var sensor = match.Groups["sensor"].Value;
+        // only show firmware that matches the selected sensor/soc
+        if (DeviceConfig.Instance.ChipType != sensor)
+            return; // using `return` to exit the method. continue is no longer relevant here
 
-    // only show firmware that matches the selected sensor/soc
-    if (DeviceConfig.Instance.ChipType != sensor)
-        return; // using `return` to exit the method. continue is no longer relevant here
+        var firmwareType = match.Groups["firmwareType"].Value;
+        var manufacturerName = match.Groups["manufacturer"].Value;
+        var deviceName = match.Groups["device"].Value;
+        var memoryType = match.Groups["memoryType"].Value;
 
-    var firmwareType = match.Groups["firmwareType"].Value;
-    var manufacturerName = match.Groups["manufacturer"].Value;
-    var deviceName = match.Groups["device"].Value;
-    var memoryType = match.Groups["memoryType"].Value;
+        Debug.WriteLine(
+            $"Parsed file: Sensor={sensor}, FirmwareType={firmwareType}, Manufacturer={manufacturerName}, Device={deviceName}, MemoryType={memoryType}");
 
-    Debug.WriteLine(
-        $"Parsed file: Sensor={sensor}, FirmwareType={firmwareType}, Manufacturer={manufacturerName}, Device={deviceName}, MemoryType={memoryType}");
-
-    AddFirmwareData(firmwareData, manufacturerName, deviceName, firmwareType, sensor, memoryType);
-}
-
-private void AddFirmwareData(FirmwareData firmwareData, string manufacturerName, string deviceName,
-    string firmwareType, string sensor, string memoryType)
-{
-    var manufacturer = firmwareData.Manufacturers.FirstOrDefault(m => m.Name == manufacturerName);
-    if (manufacturer == null)
-    {
-        manufacturer = CreateAndAddManufacturer(firmwareData, manufacturerName);
+        AddFirmwareData(firmwareData, manufacturerName, deviceName, firmwareType, sensor, memoryType);
     }
 
-    var device = manufacturer.Devices.FirstOrDefault(d => d.Name == deviceName);
-    if (device == null)
+    private void AddFirmwareData(FirmwareData firmwareData, string manufacturerName, string deviceName,
+        string firmwareType, string sensor, string memoryType)
     {
-        device = CreateAndAddDevice(manufacturer, deviceName);
+        var manufacturer = firmwareData.Manufacturers.FirstOrDefault(m => m.Name == manufacturerName);
+        if (manufacturer == null)
+        {
+            manufacturer = CreateAndAddManufacturer(firmwareData, manufacturerName);
+        }
+
+        var device = manufacturer.Devices.FirstOrDefault(d => d.Name == deviceName);
+        if (device == null)
+        {
+            device = CreateAndAddDevice(manufacturer, deviceName);
+        }
+
+        var firmwareIdentifier = $"{firmwareType}-{sensor}-{memoryType}";
+        if (!device.Firmware.Contains(firmwareIdentifier)) device.Firmware.Add(firmwareIdentifier);
+    }
+    
+    private Manufacturer CreateAndAddManufacturer(FirmwareData firmwareData, string manufacturerName)
+    {
+        var manufacturer = new Manufacturer
+        {
+            Name = manufacturerName,
+            Devices = new ObservableCollection<Device>()
+        };
+        firmwareData.Manufacturers.Add(manufacturer);
+        return manufacturer;
     }
 
-    var firmwareIdentifier = $"{firmwareType}-{sensor}-{memoryType}";
-    if (!device.Firmware.Contains(firmwareIdentifier)) device.Firmware.Add(firmwareIdentifier);
-}
-
-private Manufacturer CreateAndAddManufacturer(FirmwareData firmwareData, string manufacturerName)
-{
-    var manufacturer = new Manufacturer
+    private Device CreateAndAddDevice(Manufacturer manufacturer, string deviceName)
     {
-        Name = manufacturerName,
-        Devices = new ObservableCollection<Device>()
-    };
-    firmwareData.Manufacturers.Add(manufacturer);
-    return manufacturer;
-}
-
-private Device CreateAndAddDevice(Manufacturer manufacturer, string deviceName)
-{
-    var device = new Device
-    {
-        Name = deviceName,
-        Firmware = new ObservableCollection<string>()
-    };
-    manufacturer.Devices.Add(device);
-    return device;
-}
+        var device = new Device
+        {
+            Name = deviceName,
+            Firmware = new ObservableCollection<string>()
+        };
+        manufacturer.Devices.Add(device);
+        return device;
+    }
 
     private async Task<string> DownloadFirmwareAsync(string url = null, string filename = null)
     {
@@ -597,18 +656,21 @@ private Device CreateAndAddDevice(Manufacturer manufacturer, string deviceName)
         }
     }
 
-    public async Task PerformFirmwareUpgradeAsync()
+    private async Task DownloadAndPerformFirmwareUpgradeAsync()
     {
         try
         {
             ProgressValue = 0;
 
-            string firmwareFilePath;
-
             if (!string.IsNullOrEmpty(ManualFirmwareFile))
             {
                 Logger.Information("Performing firmware upgrade using manual file.");
-                firmwareFilePath = ManualFirmwareFile;
+                await UpgradeFirmwareFromFileAsync(ManualFirmwareFile);
+            }
+            else if (!string.IsNullOrEmpty(SelectedFirmwareBySoc))
+            {
+                Logger.Information("Performing firmware upgrade using firmware by soc.");
+                await PerformFirmwareUpgradeFromSocAsync();
             }
             else
             {
@@ -621,41 +683,7 @@ private Device CreateAndAddDevice(Manufacturer manufacturer, string deviceName)
                 }
 
                 Logger.Information("Performing firmware upgrade using selected dropdown options.");
-
-                var manufacturer = _firmwareData?.Manufacturers
-                    .FirstOrDefault(m => m.Name == SelectedManufacturer);
-
-                var device = manufacturer?.Devices
-                    .FirstOrDefault(d => d.Name == SelectedDevice);
-
-                var firmwareIdentifier = device?.Firmware
-                    .FirstOrDefault(f => f.StartsWith(SelectedFirmware));
-
-                if (!string.IsNullOrEmpty(manufacturer?.Name) &&
-                    !string.IsNullOrEmpty(device?.Name) &&
-                    !string.IsNullOrEmpty(firmwareIdentifier))
-                {
-                    var components = firmwareIdentifier.Split('-');
-                    var firmwareType = components[0];
-                    var sensor = components[1];
-                    var memoryType = components[2];
-
-                    var filename = $"{sensor}_{firmwareType}_{SelectedManufacturer}-{device.Name}-{memoryType}.tgz";
-                    var downloadUrl = $"https://github.com/OpenIPC/builder/releases/download/latest/{filename}";
-
-                    firmwareFilePath = await DownloadFirmwareAsync(downloadUrl, filename);
-
-                }
-                else
-                {
-                    Logger.Warning("Failed to construct firmware URL. Missing or invalid data.");
-                    return;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(firmwareFilePath))
-            {
-                await UpgradeFirmwareFromFileAsync(firmwareFilePath);
+                await PerformFirmwareUpgradeFromDropdownAsync();
             }
         }
         catch (Exception ex)
@@ -663,6 +691,107 @@ private Device CreateAndAddDevice(Manufacturer manufacturer, string deviceName)
             Logger.Error(ex, "Error performing firmware upgrade");
         }
     }
+
+    private async Task PerformFirmwareUpgradeFromSocAsync()
+    {
+        try
+        {
+            ProgressValue = 0;
+            
+            Logger.Information("Performing firmware upgrade using selected dropdown options.");
+            
+            var firmwwareFile = SelectedFirmwareBySoc;
+            
+            var downloadUrl = string.Empty;
+            var filename = String.Empty;
+            
+            if (!string.IsNullOrEmpty(firmwwareFile))
+            {
+                filename = firmwwareFile;
+                downloadUrl = $"https://github.com/OpenIPC/builder/releases/download/latest/{firmwwareFile}";
+            }
+            
+            else
+            {
+                Logger.Warning("Failed to construct firmware URL. Missing or invalid data.");
+                return;
+            }
+
+            string firmwareFilePath = await DownloadFirmwareAsync(downloadUrl, filename);
+            if (!string.IsNullOrEmpty(firmwareFilePath))
+            {
+                await UpgradeFirmwareFromFileAsync(firmwareFilePath);
+            }
+            
+            
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Error performing firmware upgrade from dropdown");
+        }
+    }
+    private async Task PerformFirmwareUpgradeFromDropdownAsync()
+    {
+        try
+        {
+            ProgressValue = 0;
+
+            if (string.IsNullOrEmpty(SelectedManufacturer) ||
+                string.IsNullOrEmpty(SelectedDevice) ||
+                string.IsNullOrEmpty(SelectedFirmware))
+            {
+                Logger.Warning("Cannot perform firmware upgrade. Missing dropdown selections.");
+                return;
+            }
+
+            Logger.Information("Performing firmware upgrade using selected dropdown options.");
+
+            var manufacturer = _firmwareData?.Manufacturers
+                .FirstOrDefault(m => m.Name == SelectedManufacturer);
+
+            var device = manufacturer?.Devices
+                .FirstOrDefault(d => d.Name == SelectedDevice);
+
+            var firmwareIdentifier = device?.Firmware
+                .FirstOrDefault(f => f.StartsWith(SelectedFirmware));
+
+            var downloadUrl = string.Empty;
+            var filename = String.Empty;
+            
+
+            if (!string.IsNullOrEmpty(manufacturer?.Name) &&
+                !string.IsNullOrEmpty(device?.Name) &&
+                !string.IsNullOrEmpty(firmwareIdentifier))
+            {
+                var components = firmwareIdentifier.Split('-');
+                var firmwareType = components[0];
+                var sensor = components[1];
+                var memoryType = components[2];
+
+                filename = $"{sensor}_{firmwareType}_{SelectedManufacturer}-{device.Name}-{memoryType}.tgz";
+                downloadUrl = $"https://github.com/OpenIPC/builder/releases/download/latest/{filename}";
+            }
+            
+            else
+            {
+                Logger.Warning("Failed to construct firmware URL. Missing or invalid data.");
+                return;
+            }
+
+            string firmwareFilePath = await DownloadFirmwareAsync(downloadUrl, filename);
+            if (!string.IsNullOrEmpty(firmwareFilePath))
+            {
+                await UpgradeFirmwareFromFileAsync(firmwareFilePath);
+            }
+            
+            
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Error performing firmware upgrade from dropdown");
+        }
+    }
+
 
     public void CancelSysupgrade()
     {
@@ -719,7 +848,8 @@ private Device CreateAndAddDevice(Manufacturer manufacturer, string deviceName)
                                     break;
                                 case var s when s.Contains("Root filesystem uploaded successfully"):
                                     ProgressValue = 70;
-                                    Logger.Debug("Root filesystem uploaded successfully ProgressValue: " + ProgressValue);
+                                    Logger.Debug(
+                                        "Root filesystem uploaded successfully ProgressValue: " + ProgressValue);
                                     break;
                                 case var s when s.Contains("Erase overlay partition"):
                                     ProgressValue = 90;
@@ -776,13 +906,16 @@ private Device CreateAndAddDevice(Manufacturer manufacturer, string deviceName)
             ManualFirmwareFile = selectedFile;
         }
     }
+
     #endregion
 }
 
 #region Support Classes
+
 public class FirmwareData
 {
     public ObservableCollection<Manufacturer> Manufacturers { get; set; }
+    
 }
 
 public class Manufacturer
@@ -796,4 +929,5 @@ public class Device
     public string Name { get; set; }
     public ObservableCollection<string> Firmware { get; set; }
 }
+
 #endregion

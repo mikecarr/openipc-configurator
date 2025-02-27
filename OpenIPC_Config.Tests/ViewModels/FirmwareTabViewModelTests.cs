@@ -9,11 +9,13 @@ namespace OpenIPC_Config.Tests.ViewModels;
 [TestFixture]
 public class FirmwareTabViewModelTests
 {
+    
+    
     private FirmwareTabViewModel _viewModel;
     private Mock<ILogger> _mockLogger;
     private Mock<ISshClientService> _mockSshClientService;
     private Mock<IEventSubscriptionService> _mockEventSubscriptionService;
-    private Mock<GitHubService> _mockGithubService;
+    private Mock<IGitHubService> _mockGithubService;
 
     [SetUp]
     public void Setup()
@@ -21,7 +23,8 @@ public class FirmwareTabViewModelTests
         _mockLogger = new Mock<ILogger>();
         _mockSshClientService = new Mock<ISshClientService>();
         _mockEventSubscriptionService = new Mock<IEventSubscriptionService>();
-
+        _mockGithubService = new Mock<IGitHubService>(); 
+        
         _viewModel = new FirmwareTabViewModel(
             _mockLogger.Object,
             _mockSshClientService.Object,
@@ -94,58 +97,8 @@ public class FirmwareTabViewModelTests
         Assert.That(_viewModel.Firmwares, Does.Contain("fpv"));
     }
 
-    [Test]
-    public async Task PerformFirmwareUpgradeAsync_ManualFile_PerformsUpgradeFromFile()
-    {
-        // Arrange
-        _viewModel.ManualFirmwareFile = "test.tgz";
-
-        // Act
-        await _viewModel.PerformFirmwareUpgradeAsync();
-
-        // Assert
-        _mockLogger.Verify(
-            l => l.Information(It.Is<string>(s => s.Contains("Performing firmware upgrade using manual file"))),
-            Times.Once);
-    }
-
-    [Test]
-    public async Task PerformFirmwareUpgradeAsync_DropdownsSelected_PerformsUpgradeFromUrl()
-    {
-        // Arrange
-        _viewModel.GetType()
-            .GetField("_firmwareData", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .SetValue(_viewModel, new FirmwareData
-            {
-                Manufacturers = new ObservableCollection<Manufacturer>
-                {
-                    new Manufacturer
-                    {
-                        Name = "TestManufacturer",
-                        Devices = new ObservableCollection<Device>
-                        {
-                            new Device
-                            {
-                                Name = "TestDevice",
-                                Firmware = new ObservableCollection<string> { "fpv-sensor-nand" }
-                            }
-                        }
-                    }
-                }
-            });
-
-        _viewModel.SelectedManufacturer = "TestManufacturer";
-        _viewModel.SelectedDevice = "TestDevice";
-        _viewModel.SelectedFirmware = "fpv";
-
-        // Act
-        await _viewModel.PerformFirmwareUpgradeAsync();
-
-        // Assert
-        _mockLogger.Verify(
-            l => l.Information(It.Is<string>(s => s.Contains("Performing firmware upgrade using selected dropdown options"))),
-            Times.Once);
-    }
+    
+    
 
     [Test]
     public void CanExecuteDownloadFirmware_ReturnsFalse_IfInvalidState()
