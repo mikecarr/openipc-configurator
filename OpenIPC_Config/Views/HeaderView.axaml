@@ -24,7 +24,7 @@
             <Svg Width="150" Margin="10,5,0,0" Path="/Assets/Icons/openipc-logo.svg" />
 
             <TextBlock FontSize="14" Foreground="White" Margin="10,5,0,5">
-                <Run Text="CONFIGURATOR" />
+                <Run Text="COMPANION" />
                 <Run Text="{Binding AppVersionText}" />
             </TextBlock>
 
