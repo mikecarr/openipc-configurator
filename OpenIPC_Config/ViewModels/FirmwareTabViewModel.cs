@@ -317,9 +317,13 @@ public partial class FirmwareTabViewModel : ViewModelBase
         SelectedManufacturer = string.Empty;
         SelectedDevice = string.Empty;
         SelectedFirmware = string.Empty;
+        SelectedFirmwareBySoc = string.Empty;
+        ManualFirmwareFile = string.Empty;
+        
         IsFirmwareSelected = false;
         IsManufacturerSelected = false;
         IsManualUpdateEnabled = true;
+        
         UpdateCanExecuteCommands();
     }
 
