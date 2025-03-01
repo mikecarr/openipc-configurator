@@ -95,20 +95,23 @@
                         <TextBlock Text="Local" Grid.Row="0" Grid.Column="0"
                                    VerticalAlignment="Center" />
 
-                        <Button Grid.Row="0" Grid.Column="1" Content="Select Firmware"
+                        <TextBlock Grid.Row="0" Grid.Column="1" 
+                                 Margin="5,0,0,0"
+                                 Padding="5"
+                                 Background="#F0F0F0"
+                                 Width="400"
+                                 Height="25"
+                                 IsEnabled="{Binding CanUseSelectFirmware}"
+                                 Text="{Binding Path=ManualFirmwareFile, Mode=TwoWay}" />
+                        
+                        <Button Grid.Row="0" Grid.Column="2" Content="..."
                                 Margin="5,5,0,0"
                                 VerticalAlignment="Center"
+                                Background="LightGray"
                                 IsEnabled="{Binding CanUseSelectFirmware}"
                                 Command="{Binding SelectFirmwareCommand}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                 Margin="0,5,0,0"
-                                 VerticalAlignment="Center"
-                                 Background="#F0F0F0"
-                                 Width="400"
-                                 IsEnabled="{Binding CanUseSelectFirmware}"
-                                 Text="{Binding Path=ManualFirmwareFile, Mode=TwoWay}" />
                     </Grid>
                 </Border>
 
