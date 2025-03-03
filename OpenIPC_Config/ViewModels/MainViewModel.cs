@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -20,18 +22,31 @@ namespace OpenIPC_Config.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    
+    // With this singleton service
+    private readonly PingService _pingService;
+    
+    private DispatcherTimer _pingTimer;
+    private readonly TimeSpan _pingInterval = TimeSpan.FromSeconds(1);
+    private readonly TimeSpan _pingTimeout = TimeSpan.FromMilliseconds(500);
+
+    
     [ObservableProperty] private string _svgPath;
     private bool _isTabsCollapsed;
-    
+
     [ObservableProperty] private bool _isMobile;
     private DeviceType _selectedDeviceType;
-    
+
     [ObservableProperty] private string _soc;
     [ObservableProperty] private string _sensor;
     [ObservableProperty] private string _networkCardType;
 
     private readonly IServiceProvider _serviceProvider;
     private readonly GlobalSettingsViewModel _globalSettingsSettingsViewModel;
+
+    
+    [ObservableProperty] private bool _isWaiting;
+    [ObservableProperty] private bool _isConnected;
     
 
     public MainViewModel(ILogger logger,
@@ -41,24 +56,25 @@ public partial class MainViewModel : ViewModelBase
         GlobalSettingsViewModel globalSettingsSettingsViewModel)
         : base(logger, sshClientService, eventSubscriptionService)
     {
+        LoadSettings();
+        
+        // Initialize the ping service
+        _pingService = PingService.Instance(logger);
+        CanConnect = false;
+        
         IsMobile = false;
         _serviceProvider = serviceProvider;
         _appVersionText = GetFormattedAppVersion();
-        CanConnect = false;
         _globalSettingsSettingsViewModel = globalSettingsSettingsViewModel;
-        
-        LoadSettings();
-        
+
         Tabs = new ObservableCollection<TabItemViewModel> { };
         // Subscribe to device type change events
         EventSubscriptionService.Subscribe<DeviceTypeChangeEvent, DeviceType>(
             OnDeviceTypeChangeEvent);
 
-        
+
         ToggleTabsCommand = new RelayCommand(() => IsTabsCollapsed = !IsTabsCollapsed);
 
-        LoadSettings();
-        
         EntryBoxBgColor = new SolidColorBrush(Colors.White);
 
         ConnectCommand = new RelayCommand(() => Connect());
@@ -74,6 +90,9 @@ public partial class MainViewModel : ViewModelBase
         Sensor = string.Empty;
         NetworkCardType = string.Empty;
         IsVRXEnabled = false;
+        
+        // initialize tabs with Camera
+        InitializeTabs(DeviceType.Camera);
     }
 
     private void InitializeTabs(DeviceType deviceType)
@@ -81,7 +100,7 @@ public partial class MainViewModel : ViewModelBase
         Tabs.Clear();
 
         // if Mobile apps default to tabs collapsed
-        if(OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+        if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
         {
             IsMobile = true;
             IsTabsCollapsed = true;
@@ -109,11 +128,9 @@ public partial class MainViewModel : ViewModelBase
                 _serviceProvider.GetRequiredService<WfbGSTabViewModel>(), IsTabsCollapsed));
             Tabs.Add(new TabItemViewModel("Setup", "avares://OpenIPC_Config/Assets/Icons/iconoir_settings_dark.svg",
                 _serviceProvider.GetRequiredService<SetupTabViewModel>(), IsTabsCollapsed));
-            
         }
-        
     }
-    
+
     public bool IsTabsCollapsed
     {
         get => _isTabsCollapsed;
@@ -129,8 +146,7 @@ public partial class MainViewModel : ViewModelBase
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
     public ObservableCollection<DeviceType> DeviceTypes { get; set; }
 
-    [ObservableProperty]
-    private SolidColorBrush _entryBoxBgColor;
+    [ObservableProperty] private SolidColorBrush _entryBoxBgColor;
     public int SelectedTabIndex { get; set; }
 
     public ICommand ConnectCommand { get; private set; }
@@ -152,7 +168,7 @@ public partial class MainViewModel : ViewModelBase
             ? "/Assets/Icons/drawer-open.svg"
             : "/Assets/Icons/drawer-close.svg";
     }
-    
+
     public DeviceType SelectedDeviceType
     {
         get => _selectedDeviceType;
@@ -191,10 +207,34 @@ public partial class MainViewModel : ViewModelBase
             var isValidIp = Utilities.IsValidIpAddress(IpAddress);
             CanConnect = !string.IsNullOrWhiteSpace(Password)
                          && isValidIp
-                         && !SelectedDeviceType.Equals(DeviceType.None);
+                         && !SelectedDeviceType.Equals(DeviceType.None)
+                         && IsConnected;
+
         });
     }
 
+    partial void OnIpAddressChanged(string value)
+    {
+        Logger.Debug($"IP Address changed to: {value}");
+        if (!string.IsNullOrEmpty(value))
+        {
+            if (Utilities.IsValidIpAddress(value))
+            {
+                Logger.Debug($"Starting ping timer for valid IP: {value}");
+                StartPingTimer();
+            }
+            else
+            {
+                Logger.Debug($"Stopping ping timer for invalid IP: {value}");
+                StopPingTimer();
+            }
+        }
+        else
+        {
+            Logger.Debug("Stopping ping timer for empty IP");
+            StopPingTimer();
+        }
+    }
     partial void OnPortChanged(int value)
     {
         CheckIfCanConnect();
@@ -215,6 +255,124 @@ public partial class MainViewModel : ViewModelBase
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(deviceType);
     }
 
+    private void StopPingTimer()
+    {
+        if (_pingTimer != null)
+        {
+            CanConnect = false;
+            Logger.Debug($"Stopping ping timer for IP: {IpAddress}");
+
+            _pingTimer.Tick -= PingTimer_Tick; // Remove the event handler
+            _pingTimer.Stop();
+            _pingTimer.IsEnabled = false;
+            _pingTimer = null; // Set to null to ensure it's recreated
+            
+            IsWaiting = true;
+        }
+    }
+    private void StartPingTimer()
+    {
+        CanConnect = false;
+        
+        // First, stop any existing timer to avoid duplicates
+        StopPingTimer();
+    
+        _pingTimer = new DispatcherTimer
+        {
+            Interval = _pingInterval
+        };
+        Logger.Debug($"************************* Adding PickerTimer_Tick event handler for IP: {IpAddress}");
+         _pingTimer.Tick += PingTimer_Tick;
+         
+         Logger.Debug($"Starting ping timer for IP: {IpAddress}");
+         _pingTimer.Start();
+    }
+    
+    // PingTimer_Tick method
+    private async void PingTimer_Tick(object? sender, EventArgs e)
+    {
+        try
+        {
+            string currentIpAddress = IpAddress; // Assuming this is the property holding the IP
+            
+            // Check if can connect
+            CheckIfCanConnect();
+            
+            // Important: Store the IP address that was used for this ping operation
+            string ipBeingPinged = currentIpAddress;
+            
+            Logger.Debug($"PingTimer_Tick executing ping to: {ipBeingPinged}");
+            
+            if (string.IsNullOrEmpty(ipBeingPinged))
+            {
+                Logger.Debug("Empty IP - Setting IsConnected=false, IsWaiting=true");
+                IsConnected = false;
+                IsWaiting = true;
+                return;
+            }
+        
+            try
+            {
+                var reply = await _pingService.SendPingAsync(ipBeingPinged, (int)_pingTimeout.TotalMilliseconds);
+            
+                // Only update the UI state if the IP we pinged is still the current IP
+                if (ipBeingPinged == IpAddress)
+                {
+                    if (reply.Status == IPStatus.Success)
+                    {
+                        Logger.Debug("Ping successful - Setting IsConnected=true, IsWaiting=false");
+                        
+                        // used for status color changes
+                        IsConnected = true;
+                        IsWaiting = false;
+                        
+                        // enable connect button
+                        CanConnect = true;
+                    }
+                    else
+                    {
+                        Logger.Debug("Ping failed - Setting IsConnected=false, IsWaiting=true");
+                        
+                        // used for status color changes
+                        IsConnected = false;
+                        IsWaiting = true;
+                        
+                        // disable connect button, device not ready
+                        CanConnect = false;
+                    }
+                }
+                else
+                {
+                    Logger.Debug($"IP changed during ping from {ipBeingPinged} to {IpAddress} - ignoring result");
+                }
+            }
+            catch (Exception pingEx)
+            {
+                CanConnect = false;
+                // Only update the UI state if the IP we pinged is still the current IP
+                if (ipBeingPinged == IpAddress)
+                {
+                    Logger.Error(pingEx, $"Error occurred during ping to {ipBeingPinged}");
+                    IsConnected = false;
+                    IsWaiting = true;
+                    Logger.Debug("Current state after exception: IsConnected=False, IsWaiting=True");
+                }
+                else
+                {
+                    Logger.Debug($"IP changed during ping from {ipBeingPinged} to {IpAddress} - ignoring error");
+                }
+            }
+        
+            Logger.Debug($"After ping to {ipBeingPinged}: IsConnected={IsConnected}, IsWaiting={IsWaiting}");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Unhandled error in PingTimer_Tick");
+            IsConnected = false;
+            IsWaiting = true;
+        }
+    }
+    
     private async void Connect()
     {
         var appMessage = new AppMessage();
@@ -232,7 +390,7 @@ public partial class MainViewModel : ViewModelBase
             Log.Error("Failed to get hostname, stopping");
             return;
         }
-        
+
         var validator = App.ServiceProvider.GetRequiredService<DeviceConfigValidator>();
         if (!validator.IsDeviceConfigValid(_deviceConfig))
         {
@@ -248,13 +406,13 @@ public partial class MainViewModel : ViewModelBase
                 return;
             }
         }
-        
+
         await getSensorType(_deviceConfig);
         Sensor = _deviceConfig.SensorType;
-        
+
         await getNetworkCardType(_deviceConfig);
         NetworkCardType = _deviceConfig.NetworkCardType;
-        
+
         await getChipType(_deviceConfig);
         Soc = _deviceConfig.ChipType;
         // Save the config to app settings
@@ -265,7 +423,7 @@ public partial class MainViewModel : ViewModelBase
 
         // set the background to gray
         EntryBoxBgColor = new SolidColorBrush(Colors.Gray);
-        
+
         appMessage.DeviceConfig = _deviceConfig;
 
         if (_deviceConfig != null)
@@ -285,9 +443,10 @@ public partial class MainViewModel : ViewModelBase
         }
 
         UpdateUIMessage("Connected");
-        
     }
 
+    
+    
     private void SaveConfig()
     {
         _deviceConfig.DeviceType = SelectedDeviceType;
@@ -337,7 +496,7 @@ public partial class MainViewModel : ViewModelBase
         // Cleanup
         cts.Dispose();
     }
-    
+
     /// <summary>
     ///     Retrieves the chip type or SOC of the device asynchronously using SSH.
     ///     <para>
@@ -370,12 +529,12 @@ public partial class MainViewModel : ViewModelBase
 
         var chipType = Utilities.RemoveSpecialCharacters(cmdResult.Result);
         deviceConfig.ChipType = chipType;
-        
+
 
         // Cleanup
         cts.Dispose();
     }
-    
+
     /// <summary>
     ///     Retrieves the snesor type of the device asynchronously using SSH.
     ///     <para>
@@ -408,12 +567,12 @@ public partial class MainViewModel : ViewModelBase
 
         var sensorType = Utilities.RemoveSpecialCharacters(cmdResult.Result);
         deviceConfig.SensorType = sensorType;
-        
+
 
         // Cleanup
         cts.Dispose();
     }
-    
+
     /// <summary>
     ///     Retrieves the network card type of the device asynchronously using SSH.
     ///     <para>
@@ -445,9 +604,9 @@ public partial class MainViewModel : ViewModelBase
         }
 
         var lsusbResults = Utilities.RemoveLastChar(cmdResult.Result);
-        var networkCardType= WifiCardDetector.DetectWifiCard(lsusbResults);
+        var networkCardType = WifiCardDetector.DetectWifiCard(lsusbResults);
         deviceConfig.NetworkCardType = networkCardType;
-        
+
 
         // Cleanup
         cts.Dispose();
@@ -456,15 +615,31 @@ public partial class MainViewModel : ViewModelBase
     private async void processCameraFiles()
     {
         // read device to determine configurations
-        _globalSettingsSettingsViewModel.ReadDevice();
-        
-
+        await _globalSettingsSettingsViewModel.ReadDevice();
         Logger.Debug($"IsWfbYamlEnabled = {_globalSettingsSettingsViewModel.IsWfbYamlEnabled}");
+
+        // remove when ready
+        _globalSettingsSettingsViewModel.IsWfbYamlEnabled = false;
+        
         if (_globalSettingsSettingsViewModel.IsWfbYamlEnabled)
         {
-            Logger.Debug($"Reading wfb.yaml");
+            try
+            {
+                // download file wfb.yaml
+                Logger.Debug($"Reading wfb.yaml");
+
+                var wfbContent = await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WfbYamlFileLoc);
+
+                if (wfbContent != null)
+                    EventSubscriptionService.Publish<WfbYamlContentUpdatedEvent,
+                        WfbYamlContentUpdatedMessage>(new WfbYamlContentUpdatedMessage(wfbContent));
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+            }
         }
-        else 
+        else
         {
             Logger.Debug($"Reading legacy settings");
             // download file wfb.conf
@@ -533,8 +708,8 @@ public partial class MainViewModel : ViewModelBase
         }
 
         EventSubscriptionService.Publish<AppMessageEvent,
-            AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig});
-        
+            AppMessage>(new AppMessage { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
+
         Log.Information("Done reading files from device.");
     }
 
@@ -646,14 +821,13 @@ public partial class MainViewModel : ViewModelBase
 
         EventSubscriptionService.Publish<AppMessageEvent, AppMessage>(new AppMessage
             { CanConnect = DeviceConfig.Instance.CanConnect, DeviceConfig = _deviceConfig });
-        
+
         Log.Information("Done reading files from device.");
-        
-        
     }
 
     private void LoadSettings()
     {
+        IsWaiting = true;
         // Load settings via the SettingsManager
         var settings = SettingsManager.LoadSettings();
         _deviceConfig = DeviceConfig.Instance;
@@ -671,7 +845,7 @@ public partial class MainViewModel : ViewModelBase
         Log.Debug($"Device type changed to: {deviceTypeEvent}");
 
         InitializeTabs(deviceTypeEvent);
-        
+
         // Update IsVRXEnabled based on the device type
         //IsVRXEnabled = deviceTypeEvent == DeviceType.Radxa || deviceTypeEvent == DeviceType.NVR;
 

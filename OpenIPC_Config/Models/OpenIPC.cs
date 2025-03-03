@@ -20,6 +20,7 @@ public class OpenIPC
     public const string OpenIPCBuilderGitHubApiUrl = "https://api.github.com/repos/OpenIPC/builder/releases/latest";
     public const string MajesticFileLoc = "/etc/majestic.yaml";
     public const string WfbConfFileLoc = "/etc/wfb.conf";
+    public const string WfbYamlFileLoc = "/etc/wfb.yaml";
     public const string TelemetryConfFileLoc = "/etc/telemetry.conf";
 
     // Radxa files

@@ -344,8 +344,10 @@ public partial class FirmwareTabViewModel : ViewModelBase
         OnPropertyChanged(nameof(CanUseDropdownsBySoc));
         OnPropertyChanged(nameof(CanUseSelectFirmware));
 
+
         (DownloadFirmwareAsyncCommand as RelayCommand)?.NotifyCanExecuteChanged();
         (PerformFirmwareUpgradeAsyncCommand as RelayCommand)?.NotifyCanExecuteChanged();
+        (SelectFirmwareCommand as RelayCommand)?.NotifyCanExecuteChanged();
     }
 
     private async Task<FirmwareData> FetchFirmwareListAsync()

@@ -29,7 +29,13 @@ public class App : Application
 
     public static string OSType { get; private set; }
     
+    
+
+#if DEBUG
     private bool _ShouldCheckForUpdates = false;
+#else
+    private bool _ShouldCheckForUpdates = true;
+#endif    
 
     private void DetectOsType()
     {
@@ -62,6 +68,7 @@ public class App : Application
             Log.Information($"Default appsettings.json created at {configPath}");
         //}
 
+        Console.WriteLine($"Loading configuration from: {configPath}");
         // Build configuration
         var configuration = new ConfigurationBuilder()
             .AddJsonFile(configPath, false, true)
@@ -192,6 +199,8 @@ public class App : Application
         var configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             Assembly.GetExecutingAssembly().GetName().Name, "appsettings.json");
 
+        Console.WriteLine($"Loading configuration from: {configPath}");
+        
         // Create an IConfiguration instance
         var configuration = new ConfigurationBuilder()
             .AddJsonFile(configPath, false, true)
@@ -269,7 +278,7 @@ public class App : Application
     private static void RegisterViewModels(IServiceCollection services)
     {
         // Register ViewModels
-        services.AddTransient<MainViewModel>();
+        services.AddSingleton<MainViewModel>();
         
         // Register tab ViewModels as singletons
         services.AddSingleton<GlobalSettingsViewModel>();
@@ -327,7 +336,12 @@ public class App : Application
                     new JProperty("WriteTo",
                         new JArray(
                             new JObject(
-                                new JProperty("Name", "Console")
+                                new JProperty("Name", "Console"),
+                                new JProperty("Args",  // Add Args here for Console
+                                    new JObject(
+                                        new JProperty("outputTemplate", "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+                                    )
+                                )
                             ),
                             new JObject(
                                 new JProperty("Name", "File"),
@@ -337,7 +351,8 @@ public class App : Application
                                         new JProperty("rollingInterval",
                                             "Day"),
                                         new JProperty("retainedFileCountLimit",
-                                            "5")
+                                            "5"),
+                                        new JProperty("outputTemplate", "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
                                     )
                                 )
                             )

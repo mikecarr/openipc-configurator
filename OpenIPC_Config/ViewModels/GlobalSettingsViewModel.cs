@@ -73,10 +73,12 @@ public partial class GlobalSettingsViewModel : ViewModelBase
         try
         {
             var cmdResult = await GetIsWfbYamlSupported(cancellationToken);
+            
+            IsWfbYamlEnabled = bool.TryParse(Utilities.RemoveLastChar(cmdResult?.Result), out var result) && result;
 
             // TODO: check if wfb.yaml exists when all parameters are supported
             // https://github.com/svpcom/wfb-ng/wiki/Drone-auto-provisioning
-            IsWfbYamlEnabled = false;
+            //IsWfbYamlEnabled = false;
 
             Logger.Debug($"WFB YAML support status: {IsWfbYamlEnabled}");
         }
