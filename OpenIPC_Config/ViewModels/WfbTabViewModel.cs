@@ -77,6 +77,7 @@ public partial class WfbTabViewModel : ViewModelBase
         InitializeCollections();
         InitializeCommands();
         SubscribeToEvents();
+        
     }
     #endregion
 
@@ -104,6 +105,9 @@ public partial class WfbTabViewModel : ViewModelBase
 
     private void SubscribeToEvents()
     {
+        EventSubscriptionService.Subscribe<WfbYamlContentUpdatedEvent, WfbYamlContentUpdatedMessage>(
+            OnWfbYamlContentUpdated);
+        
         EventSubscriptionService.Subscribe<WfbConfContentUpdatedEvent, WfbConfContentUpdatedMessage>(
             OnWfbConfContentUpdated);
         EventSubscriptionService.Subscribe<AppMessageEvent, AppMessage>(OnAppMessage);
@@ -115,6 +119,13 @@ public partial class WfbTabViewModel : ViewModelBase
     {
         WfbConfContent = message.Content;
         ParseWfbConfContent();
+    }
+    
+    private void OnWfbYamlContentUpdated(WfbYamlContentUpdatedMessage message)
+    {
+        //WfbContent = message.Content;
+        //ParseWfbConfContent();
+        //TODO
     }
 
     private void OnAppMessage(AppMessage message)
