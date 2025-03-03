@@ -630,9 +630,9 @@ public partial class MainViewModel : ViewModelBase
 
                 var wfbContent = await SshClientService.DownloadFileAsync(_deviceConfig, OpenIPC.WfbYamlFileLoc);
 
-                if (wfbContent != null)
-                    EventSubscriptionService.Publish<WfbYamlContentUpdatedEvent,
-                        WfbYamlContentUpdatedMessage>(new WfbYamlContentUpdatedMessage(wfbContent));
+                // if (wfbContent != null)
+                //     EventSubscriptionService.Publish<WfbYamlContentUpdatedEvent,
+                //         WfbYamlContentUpdatedMessage>(new WfbYamlContentUpdatedMessage(wfbContent));
             }
             catch (Exception e)
             {
