@@ -105,8 +105,8 @@ public partial class WfbTabViewModel : ViewModelBase
 
     private void SubscribeToEvents()
     {
-        EventSubscriptionService.Subscribe<WfbYamlContentUpdatedEvent, WfbYamlContentUpdatedMessage>(
-            OnWfbYamlContentUpdated);
+        // EventSubscriptionService.Subscribe<WfbYamlContentUpdatedEvent, WfbYamlContentUpdatedMessage>(
+        //     OnWfbYamlContentUpdated);
         
         EventSubscriptionService.Subscribe<WfbConfContentUpdatedEvent, WfbConfContentUpdatedMessage>(
             OnWfbConfContentUpdated);
@@ -121,12 +121,12 @@ public partial class WfbTabViewModel : ViewModelBase
         ParseWfbConfContent();
     }
     
-    private void OnWfbYamlContentUpdated(WfbYamlContentUpdatedMessage message)
-    {
-        //WfbContent = message.Content;
-        //ParseWfbConfContent();
-        //TODO
-    }
+    // private void OnWfbYamlContentUpdated(WfbYamlContentUpdatedMessage message)
+    // {
+    //     //WfbContent = message.Content;
+    //     //ParseWfbConfContent();
+    //     //TODO
+    // }
 
     private void OnAppMessage(AppMessage message)
     {
