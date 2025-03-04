@@ -255,6 +255,9 @@ public partial class MainViewModel : ViewModelBase
         EventSubscriptionService.Publish<DeviceTypeChangeEvent, DeviceType>(deviceType);
     }
 
+    #region Ping Logic
+
+
     private void StopPingTimer()
     {
         if (_pingTimer != null)
@@ -373,6 +376,8 @@ public partial class MainViewModel : ViewModelBase
         }
     }
     
+    #endregion
+
     private async void Connect()
     {
         var appMessage = new AppMessage();
