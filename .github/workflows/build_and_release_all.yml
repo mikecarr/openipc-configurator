@@ -298,13 +298,26 @@ jobs:
           generate_release_notes: true
           body: |
             ## OpenIPC Multiplatform Configurator
+
+            Report Issues here: https://github.com/OpenIPC/openipc-configurator/issues
             
             Thank you for using OpenIPC Configurator! This application helps you configure OpenIPC cameras for FPV use.
             
             ### Installation Instructions:
             - **Windows**: Extract the zip file and run the executable
             - **macOS**: Mount the DMG file and drag the app to your Applications folder
-            - **Linux**: Download the archive and extract, open terminal, cd into folder and and run it ./OpenIPC-Config.Desktop
+            - **Linux**: 
+            Open Terminal
+
+            # change directory to where you downloaded the file
+            cd ~\Downloads 
+            
+            unzip OpenIPC-Config-linux-x64.zip
+            
+            cd OpenIPC-Config-linux-x64
+            
+            # run it
+            ./OpenIPC_Config.Desktop
                         
             ---          
             files: |
