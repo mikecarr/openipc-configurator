@@ -157,29 +157,6 @@ jobs:
         run: |
           echo "Cleaning up the custom keychain"
           security delete-keychain build.keychain || true
-
-            
-      # Linux Icon and Packaging
-      - name: Set up Icon and .desktop file
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          APP_NAME="OpenIPC-Config"
-          PUBLISH_DIR="./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-x64/publish"
-          DESKTOP_FILE="${PUBLISH_DIR}/${APP_NAME}-App.desktop"
-          
-          # Ensure the icon is in the publish directory
-          cp ./OpenIPC_Config/Assets/Icons/OpenIPC.png "$ICON_PATH"
-
-          # Create .desktop file
-          cat << EOF > "$DESKTOP_FILE"
-          [Desktop Entry]
-          Name=OpenIPC Config
-          Exec=./OpenIPC-Config.Desktop
-          Icon=./Assets/OpenIPC.png
-          Type=Application
-          Terminal=true
-          Categories=Utility;
-          EOF
       
       # Windows Icon and Packaging
       - name: Set Windows Icon and Package
@@ -200,36 +177,95 @@ jobs:
           DOTNET_ROOT: C:\Program Files\dotnet
           VERSION: 0.0.1
     
-      - name: Zip .app Bundle for MacOS and Linux
+      - name: Create macOS DMG
+        if: matrix.os == 'macos-latest'
         run: |
-          echo "Runner OS: ${{ runner.os }}"
-          if [[ "${{ runner.os }}" == "macOS" ]]; then
-            DMG_NAME="OpenIPC-Config-macos-${{ matrix.arch }}.dmg"
-            APP_NAME="OpenIPC_Config.app"
-            BUILD_DIR="OpenIPC-Config-macos-${{ matrix.arch }}-dmg-build"
-            
-            # Create a temporary folder for the .dmg contents
-            mkdir -p "${BUILD_DIR}"
-            cp -R "${APP_NAME}" "${BUILD_DIR}/"
-            
-            # Create an alias to the Applications folder
-            ln -s /Applications "${BUILD_DIR}/Applications"
-            
-            # Create the .dmg with the Applications alias
-            hdiutil create -volname "OpenIPC Config" -srcfolder "${BUILD_DIR}" -ov -format UDZO -size 200m "${DMG_NAME}"
-            
-            # Clean up the temporary build folder
-            rm -rf "${BUILD_DIR}"
-          elif [[ "${{ runner.os }}" == "Linux" ]]; then
-
-            mkdir -p OpenIPC-Config-linux-${{ matrix.arch }}
-            cp -r ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish/* OpenIPC-Config-linux-${{ matrix.arch }}/
-            zip -r OpenIPC-Config-linux-${{ matrix.arch }}.zip OpenIPC-Config-linux-${{ matrix.arch }}
-             echo "directory created"
-             ls -al
-            # zip -r OpenIPC-Config-linux-${{ matrix.arch }}.zip ./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish/*
-          fi
+          DMG_NAME="OpenIPC-Config-macos-${{ matrix.arch }}.dmg"
+          APP_NAME="OpenIPC_Config.app"
+          BUILD_DIR="OpenIPC-Config-macos-${{ matrix.arch }}-dmg-build"
+          
+          # Create a temporary folder for the .dmg contents
+          mkdir -p "${BUILD_DIR}"
+          cp -R "${APP_NAME}" "${BUILD_DIR}/"
+          
+          # Create an alias to the Applications folder
+          ln -s /Applications "${BUILD_DIR}/Applications"
+          
+          # Create the .dmg with the Applications alias
+          hdiutil create -volname "OpenIPC Config" -srcfolder "${BUILD_DIR}" -ov -format UDZO -size 200m "${DMG_NAME}"
+          
+          # Clean up the temporary build folder
+          rm -rf "${BUILD_DIR}"
         shell: bash
+
+      # Install AppImage tools on Linux
+      - name: Install AppImage Tools
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2
+          wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+      
+      # Create AppDir for AppImage
+      - name: Create AppDir for AppImage
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          APP_NAME="OpenIPC-Config"
+          PUBLISH_DIR="./OpenIPC_Config.Desktop/bin/Release/net8.0/linux-${{ matrix.arch }}/publish"
+          APPDIR="${APP_NAME}.AppDir"
+          
+          # Create AppDir structure
+          mkdir -p "${APPDIR}/usr/bin"
+          mkdir -p "${APPDIR}/usr/share/icons/hicolor/256x256/apps"
+          mkdir -p "${APPDIR}/usr/share/applications"
+          
+          # Copy application files to AppDir
+          cp -r "${PUBLISH_DIR}/"* "${APPDIR}/usr/bin/"
+          
+          # Copy icon
+          cp ./OpenIPC_Config/Assets/Icons/OpenIPC.png "${APPDIR}/usr/share/icons/hicolor/256x256/apps/${APP_NAME}.png"
+          cp ./OpenIPC_Config/Assets/Icons/OpenIPC.png "${APPDIR}/${APP_NAME}.png"
+          
+          # Create desktop file
+          cat > "${APPDIR}/usr/share/applications/${APP_NAME}.desktop" << EOF
+          [Desktop Entry]
+          Name=OpenIPC Config
+          Exec=OpenIPC-Config.Desktop
+          Icon=${APP_NAME}
+          Type=Application
+          Terminal=false
+          Categories=Utility;
+          EOF
+          
+          # Copy desktop file to root as well
+          cp "${APPDIR}/usr/share/applications/${APP_NAME}.desktop" "${APPDIR}/${APP_NAME}.desktop"
+          
+          # Create AppRun script
+          cat > "${APPDIR}/AppRun" << EOF
+          #!/bin/bash
+          SELF=\$(readlink -f "\$0")
+          HERE=\${SELF%/*}
+          export PATH="\${HERE}/usr/bin:\${PATH}"
+          export LD_LIBRARY_PATH="\${HERE}/usr/lib:\${LD_LIBRARY_PATH}"
+          exec "\${HERE}/usr/bin/OpenIPC-Config.Desktop" "\$@"
+          EOF
+          
+          # Make AppRun executable
+          chmod +x "${APPDIR}/AppRun"
+      
+      # Create AppImage for Linux
+      - name: Create AppImage for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          # Build the AppImage
+          ARCH="${{ matrix.arch }}" ./appimagetool OpenIPC-Config.AppDir
+          
+          # Rename the AppImage according to your naming convention
+          mv OpenIPC-Config-*.AppImage OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
+          
+          # Make it executable
+          chmod +x OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
       
       # Upload Artifacts
       - name: Upload macOS Artifact
@@ -246,12 +282,13 @@ jobs:
           name: OpenIPC-Config-windows-${{ matrix.arch }}
           path: OpenIPC-Config-windows-${{ matrix.arch }}.zip
 
-      - name: Upload Ubuntu Artifact
+      # Upload AppImage for Linux
+      - name: Upload Linux Artifact
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: OpenIPC-Config-linux-${{ matrix.arch }}
-          path: OpenIPC-Config-linux-${{ matrix.arch }}.zip
+          path: OpenIPC-Config-linux-${{ matrix.arch }}.AppImage        
 
   release:
     runs-on: ubuntu-latest
@@ -301,10 +338,11 @@ jobs:
             ### Installation Instructions:
             - **Windows**: Extract the zip file and run the executable
             - **macOS**: Mount the DMG file and drag the app to your Applications folder
-            - **Linux**: Download the zip file, open terminal, cd into folder, and run ./OpenIPC_Config.Desktop
+            - **Linux**: Download the AppImage, make it executable with `chmod +x OpenIPC-Config-linux-*.AppImage`, and run it
                         
             ---
           files: |
             ./OpenIPC-Config-*/OpenIPC-Config-*.zip
             ./OpenIPC-Config-*/OpenIPC-Config-*.dmg
+            ./OpenIPC-Config-*/OpenIPC-Config-*.AppImage
             ./latest.json
