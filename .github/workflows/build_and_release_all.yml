@@ -257,23 +257,33 @@ jobs:
       - name: Create AppImage for Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          # Set arch variable directly
-          if [[ "${{ matrix.arch }}" == "x64" ]]; then
-            export APPIMAGE_ARCH="x86_64"
+          # Use a simpler approach to set architecture
+          APPIMAGE_ARCH=""
+          if [ "${{ matrix.arch }}" = "x64" ]; then
+            APPIMAGE_ARCH="x86_64"
           else
-            export APPIMAGE_ARCH="aarch64"
+            APPIMAGE_ARCH="aarch64"
           fi
           
-          echo "Using architecture: ${APPIMAGE_ARCH}"
+          echo "Matrix architecture: ${{ matrix.arch }}"
+          echo "AppImage architecture: ${APPIMAGE_ARCH}"
           
-          # Build the AppImage with explicit architecture
-          ./appimagetool --appimage-extract-and-run -n OpenIPC-Config.AppDir -a ${APPIMAGE_ARCH}
+          # Extract appimagetool first
+          chmod +x ./appimagetool
+          ./appimagetool --appimage-extract
           
-          # Rename the AppImage
-          mv OpenIPC-Config*.AppImage OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
+          # Run extracted appimagetool with explicit architecture
+          ./squashfs-root/AppRun OpenIPC-Config.AppDir -v -n -a ${APPIMAGE_ARCH}
+          
+          # Check what was created
+          ls -la *.AppImage
+          
+          # Rename to our convention
+          mv *.AppImage OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
           
           # Make it executable
-          chmod +x OpenIPC-Config-linux-${{ matrix.arch }}.AppImage      
+          chmod +x OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
+    
       # Upload Artifacts
       - name: Upload macOS Artifact
         if: matrix.os == 'macos-latest'
