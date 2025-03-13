@@ -304,7 +304,7 @@ jobs:
             Thank you for using OpenIPC Configurator! This application helps you configure OpenIPC cameras for FPV use.
             
             ### Installation Instructions:
-            - **Windows**: Extract the zip file and run the executable
+            - **Windows**: Extract the zip file and run the executable: OpenIPC_Config.Desktop.exe
             - **macOS**: Mount the DMG file and drag the app to your Applications folder
             - **Linux**: 
                 Open Terminal
