@@ -271,11 +271,12 @@ jobs:
           # Force the architecture with environment variable
           ARCH=${TARGET_ARCH} ./squashfs-root/AppRun --comp xz OpenIPC-Config.AppDir
           
-          # Check output files
-          ls -la *.AppImage
+          # List created files to debug
+          echo "Created AppImage files:"
+          ls -la *AppImage
           
-          # Rename the AppImage
-          mv OpenIPC-Config*.AppImage OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
+          # Rename the AppImage - Use the actual pattern that was created
+          mv OpenIPC_Config-*-${TARGET_ARCH}.AppImage OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
     
       # Upload Artifacts
       - name: Upload macOS Artifact
