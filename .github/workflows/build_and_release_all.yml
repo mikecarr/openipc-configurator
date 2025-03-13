@@ -307,19 +307,19 @@ jobs:
             - **Windows**: Extract the zip file and run the executable
             - **macOS**: Mount the DMG file and drag the app to your Applications folder
             - **Linux**: 
-              Open Terminal
-  
-              ```
-              # change directory to where you downloaded the file
-              cd ~\Downloads 
-              
-              unzip OpenIPC-Config-linux-x64.zip
-              
-              cd OpenIPC-Config-linux-x64
-              
-              # run it
-              ./OpenIPC_Config.Desktop
-              ```            
+                Open Terminal
+    
+                ```
+                # change directory to where you downloaded the file
+                cd ~\Downloads 
+                
+                unzip OpenIPC-Config-linux-x64.zip
+                
+                cd OpenIPC-Config-linux-x64
+                
+                # run it
+                ./OpenIPC_Config.Desktop
+                ```            
             ---          
           files: |
             ./OpenIPC-Config-*/OpenIPC-Config-*.zip
