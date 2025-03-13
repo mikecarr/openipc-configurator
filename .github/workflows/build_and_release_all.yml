@@ -243,7 +243,7 @@ jobs:
           HERE="\$(dirname "\$(readlink -f "\${0}")")"
           export PATH="\${HERE}/usr/bin:\${PATH}"
           export LD_LIBRARY_PATH="\${HERE}/usr/lib:\${LD_LIBRARY_PATH}"
-          "\${HERE}/usr/bin/OpenIPC-Config.Desktop" "\$@"
+          "\${HERE}/usr/bin/OpenIPC_Config.Desktop" "\$@"
           EOF
           
           # Make AppRun executable
