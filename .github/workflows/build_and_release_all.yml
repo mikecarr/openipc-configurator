@@ -257,29 +257,27 @@ jobs:
       - name: Create AppImage for Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          # Use a simpler approach to set architecture
-          APPIMAGE_ARCH=""
+          # Set architecture explicitly
           if [ "${{ matrix.arch }}" = "x64" ]; then
-            APPIMAGE_ARCH="x86_64"
+            export ARCH="x86_64"
           else
-            APPIMAGE_ARCH="aarch64"
+            export ARCH="aarch64"
           fi
           
-          echo "Matrix architecture: ${{ matrix.arch }}"
-          echo "AppImage architecture: ${APPIMAGE_ARCH}"
+          echo "Using ARCH=${ARCH}"
           
-          # Extract appimagetool first
+          # Extract appimagetool
           chmod +x ./appimagetool
           ./appimagetool --appimage-extract
           
-          # Run extracted appimagetool with explicit architecture
-          ./squashfs-root/AppRun OpenIPC-Config.AppDir -v -n -a ${APPIMAGE_ARCH}
+          # Run the extracted appimagetool
+          ARCH=${ARCH} ./squashfs-root/AppRun OpenIPC-Config.AppDir -v
           
-          # Check what was created
+          # Check output files
           ls -la *.AppImage
           
-          # Rename to our convention
-          mv *.AppImage OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
+          # Rename the AppImage
+          mv OpenIPC-Config*.AppImage OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
           
           # Make it executable
           chmod +x OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
