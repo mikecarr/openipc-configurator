@@ -20,8 +20,8 @@ jobs:
     runs-on: ${{ matrix.os }} 
     strategy:
       matrix:
-       os: [macos-latest, windows-latest, ubuntu-latest]
-       #os: [ubuntu-latest]
+       #os: [macos-latest, windows-latest, ubuntu-latest]
+       os: [ubuntu-latest]
        arch: [x64, arm64]
         
 
