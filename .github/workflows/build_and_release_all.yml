@@ -207,7 +207,6 @@ jobs:
           wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
           chmod +x appimagetool
       
-      # Create AppDir for AppImage
       - name: Create AppDir for AppImage
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -227,8 +226,8 @@ jobs:
           cp ./OpenIPC_Config/Assets/Icons/OpenIPC.png "${APPDIR}/usr/share/icons/hicolor/256x256/apps/${APP_NAME}.png"
           cp ./OpenIPC_Config/Assets/Icons/OpenIPC.png "${APPDIR}/${APP_NAME}.png"
           
-          # Create desktop file
-          cat > "${APPDIR}/usr/share/applications/${APP_NAME}.desktop" << EOF
+          # Create desktop file with proper Exec path
+          cat > "${APPDIR}/${APP_NAME}.desktop" << EOF
           [Desktop Entry]
           Name=OpenIPC Config
           Exec=OpenIPC-Config.Desktop
@@ -238,17 +237,13 @@ jobs:
           Categories=Utility;
           EOF
           
-          # Copy desktop file to root as well
-          cp "${APPDIR}/usr/share/applications/${APP_NAME}.desktop" "${APPDIR}/${APP_NAME}.desktop"
-          
-          # Create AppRun script
+          # Create a simplified AppRun script that won't confuse architecture detection
           cat > "${APPDIR}/AppRun" << EOF
           #!/bin/bash
-          SELF=\$(readlink -f "\$0")
-          HERE=\${SELF%/*}
+          HERE="\$(dirname "\$(readlink -f "\${0}")")"
           export PATH="\${HERE}/usr/bin:\${PATH}"
           export LD_LIBRARY_PATH="\${HERE}/usr/lib:\${LD_LIBRARY_PATH}"
-          exec "\${HERE}/usr/bin/OpenIPC-Config.Desktop" "\$@"
+          "\${HERE}/usr/bin/OpenIPC-Config.Desktop" "\$@"
           EOF
           
           # Make AppRun executable
@@ -257,30 +252,30 @@ jobs:
       - name: Create AppImage for Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          # Set architecture explicitly
+          # Map .NET architecture to AppImage architecture
           if [ "${{ matrix.arch }}" = "x64" ]; then
-            export ARCH="x86_64"
+            export TARGET_ARCH="x86_64"
           else
-            export ARCH="aarch64"
+            export TARGET_ARCH="aarch64"
           fi
           
-          echo "Using ARCH=${ARCH}"
+          echo "Setting TARGET_ARCH=${TARGET_ARCH}"
           
           # Extract appimagetool
           chmod +x ./appimagetool
           ./appimagetool --appimage-extract
           
-          # Run the extracted appimagetool
-          ARCH=${ARCH} ./squashfs-root/AppRun OpenIPC-Config.AppDir -v
+          # Create a file to force the architecture
+          echo "${TARGET_ARCH}" > OpenIPC-Config.AppDir/.DirIcon.arch
+          
+          # Force the architecture with environment variable
+          ARCH=${TARGET_ARCH} ./squashfs-root/AppRun --comp xz OpenIPC-Config.AppDir
           
           # Check output files
           ls -la *.AppImage
           
           # Rename the AppImage
           mv OpenIPC-Config*.AppImage OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
-          
-          # Make it executable
-          chmod +x OpenIPC-Config-linux-${{ matrix.arch }}.AppImage
     
       # Upload Artifacts
       - name: Upload macOS Artifact
